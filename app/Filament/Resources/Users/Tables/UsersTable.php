@@ -12,8 +12,10 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use STS\FilamentImpersonate\Actions\Impersonate;
 
 class UsersTable
@@ -21,38 +23,32 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                $query->whereDoesntHave('roles', function (Builder $q) {
+                    $q->where('name', 'Super Admin');
+                });
+            })
             ->columns([
                 TextColumn::make('name')
+                    ->label('Name')
                     ->searchable(),
+
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
-                TextColumn::make('email_verified_at')
-                    ->dateTime()
+
+                TextColumn::make('roles.name')
+                    ->label('Role')
+                    ->badge()
+                    ->color('primary')
                     ->sortable(),
-                IconColumn::make('is_active')
-                    ->boolean(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_by')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('updated_by')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_by')
-                    ->numeric()
-                    ->sortable(),
+
+                ToggleColumn::make('is_active')
+                    ->label('Active')
+                    ->offIcon(Heroicon::XMark)
+                    ->onIcon(Heroicon::Check)
+                    ->offColor('danger')
+                    ->onColor('success'),
             ])
             ->filters([
                 TrashedFilter::make(),

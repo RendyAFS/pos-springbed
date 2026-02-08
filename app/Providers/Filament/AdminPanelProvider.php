@@ -23,6 +23,8 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Enums\ThemeMode;
+use Filament\Navigation\NavigationGroup;
+use Filament\Support\Icons\Heroicon;
 use Jacobtims\FilamentLogger\FilamentLoggerPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 
@@ -66,9 +68,19 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Access Control')
+                    ->icon(Heroicon::ShieldCheck)
+                    ->collapsed(),
+            ])
             ->plugins([
                 FilamentLoggerPlugin::make(),
-                FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make()
+                    ->navigationLabel('Role')
+                    ->pluralModelLabel('Manage Roles')
+                    ->navigationIcon(false)
+                    ->navigationGroup('Access Control'),
                 FilamentUiSwitcherPlugin::make()
                     ->withModeSwitcher(),
                 LightSwitchPlugin::make()
