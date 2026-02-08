@@ -32,7 +32,7 @@
             {{-- Reset Button --}}
             <button wire:click="resetToDefaults" wire:loading.class="opacity-50 cursor-wait"
                 wire:target="resetToDefaults" type="button"
-                class="fi-icon-btn absolute end-[4.5rem] top-6 flex items-center justify-center text-gray-400 hover:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:text-gray-400 transition"
+                class="fi-icon-btn absolute end-18 top-6 flex items-center justify-center text-gray-400 hover:text-gray-500 focus:outline-none dark:text-gray-500 dark:hover:text-gray-400 transition"
                 x-tooltip="{
                     content: '{{ __('filament-ui-switcher::filament-ui-switcher.reset.button') }}',
                     theme: $store.theme,
