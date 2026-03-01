@@ -22,8 +22,10 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use Filament\Enums\ThemeMode;
 use Filament\Navigation\NavigationGroup;
+use Filament\Support\Enums\Platform;
 use Filament\Support\Icons\Heroicon;
 use Jacobtims\FilamentLogger\FilamentLoggerPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
@@ -54,6 +56,13 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->globalSearchDebounce('750ms')
+            ->globalSearchFieldSuffix(fn(): ?string => match (Platform::detect()) {
+                Platform::Windows, Platform::Linux => 'ctrl + k',
+                Platform::Mac => '⌘ k',
+                default => null,
+            })
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -70,11 +79,16 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Master Data')
+                    ->icon(Heroicon::ServerStack)
+                    ->collapsed(),
+                NavigationGroup::make()
                     ->label('Access Control')
                     ->icon(Heroicon::ShieldCheck)
                     ->collapsed(),
             ])
             ->plugins([
+                GlobalSearchModalPlugin::make(),
                 FilamentLoggerPlugin::make(),
                 FilamentShieldPlugin::make()
                     ->navigationLabel('Role')

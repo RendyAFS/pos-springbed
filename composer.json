@@ -13,6 +13,7 @@
         "andreia/filament-ui-switcher": "^1.0",
         "awcodes/light-switch": "^2.0",
         "bezhansalleh/filament-shield": "^4.1",
+        "charrafimed/global-search-modal": "^5.0",
         "filament/filament": "~4.0",
         "filament/spatie-laravel-media-library-plugin": "^4.7",
         "jacobtims/filament-logger": "^1.1",
