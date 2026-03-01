@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('store_name')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
-            $table->longtext('homepage_banner')->nullable();
+            $table->longtext('address')->nullable();
             $table->timestamps();
             $table->userstamps();
             $table->softDeletes();

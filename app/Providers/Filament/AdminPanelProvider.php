@@ -79,6 +79,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Master Data')
+                    ->icon(Heroicon::ServerStack)
+                    ->collapsed(),
+                NavigationGroup::make()
                     ->label('Access Control')
                     ->icon(Heroicon::ShieldCheck)
                     ->collapsed(),

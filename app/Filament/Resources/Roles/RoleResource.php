@@ -56,7 +56,6 @@ class RoleResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Name'  => $record->name,
             'Guard'  => $record->guard_name,
         ];
     }
