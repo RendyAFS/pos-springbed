@@ -26,7 +26,7 @@ class UserResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['name', 'email', 'is_active'];
+        return ['name', 'email'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
