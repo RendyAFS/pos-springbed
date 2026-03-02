@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Users\Tables;
+namespace App\Filament\Resources\Products\Tables;
 
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -12,39 +12,48 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use STS\FilamentImpersonate\Actions\Impersonate;
 
-class UsersTable
+class ProductsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                $query->whereDoesntHave('roles', function (Builder $q) {
-                    $q->where('name', 'Super Admin');
-                });
-            })
             ->columns([
+                TextColumn::make('brand.name')
+                    ->label('Brand')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('category.name')
+                    ->label('Category')
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable(),
-
-                TextColumn::make('email')
-                    ->label('Email address')
+                TextColumn::make('type')
+                    ->label('Type')
                     ->searchable(),
-
-                TextColumn::make('roles.name')
-                    ->label('Role')
-                    ->badge()
-                    ->color('primary')
+                TextColumn::make('selling_price')
+                    ->label('Selling Price')
+                    ->money()
                     ->sortable(),
-
+                TextColumn::make('sku')
+                    ->label('SKU')
+                    ->searchable(),
+                TextColumn::make('size')
+                    ->label('Size')
+                    ->searchable(),
+                TextColumn::make('weight')
+                    ->label('Weight')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('color')
+                    ->label('Color')
+                    ->searchable(),
                 ToggleColumn::make('is_active')
                     ->label('Active')
                     ->offIcon(Heroicon::XMark)
@@ -58,8 +67,6 @@ class UsersTable
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make(),
-                    Impersonate::make()
-                        ->redirectTo(route('filament.admin.pages.dashboard')),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),
                     RestoreAction::make(),

@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Filament\Resources\Users;
+namespace App\Filament\Resources\Products;
 
-use App\Filament\Resources\Users\Pages\CreateUser;
-use App\Filament\Resources\Users\Pages\EditUser;
-use App\Filament\Resources\Users\Pages\ListUsers;
-use App\Filament\Resources\Users\Schemas\UserForm;
-use App\Filament\Resources\Users\Tables\UsersTable;
-use App\Models\User;
+use App\Filament\Resources\Products\Pages\CreateProduct;
+use App\Filament\Resources\Products\Pages\EditProduct;
+use App\Filament\Resources\Products\Pages\ListProducts;
+use App\Filament\Resources\Products\Schemas\ProductForm;
+use App\Filament\Resources\Products\Tables\ProductsTable;
+use App\Models\Product;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,13 +19,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
-class UserResource extends Resource
+class ProductResource extends Resource
 {
-    protected static ?string $model = User::class;
-    protected static ?string $navigationLabel = 'User';
-    protected static ?string $pluralLabel = 'Manage Users';
-    protected static string | UnitEnum | null $navigationGroup = 'Access Control';
-
+    protected static ?string $model = Product::class;
+    protected static ?string $navigationLabel = 'Products';
+    protected static ?string $pluralLabel = 'Manage Products';
+    protected static string | UnitEnum | null $navigationGroup = 'Master Data';
+    
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'email'];
@@ -45,12 +47,12 @@ class UserResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return UserForm::configure($schema);
+        return ProductForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return UsersTable::configure($table);
+        return ProductsTable::configure($table);
     }
 
     public static function getRelations(): array
@@ -63,9 +65,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListUsers::route('/'),
-            'create' => CreateUser::route('/create'),
-            'edit' => EditUser::route('/{record}/edit'),
+            'index' => ListProducts::route('/'),
+            'create' => CreateProduct::route('/create'),
+            'edit' => EditProduct::route('/{record}/edit'),
         ];
     }
 
