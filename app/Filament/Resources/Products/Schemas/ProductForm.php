@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
-use App\Enum\SizeProductEnum;
-use App\Enum\TypeProductEnum;
+use App\Enums\SizeProductEnum;
+use App\Enums\TypeProductEnum;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
