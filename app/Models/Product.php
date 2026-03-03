@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\SizeProductEnum;
+use App\Enums\TypeProductEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -22,6 +24,8 @@ class Product extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'type'      => TypeProductEnum::class,
+        'size'      => SizeProductEnum::class,
     ];
 
     public function brand()
