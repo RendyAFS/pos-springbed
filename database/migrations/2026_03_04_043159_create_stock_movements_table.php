@@ -16,8 +16,7 @@ return new class extends Migration
             $table->foreignId('product_id')->nullable()->constrained('products');
             $table->foreignId('store_setting_id')->nullable()->constrained('store_settings');
             $table->string('type')->nullable();
-            $table->string('reference_type')->nullable();
-            // $table->string('reference_id')->nullable();
+            $table->morphs('reference');
             $table->integer('qty')->nullable();
             $table->integer('cost_price_snapshot')->nullable();
             $table->timestamps();
