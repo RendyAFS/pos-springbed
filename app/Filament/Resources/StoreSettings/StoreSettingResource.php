@@ -51,7 +51,7 @@ class StoreSettingResource extends Resource
                     ->nullable()
                     ->maxLength(255),
                 TextInput::make('email')
-                    ->label('Email')
+                    ->label('Email Address')
                     ->email()
                     ->nullable()
                     ->maxLength(255),
@@ -60,6 +60,7 @@ class StoreSettingResource extends Resource
                     ->nullable()
                     ->required(),
                 SpatieMediaLibraryFileUpload::make('homepage_banner')
+                    ->label('Homepage Banner')
                     ->nullable()
                     ->image()
                     ->imageEditor()

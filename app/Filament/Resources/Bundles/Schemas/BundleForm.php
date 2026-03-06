@@ -16,24 +16,28 @@ class BundleForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Name')
                     ->required(),
                 TextInput::make('bundle_price')
+                    ->label('Bundle Price')
                     ->numeric()
                     ->default(0)
                     ->prefix('Rp.'),
                 Toggle::make('is_active')
+                    ->label('Is Active')
                     ->required(),
                 Repeater::make('bundleItems')
                     ->relationship()
                     ->label('Bundle Items')
                     ->schema([
                         Select::make('product_id')
+                            ->label('Product')
                             ->options(Product::pluck('name', 'id'))
                             ->searchable()
                             ->preload()
                             ->required(),
                         TextInput::make('qty')
-                            ->numeric()
+                            ->label('Quantity')
                             ->required()
                             ->default(0),
                     ])
