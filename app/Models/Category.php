@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Mattiverse\Userstamps\Traits\Userstamps;
 
 class Category extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Userstamps;
     protected $fillable = [
         'name',
         'slug',
