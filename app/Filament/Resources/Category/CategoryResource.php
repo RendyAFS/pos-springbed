@@ -32,7 +32,7 @@ class CategoryResource extends Resource
     protected static ?string $model = Category::class;
     protected static ?string $slug = 'categories';
     protected static ?string $navigationLabel = 'Category';
-    protected static ?string $pluralLabel = 'Manage Category';
+    protected static ?string $pluralLabel = 'Category';
     protected static string | UnitEnum | null $navigationGroup = 'Master Data';
 
     public static function getGloballySearchableAttributes(): array

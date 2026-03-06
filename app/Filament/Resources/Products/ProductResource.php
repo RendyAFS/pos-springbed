@@ -7,6 +7,7 @@ use App\Filament\Resources\Products\Pages\EditProduct;
 use App\Filament\Resources\Products\Pages\ListProducts;
 use App\Filament\Resources\Products\Schemas\ProductForm;
 use App\Filament\Resources\Products\Tables\ProductsTable;
+use App\Helpers\RupiahHelper;
 use App\Models\Product;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -23,12 +24,12 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
     protected static ?string $navigationLabel = 'Products';
-    protected static ?string $pluralLabel = 'Manage Products';
+    protected static ?string $pluralLabel = 'Products';
     protected static string | UnitEnum | null $navigationGroup = 'Master Data';
-    
+
     public static function getGloballySearchableAttributes(): array
     {
-        return ['name', 'email'];
+        return ['name'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
@@ -39,9 +40,10 @@ class ProductResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Roles'  => $record->roles->pluck('name')->implode(', '),
-            'Email'  => $record->email,
-            'Status' => $record->is_active ? 'Active' : 'Inactive',
+            'Type'          => $record->type->getLabel(),
+            'Size'          => $record->size->getLabel(),
+            'Selling Price' => RupiahHelper::format($record->selling_price),
+            'Status'        => $record->is_active ? 'Active' : 'Inactive',
         ];
     }
 
