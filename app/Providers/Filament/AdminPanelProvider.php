@@ -92,7 +92,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentLoggerPlugin::make(),
                 FilamentShieldPlugin::make()
                     ->navigationLabel('Role')
-                    ->pluralModelLabel('Manage Roles')
+                    ->pluralModelLabel('Roles')
                     ->navigationIcon(false)
                     ->navigationGroup('Access Control'),
                 FilamentUiSwitcherPlugin::make()

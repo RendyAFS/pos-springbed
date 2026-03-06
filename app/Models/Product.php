@@ -6,10 +6,11 @@ use App\Enums\SizeProductEnum;
 use App\Enums\TypeProductEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Mattiverse\Userstamps\Traits\Userstamps;
 
 class Product extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Userstamps;
 
     protected $fillable = [
         'name',
@@ -41,5 +42,10 @@ class Product extends Model
     public function productImages()
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function bundleItems()
+    {
+        return $this->hasMany(BundleItem::class);
     }
 }

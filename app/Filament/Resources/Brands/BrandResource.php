@@ -32,7 +32,7 @@ class BrandResource extends Resource
 {
     protected static ?string $model = Brand::class;
     protected static ?string $navigationLabel = 'Brand';
-    protected static ?string $pluralLabel = 'Manage Brands';
+    protected static ?string $pluralLabel = 'Brands';
     protected static string | UnitEnum | null $navigationGroup = 'Master Data';
 
     public static function getGloballySearchableAttributes(): array
