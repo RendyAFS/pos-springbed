@@ -80,11 +80,11 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Master Data')
-                    ->icon(Heroicon::ServerStack)
+                    ->icon(Heroicon::OutlinedServerStack)
                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Access Control')
-                    ->icon(Heroicon::ShieldCheck)
+                    ->icon(Heroicon::OutlinedShieldCheck)
                     ->collapsed(),
             ])
             ->plugins([
