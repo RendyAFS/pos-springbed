@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Bundles\Schemas;
 
+use App\Models\Product;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -13,22 +16,29 @@ class BundleForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->default(null),
+                    ->required(),
                 TextInput::make('bundle_price')
                     ->numeric()
-                    ->default(null)
-                    ->prefix('$'),
+                    ->default(0)
+                    ->prefix('Rp.'),
                 Toggle::make('is_active')
                     ->required(),
-                TextInput::make('created_by')
-                    ->numeric()
-                    ->default(null),
-                TextInput::make('updated_by')
-                    ->numeric()
-                    ->default(null),
-                TextInput::make('deleted_by')
-                    ->numeric()
-                    ->default(null),
+                Repeater::make('bundleItems')
+                    ->relationship()
+                    ->label('Bundle Items')
+                    ->schema([
+                        Select::make('product_id')
+                            ->options(Product::pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        TextInput::make('qty')
+                            ->numeric()
+                            ->required()
+                            ->default(0),
+                    ])
+                    ->required()
+                    ->defaultItems(1),
             ]);
     }
 }
