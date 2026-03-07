@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bundles', function (Blueprint $table) {
+        Schema::create('promo_usages', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->decimal('bundle_price', 10, 2)->nullable();
-            $table->boolean('is_active')->default(false);
+            $table->foreignId('promo_id')->nullable()->constrained('promos');
+            $table->foreignId('transaction_id')->nullable()->constrained('transactions');
+            $table->decimal('discount_amount', 10, 2)->nullable();
             $table->timestamps();
-            $table->userstamps();
-            $table->softDeletes();
-            $table->userstampSoftDeletes();
         });
     }
 
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bundles');
+        Schema::dropIfExists('promo_usages');
     }
 };

@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('promos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('brand_id')->nullable()->constrained('brands');
-            $table->foreignId('category_id')->nullable()->constrained('categories');
             $table->string('name')->nullable();
             $table->string('type')->nullable();
-            $table->decimal('selling_price', 10, 2)->nullable();
-            $table->string('sku')->nullable();
-            $table->string('size')->nullable();
-            $table->decimal('weight', 10, 2)->nullable();
-            $table->string('color')->nullable();
+            $table->string('discount_type')->nullable();
+            $table->decimal('discount_value', 10, 2)->nullable();
+            $table->decimal('min_purchase', 10, 2)->nullable();
+            $table->integer('usage_limit')->nullable();
+            $table->integer('usage_count')->default(0);
+            $table->dateTime('start_date')->nullable();
+            $table->dateTime('end_date')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->userstamps();
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('promos');
     }
 };
