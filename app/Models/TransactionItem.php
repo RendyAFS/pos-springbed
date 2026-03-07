@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TransactionItems extends Model
+class TransactionItem extends Model
 {
     protected $fillable = [
         'transaction_id',
@@ -25,6 +25,11 @@ class TransactionItems extends Model
     public function transaction()
     {
         return $this->belongsTo(Transaction::class);
+    }
+
+    public function transactionItemsCosts()
+    {
+        return $this->hasMany(TransactionItemCost::class);
     }
 
     public function product()

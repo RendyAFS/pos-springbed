@@ -55,4 +55,9 @@ class Product extends Model
     {
         return $this->belongsToMany(Promo::class, 'promo_products');
     }
+
+    public function purchaseOrderItems()
+    {
+        return $this->hasMany(PurchaseOrder::class, 'product_id');
+    }
 }

@@ -39,15 +39,6 @@ class TransactionForm
                     ->numeric()
                     ->default(null),
                 DatePicker::make('transaction_date'),
-                TextInput::make('created_by')
-                    ->numeric()
-                    ->default(null),
-                TextInput::make('updated_by')
-                    ->numeric()
-                    ->default(null),
-                TextInput::make('deleted_by')
-                    ->numeric()
-                    ->default(null),
             ]);
     }
 }
