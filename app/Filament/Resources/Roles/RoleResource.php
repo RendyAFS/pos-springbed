@@ -43,6 +43,12 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getNavigationIcon(): ?string
+    {
+        return null;
+    }
+
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'guard_name'];
