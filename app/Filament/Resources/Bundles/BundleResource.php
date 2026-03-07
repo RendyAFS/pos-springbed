@@ -15,14 +15,14 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class BundleResource extends Resource
 {
     protected static ?string $model = Bundle::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
-    // protected static ?string $recordTitleAttribute = 'Bundle';
+    protected static ?string $navigationLabel = 'Bundles';
+    protected static ?string $pluralLabel = 'Bundles';
+    protected static string | UnitEnum | null $navigationGroup = 'Master Data';
 
     public static function form(Schema $schema): Schema
     {

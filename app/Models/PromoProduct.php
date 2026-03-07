@@ -3,18 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Mattiverse\Userstamps\Traits\Userstamps;
 
-class BundleItem extends Model
+class PromoProduct extends Model
 {
     protected $fillable = [
-        'bundle_id',
+        'promo_id',
         'product_id',
-        'qty',
     ];
 
-    public function bundle()
+    public function promo()
     {
-        return $this->belongsTo(Bundle::class);
+        return $this->belongsTo(Promo::class);
     }
 
     public function product()

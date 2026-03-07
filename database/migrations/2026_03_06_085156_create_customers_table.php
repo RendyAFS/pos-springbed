@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bundles', function (Blueprint $table) {
+        Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->decimal('bundle_price', 10, 2)->nullable();
-            $table->boolean('is_active')->default(false);
+            $table->string('name');
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
+            $table->string('address')->nullable();
             $table->timestamps();
             $table->userstamps();
             $table->softDeletes();
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bundles');
+        Schema::dropIfExists('customers');
     }
 };

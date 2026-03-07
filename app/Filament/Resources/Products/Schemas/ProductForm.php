@@ -23,16 +23,19 @@ class ProductForm
                     ->icon(Heroicon::ArchiveBox)
                     ->schema([
                         Select::make('brands_id')
+                            ->label('Brand')
                             ->relationship('brand', 'name')
                             ->searchable()
                             ->preload()
                             ->nullable(),
                         Select::make('categories_id')
+                            ->label('Category')
                             ->relationship('category', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         Select::make('size')
+                            ->label('Size')
                             ->options(
                                 collect(SizeProductEnum::cases())
                                     ->mapWithKeys(fn($case) => [
@@ -43,6 +46,7 @@ class ProductForm
                             ->searchable()
                             ->required(),
                         Select::make('type')
+                            ->label('Type')
                             ->options(
                                 collect(TypeProductEnum::cases())
                                     ->mapWithKeys(fn($case) => [
@@ -53,6 +57,7 @@ class ProductForm
                             ->searchable()
                             ->required(),
                         TextInput::make('name')
+                            ->label('Name')
                             ->required()
                             ->columnSpanFull(),
                     ])->columns(2),
@@ -61,6 +66,7 @@ class ProductForm
                     ->icon(Heroicon::DocumentText)
                     ->schema([
                         TextInput::make('selling_price')
+                            ->label('Selling Price')
                             ->numeric()
                             ->required()
                             ->prefix('Rp.'),
@@ -68,9 +74,11 @@ class ProductForm
                             ->label('SKU')
                             ->default(null),
                         TextInput::make('weight')
+                            ->label('Weight')
                             ->numeric()
                             ->default(null),
                         TextInput::make('color')
+                            ->label('Color')
                             ->default(null),
                         Toggle::make('is_active')
                             ->label('Is Active')
@@ -85,6 +93,7 @@ class ProductForm
                     ->relationship()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('images_product')
+                            ->label('Image Product')
                             ->nullable()
                             ->image()
                             ->imageEditor()

@@ -24,9 +24,11 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'type'      => TypeProductEnum::class,
-        'size'      => SizeProductEnum::class,
+        'is_active'     => 'boolean',
+        'selling_price' => 'decimal:2',
+        'weight'        => 'decimal:2',
+        'type'          => TypeProductEnum::class,
+        'size'          => SizeProductEnum::class,
     ];
 
     public function brand()
@@ -47,5 +49,10 @@ class Product extends Model
     public function bundleItems()
     {
         return $this->hasMany(BundleItem::class);
+    }
+
+    public function promos()
+    {
+        return $this->belongsToMany(Promo::class, 'promo_products');
     }
 }
