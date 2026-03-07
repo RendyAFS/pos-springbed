@@ -42,10 +42,10 @@ class Transaction extends Model
         return $this->belongsTo(Promo::class);
     }
 
-    // public function transactionItems()
-    // {
-    //     return $this->hasMany(TransactionItem::class);
-    // }
+    public function transactionItems()
+    {
+        return $this->hasMany(TransactionItem::class);
+    }
 
     public function promoUsages()
     {
