@@ -8,19 +8,19 @@ use App\Filament\Resources\Transactions\Pages\ListTransactions;
 use App\Filament\Resources\Transactions\Schemas\TransactionForm;
 use App\Filament\Resources\Transactions\Tables\TransactionsTable;
 use App\Models\Transaction;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
     protected static ?string $navigationLabel = 'Transactions';
     protected static ?string $pluralLabel = 'Transactions';
-    protected static string | UnitEnum | null $navigationGroup = 'Transaction';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-archive-box';
 
     public static function form(Schema $schema): Schema
     {

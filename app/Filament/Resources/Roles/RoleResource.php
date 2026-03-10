@@ -48,7 +48,6 @@ class RoleResource extends Resource
         return null;
     }
 
-
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'guard_name'];
@@ -64,6 +63,12 @@ class RoleResource extends Resource
         return [
             'Guard'  => $record->guard_name,
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('name', '!=', 'Super Admin');
     }
 
     public static function form(Schema $schema): Schema

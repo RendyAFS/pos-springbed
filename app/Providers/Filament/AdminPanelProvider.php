@@ -83,18 +83,6 @@ class AdminPanelProvider extends PanelProvider
                     ->icon(Heroicon::OutlinedServerStack)
                     ->collapsed(),
                 NavigationGroup::make()
-                    ->label('Purchasing')
-                    ->icon(Heroicon::OutlinedShoppingBag)
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Promotion')
-                    ->icon(Heroicon::OutlinedReceiptPercent)
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Transaction')
-                    ->icon(Heroicon::OutlinedArchiveBox)
-                    ->collapsed(),
-                NavigationGroup::make()
                     ->label('Access Control')
                     ->icon(Heroicon::OutlinedShieldCheck)
                     ->collapsed(),
