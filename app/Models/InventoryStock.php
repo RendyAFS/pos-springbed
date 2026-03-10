@@ -19,6 +19,6 @@ class InventoryStock extends Model
 
     public function storeSetting()
     {
-        return $this->belongsTo(Product::class, 'store_setting_id');
+        return $this->belongsTo(StoreSetting::class, 'store_setting_id');
     }
 }

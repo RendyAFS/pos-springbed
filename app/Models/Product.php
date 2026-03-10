@@ -58,6 +58,16 @@ class Product extends Model
 
     public function purchaseOrderItems()
     {
-        return $this->hasMany(PurchaseOrder::class, 'product_id');
+        return $this->hasMany(PurchaseOrderItem::class, 'product_id');
+    }
+
+    public function inventoryStock()
+    {
+        return $this->hasOne(InventoryStock::class);
+    }
+
+    public function stockAdjustments()
+    {
+        return $this->hasMany(StockAdjustment::class);
     }
 }
