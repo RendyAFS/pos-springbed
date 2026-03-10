@@ -14,14 +14,19 @@ class StockMovement extends Model
         'store_setting_id',
         'type',
         'reference_type',
+        'reference_id',
         'qty',
         'cost_price_snapshot',
     ];
 
     protected $cast = [
         'type'           => TypeStockMovementEnum::class,
-        'reference_type' => ReferenceTypeStockMovementEnum::class,
     ];
+
+    public function reference()
+    {
+        return $this->morphTo();
+    }
 
     public function product()
     {
@@ -30,6 +35,6 @@ class StockMovement extends Model
 
     public function storeSetting()
     {
-        return $this->belongsTo(Product::class, 'store_setting_id');
+        return $this->belongsTo(StoreSetting::class, 'store_setting_id');
     }
 }
