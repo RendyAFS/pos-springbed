@@ -33,7 +33,7 @@ use UnitEnum;
 class StoreSettingResource extends Resource
 {
     protected static ?string $model = StoreSetting::class;
-    protected static ?string $navigationLabel = 'Store Setting';
+    protected static ?string $navigationLabel = 'Store Settings';
     protected static ?string $pluralLabel = 'Store Settings';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
