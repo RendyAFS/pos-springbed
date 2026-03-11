@@ -3,21 +3,24 @@
 namespace App\Services;
 
 use App\Models\Transaction;
+use Illuminate\Support\Facades\DB;
 
 class TransactionService
 {
     public function processTransaction(Transaction $transaction)
     {
-        $inventoryService = app(InventoryService::class);
+        DB::transaction(function () use ($transaction) {
 
-        foreach ($transaction->transactionItems as $transactionItem) {
+            $inventoryService = app(InventoryService::class);
 
-            $inventoryService->decreaseStock(
-                $transactionItem->product_id,
-                $transaction->store_setting_id,
-                $transactionItem->qty,
-                $transaction
-            );
-        }
+            foreach ($transaction->transactionItems as $item) {
+
+                $inventoryService->decreaseStock(
+                    $item->product_id,
+                    $item->qty,
+                    $transaction
+                );
+            }
+        });
     }
 }

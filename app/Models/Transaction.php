@@ -12,6 +12,7 @@ class Transaction extends Model
     use SoftDeletes, Userstamps;
 
     protected $fillable = [
+        'store_setting_id',
         'customer_id',
         'transaction_code',
         'subtotal',

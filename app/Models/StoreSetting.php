@@ -18,4 +18,19 @@ class StoreSetting extends Model implements HasMedia
         'email',
         'address',
     ];
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'store_setting_id');
+    }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class, 'store_setting_id');
+    }
+
+    public function inventoryStocks()
+    {
+        return $this->hasMany(InventoryStock::class, 'store_setting_id');
+    }
 }

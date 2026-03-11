@@ -12,7 +12,6 @@ class StockAdjustmentService
 
         $inventoryService->adjustStock(
             $adjustment->product_id,
-            $adjustment->store_setting_id,
             $adjustment->qty_difference,
             $adjustment
         );

@@ -10,14 +10,17 @@ class PurchaseOrderService
     {
         $inventoryService = app(InventoryService::class);
 
-        foreach ($purchaseOrder->purchaseOrderItems as $purchaseOrderItem) {
+        foreach ($purchaseOrder->purchaseOrderItems as $item) {
+
+            $item->update([
+                'qty_remaining' => $item->qty_purchased
+            ]);
 
             $inventoryService->increaseStock(
-                $purchaseOrderItem->product_id,
-                $purchaseOrder->store_setting_id,
-                $purchaseOrderItem->qty_purchased,
+                $item->product_id,
+                $item->qty_purchased,
                 $purchaseOrder,
-                $purchaseOrderItem->cost_price
+                $item->cost_price
             );
         }
     }

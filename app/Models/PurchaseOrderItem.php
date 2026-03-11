@@ -10,7 +10,7 @@ class PurchaseOrderItem extends Model
         'purchase_order_id',
         'product_id',
         'qty_purchased',
-        'qty_remainig',
+        'qty_remaining',
         'cost_price',
     ];
 

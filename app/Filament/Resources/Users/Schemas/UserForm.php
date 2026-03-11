@@ -67,6 +67,17 @@ class UserForm
                             ->searchable()
                             ->required(),
 
+                        Select::make('storeSetting')
+                            ->label('Store / Warehouse')
+                            ->relationship(
+                                name: 'storeSetting',
+                                titleAttribute: 'store_name'
+                            )
+                            ->preload()
+                            ->searchable()
+                            ->required(),
+
+
                         Toggle::make('is_active')
                             ->label('Is Active')
                             ->offIcon(Heroicon::XMark)
@@ -79,11 +90,14 @@ class UserForm
                     ->footerActions([
                         Action::make('resetPassword')
                             ->label('Reset Password')
-                            ->tooltip('Reset Password ke default "12345678"')
+                            ->tooltip('Reset Password to default "12345678"')
                             ->icon('heroicon-o-arrow-path')
                             ->color('warning')
                             ->outlined()
                             ->requiresConfirmation()
+                            ->modalHeading('Reset password')
+                            ->modalDescription('Are you sure Reset this password? to default "12345678"')
+                            ->modalSubmitActionLabel('Yes, delete it')
                             ->visible(fn(string $context) => $context === 'edit')
                             ->action(function ($record) {
                                 $record->update([
