@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class TransactionItemCost extends Model
 {
     protected $fillable = [
-        'transaction_items_id',
-        'purchase_order_items_id',
+        'transaction_item_id',
+        'purchase_order_item_id',
         'qty_taken',
         'cost_price',
     ];

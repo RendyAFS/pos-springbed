@@ -3,17 +3,50 @@
 namespace App\Services;
 
 use App\Models\InventoryStock;
+use App\Models\PurchaseOrderItem;
 use App\Models\StockMovement;
+use App\Models\TransactionItemCost;
 use App\Enums\TypeStockMovementEnum;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class InventoryService
 {
-    private function getStoreId(): int
+    private function getStoreId(Model $reference): int
     {
-        return Auth::user()->store_setting_id;
+        if (!isset($reference->store_setting_id)) {
+            throw new Exception('Reference tidak memiliki store_setting_id');
+        }
+
+        return $reference->store_setting_id;
+    }
+
+    private function validateQty(int $qty): void
+    {
+        if ($qty <= 0) {
+            throw new Exception('Qty harus lebih dari 0');
+        }
+    }
+
+    private function getStock(int $productId, int $storeId): InventoryStock
+    {
+        $stock = InventoryStock::where([
+            'product_id' => $productId,
+            'store_setting_id' => $storeId,
+        ])
+            ->lockForUpdate()
+            ->first();
+
+        if (!$stock) {
+            $stock = InventoryStock::create([
+                'product_id' => $productId,
+                'store_setting_id' => $storeId,
+                'quantity' => 0,
+            ]);
+        }
+
+        return $stock;
     }
 
     public function increaseStock(
@@ -23,21 +56,16 @@ class InventoryService
         ?float $costPrice = null
     ): void {
 
-        $storeId = $this->getStoreId();
+        $this->validateQty($qty);
 
-        DB::transaction(function () use ($productId, $storeId, $qty, $reference, $costPrice) {
+        DB::transaction(function () use ($productId, $qty, $reference, $costPrice) {
 
-            $stock = InventoryStock::firstOrCreate(
-                [
-                    'product_id' => $productId,
-                    'store_setting_id' => $storeId,
-                ],
-                [
-                    'quantity' => 0
-                ]
-            );
+            $storeId = $this->getStoreId($reference);
 
-            $stock->increment('quantity', $qty);
+            $stock = $this->getStock($productId, $storeId);
+
+            $stock->quantity += $qty;
+            $stock->save();
 
             StockMovement::create([
                 'product_id' => $productId,
@@ -57,20 +85,22 @@ class InventoryService
         Model $reference
     ): void {
 
-        $storeId = $this->getStoreId();
+        $this->validateQty($qty);
 
-        DB::transaction(function () use ($productId, $storeId, $qty, $reference) {
+        DB::transaction(function () use ($productId, $qty, $reference) {
 
-            $stock = InventoryStock::where([
-                'product_id' => $productId,
-                'store_setting_id' => $storeId
-            ])->lockForUpdate()->first();
+            $storeId = $this->getStoreId($reference);
 
-            if (!$stock || $stock->quantity < $qty) {
-                throw new \Exception('Stock tidak cukup');
+            $stock = $this->getStock($productId, $storeId);
+
+            if ($stock->quantity < $qty) {
+                throw new Exception('Stock tidak cukup');
             }
 
-            $stock->decrement('quantity', $qty);
+            $stock->quantity -= $qty;
+            $stock->save();
+
+            $this->consumeFIFO($productId, $qty, $reference);
 
             StockMovement::create([
                 'product_id' => $productId,
@@ -89,21 +119,20 @@ class InventoryService
         Model $reference
     ): void {
 
-        $storeId = $this->getStoreId();
+        DB::transaction(function () use ($productId, $difference, $reference) {
 
-        DB::transaction(function () use ($productId, $storeId, $difference, $reference) {
+            $storeId = $this->getStoreId($reference);
 
-            $stock = InventoryStock::firstOrCreate(
-                [
-                    'product_id' => $productId,
-                    'store_setting_id' => $storeId,
-                ],
-                [
-                    'quantity' => 0
-                ]
-            );
+            $stock = $this->getStock($productId, $storeId);
 
-            $stock->increment('quantity', $difference);
+            $newQty = $stock->quantity + $difference;
+
+            if ($newQty < 0) {
+                throw new Exception('Stock tidak boleh minus');
+            }
+
+            $stock->quantity = $newQty;
+            $stock->save();
 
             StockMovement::create([
                 'product_id' => $productId,
@@ -114,5 +143,55 @@ class InventoryService
                 'reference_id' => $reference->id,
             ]);
         });
+    }
+
+    /**
+     * FIFO consumption
+     */
+    private function consumeFIFO(
+        int $productId,
+        int $qty,
+        Model $reference
+    ): void {
+
+        $storeId = $this->getStoreId($reference);
+        $remaining = $qty;
+
+        $purchaseItems = PurchaseOrderItem::where('product_id', $productId)
+            ->where('qty_remaining', '>', 0)
+            ->whereHas('purchaseOrder', function ($q) use ($storeId) {
+                $q->where('store_setting_id', $storeId);
+            })
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+
+        /** @var PurchaseOrderItem $purchaseItem */
+        foreach ($purchaseItems as $purchaseItem) {
+
+            if ($remaining <= 0) {
+                break;
+            }
+
+            $available = $purchaseItem->qty_remaining;
+            $deduct = min($available, $remaining);
+            $purchaseItem->qty_remaining -= $deduct;
+            $purchaseItem->save();
+
+            TransactionItemCost::create([
+                'purchase_order_item_id' => $purchaseItem->id,
+                'transaction_item_id' => $reference->id,
+                'qty' => $deduct,
+                'cost_price' => $purchaseItem->cost_price,
+            ]);
+
+            $remaining -= $deduct;
+        }
+
+        if ($remaining > 0) {
+            throw new Exception('FIFO stock tidak cukup');
+        }
     }
 }

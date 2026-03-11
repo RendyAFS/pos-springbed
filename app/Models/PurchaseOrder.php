@@ -11,6 +11,7 @@ class PurchaseOrder extends Model
     use SoftDeletes, Userstamps;
 
     protected $fillable = [
+        'store_setting_id',
         'supplier_name',
         'invoice_number',
         'purchase_date',
