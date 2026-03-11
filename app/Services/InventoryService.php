@@ -6,17 +6,24 @@ use App\Models\InventoryStock;
 use App\Models\StockMovement;
 use App\Enums\TypeStockMovementEnum;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class InventoryService
 {
+    private function getStoreId(): int
+    {
+        return Auth::user()->store_setting_id;
+    }
+
     public function increaseStock(
         int $productId,
-        int $storeId,
         int $qty,
         Model $reference,
         ?float $costPrice = null
     ): void {
+
+        $storeId = $this->getStoreId();
 
         DB::transaction(function () use ($productId, $storeId, $qty, $reference, $costPrice) {
 
@@ -46,10 +53,11 @@ class InventoryService
 
     public function decreaseStock(
         int $productId,
-        int $storeId,
         int $qty,
         Model $reference
     ): void {
+
+        $storeId = $this->getStoreId();
 
         DB::transaction(function () use ($productId, $storeId, $qty, $reference) {
 
@@ -77,10 +85,11 @@ class InventoryService
 
     public function adjustStock(
         int $productId,
-        int $storeId,
         int $difference,
         Model $reference
     ): void {
+
+        $storeId = $this->getStoreId();
 
         DB::transaction(function () use ($productId, $storeId, $difference, $reference) {
 

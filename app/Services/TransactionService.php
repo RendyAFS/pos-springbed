@@ -14,7 +14,6 @@ class TransactionService
 
             $inventoryService->decreaseStock(
                 $transactionItem->product_id,
-                $transaction->store_setting_id,
                 $transactionItem->qty,
                 $transaction
             );

@@ -14,7 +14,6 @@ class PurchaseOrderService
 
             $inventoryService->increaseStock(
                 $purchaseOrderItem->product_id,
-                $purchaseOrder->store_setting_id,
                 $purchaseOrderItem->qty_purchased,
                 $purchaseOrder,
                 $purchaseOrderItem->cost_price
