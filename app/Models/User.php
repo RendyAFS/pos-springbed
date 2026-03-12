@@ -27,6 +27,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
+        'store_setting_id',
     ];
 
     /**
@@ -52,5 +53,10 @@ class User extends Authenticatable
             'is_active'         => 'boolean',
             'ui_preferences'    => 'array',
         ];
+    }
+
+    public function storeSetting()
+    {
+        return $this->belongsTo(StoreSetting::class, 'store_setting_id');
     }
 }
