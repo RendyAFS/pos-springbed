@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('purchase_order_id')->nullable()->constrained('purchase_orders');
             $table->foreignId('product_id')->nullable()->constrained('products');
             $table->integer('qty_purchased')->nullable;
-            $table->integer('qty_remainig')->nullable;
+            $table->integer('qty_remaining')->nullable;
             $table->decimal('cost_price', 10, 2)->nullable;
             $table->timestamps();
         });

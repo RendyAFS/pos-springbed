@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('transaction_item_costs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaction_items_id')->nullable()->constrained('transaction_items');
-            $table->foreignId('purchase_order_items_id')->nullable()->constrained('purchase_order_items');
+            $table->foreignId('transaction_item_id')->nullable()->constrained('transaction_items');
+            $table->foreignId('purchase_order_item_id')->nullable()->constrained('purchase_order_items');
             $table->integer('qty_taken')->nullable();
             $table->decimal('cost_price', 10, 2)->nullable();
             $table->timestamps();
