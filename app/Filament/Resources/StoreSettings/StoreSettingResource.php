@@ -106,7 +106,7 @@ class StoreSettingResource extends Resource
                     })
                     ->searchable(),
                 SpatieMediaLibraryImageColumn::make('homepage_banner')
-                    ->defaultImageUrl(asset('assets/image/logo-no-image.png'))
+                    ->defaultImageUrl(asset('assets/images/logo-no-image.png'))
                     ->extraImgAttributes([
                         'class' => 'rounded-md'
                     ])

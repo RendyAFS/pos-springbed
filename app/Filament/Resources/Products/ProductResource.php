@@ -12,20 +12,18 @@ use App\Models\Product;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
     protected static ?string $navigationLabel = 'Products';
     protected static ?string $pluralLabel = 'Products';
-    protected static string | UnitEnum | null $navigationGroup = 'Master Data';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-square-3-stack-3d';
 
     public static function getGloballySearchableAttributes(): array
     {

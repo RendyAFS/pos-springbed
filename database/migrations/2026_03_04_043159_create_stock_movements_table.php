@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('type')->nullable();
             $table->morphs('reference');
             $table->integer('qty')->nullable();
-            $table->integer('cost_price_snapshot')->nullable();
+            $table->decimal('cost_price_snapshot', 10, 2)->nullable();
             $table->timestamps();
         });
     }
