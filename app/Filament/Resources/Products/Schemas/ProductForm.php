@@ -35,7 +35,7 @@ class ProductForm
                             ->relationship('brand', 'name')
                             ->searchable()
                             ->preload()
-                            ->nullable(),
+                            ->required(),
                         Select::make('categories_id')
                             ->label('Category')
                             ->relationship('category', 'name')
@@ -125,10 +125,11 @@ class ProductForm
 
                                 if ($temp) {
                                     $qty = $temp['quantity'];
+                                    $storeName = StoreSetting::find($temp['store_setting_id'])?->store_name ?? 'Unknown Store';
                                 } else {
                                     $qty = InventoryStock::query()
                                         ->where('product_id', $record->id)
-                                        ->when($storeId, fn ($q) => $q->where('store_setting_id', $storeId))
+                                        ->when($storeId, fn($q) => $q->where('store_setting_id', $storeId))
                                         ->sum('quantity');
                                 }
 
