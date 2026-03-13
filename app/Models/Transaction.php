@@ -52,4 +52,9 @@ class Transaction extends Model
     {
         return $this->hasMany(PromoUsage::class);
     }
+
+    public function storeSetting()
+    {
+        return $this->belongsTo(StoreSetting::class, 'store_setting_id');
+    }
 }

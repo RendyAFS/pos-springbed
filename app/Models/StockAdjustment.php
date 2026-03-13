@@ -19,4 +19,9 @@ class StockAdjustment extends Model
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
+
+    public function storeSetting()
+    {
+        return $this->belongsTo(StoreSetting::class, 'store_setting_id');
+    }
 }
