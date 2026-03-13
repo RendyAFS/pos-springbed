@@ -28,7 +28,7 @@ class ProductResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['name'];
+        return ['name', 'sku'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
@@ -41,6 +41,7 @@ class ProductResource extends Resource
         return [
             'Type'          => $record->type->getLabel(),
             'Size'          => $record->size->getLabel(),
+            'SKU'           => $record->sku,
             'Selling Price' => RupiahHelper::format($record->selling_price),
             'Status'        => $record->is_active ? 'Active' : 'Inactive',
         ];

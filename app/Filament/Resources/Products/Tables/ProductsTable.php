@@ -13,6 +13,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Support\Enums\FontFamily;
+use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -50,7 +51,12 @@ class ProductsTable
                 TextColumn::make('sku')
                     ->label('SKU')
                     ->fontFamily(FontFamily::Mono)
-                    ->searchable(),
+                    ->searchable()
+                    ->icon(Heroicon::ClipboardDocumentList)
+                    ->iconPosition(IconPosition::After)
+                    ->copyable()
+                    ->copyMessage('SKU copied')
+                    ->copyMessageDuration(1500),
                 TextColumn::make('category.name')
                     ->label('Category')
                     ->badge()
