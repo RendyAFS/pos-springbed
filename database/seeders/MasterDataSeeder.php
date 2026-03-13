@@ -46,19 +46,19 @@ class MasterDataSeeder extends Seeder
 
         $brands = [
             [
-                'name' => 'Springbed',
+                'name' => 'King Koil',
                 'is_active' => true,
             ],
             [
-                'name' => 'Divan',
+                'name' => 'Serta',
                 'is_active' => true,
             ],
             [
-                'name' => 'Headboard',
+                'name' => 'Comforta',
                 'is_active' => true,
             ],
             [
-                'name' => 'Bundle',
+                'name' => 'Florence',
                 'is_active' => true,
             ],
         ];
