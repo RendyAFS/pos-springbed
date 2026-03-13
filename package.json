@@ -5,8 +5,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "get-update": "git pull origin develop && composer install && npm install && php artisan migrate && npm run build && php artisan shield:generate --all && npm run dev",
-        "update": "composer install && npm install && php artisan migrate && npm run build && php artisan shield:generate --all && npm run dev"
+        "get-update": "git pull origin develop && composer install && npm install && php artisan migrate:fresh --seed && npm run build && php artisan shield:generate --all && npm run dev",
+        "update": "composer install && npm install && php artisan migrate:fresh --seed && npm run build && php artisan shield:generate --all && npm run dev"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.1.18",
