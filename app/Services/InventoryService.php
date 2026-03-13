@@ -7,6 +7,7 @@ use App\Models\PurchaseOrderItem;
 use App\Models\StockMovement;
 use App\Models\TransactionItemCost;
 use App\Enums\TypeStockMovementEnum;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -20,6 +21,15 @@ class InventoryService
         }
 
         return $reference->store_setting_id;
+    }
+
+    private function ensureProductStore(int $productId, int $storeId): void
+    {
+        Product::where('id', $productId)
+            ->whereNull('store_setting_id')
+            ->update([
+                'store_setting_id' => $storeId,
+            ]);
     }
 
     private function validateQty(int $qty): void
@@ -61,6 +71,7 @@ class InventoryService
         DB::transaction(function () use ($productId, $qty, $reference, $costPrice) {
 
             $storeId = $this->getStoreId($reference);
+            $this->ensureProductStore($productId, $storeId);
 
             $stock = $this->getStock($productId, $storeId);
 
@@ -90,6 +101,7 @@ class InventoryService
         DB::transaction(function () use ($productId, $qty, $reference) {
 
             $storeId = $this->getStoreId($reference);
+            $this->ensureProductStore($productId, $storeId);
 
             $stock = $this->getStock($productId, $storeId);
 
@@ -122,17 +134,31 @@ class InventoryService
         DB::transaction(function () use ($productId, $difference, $reference) {
 
             $storeId = $this->getStoreId($reference);
+            $this->ensureProductStore($productId, $storeId);
 
-            $stock = $this->getStock($productId, $storeId);
+            $stock = InventoryStock::where([
+                'product_id' => $productId,
+                'store_setting_id' => $storeId,
+            ])
+                ->lockForUpdate()
+                ->first();
 
-            $newQty = $stock->quantity + $difference;
+            $qtyBefore = $stock?->quantity ?? 0;
+            $qtyAfter = $qtyBefore + $difference;
 
-            if ($newQty < 0) {
+            if ($qtyAfter < 0) {
                 throw new Exception('Stock tidak boleh minus');
             }
 
-            $stock->quantity = $newQty;
-            $stock->save();
+            if ($stock) {
+                $stock->delete();
+            }
+
+            InventoryStock::create([
+                'product_id' => $productId,
+                'store_setting_id' => $storeId,
+                'quantity' => $qtyAfter,
+            ]);
 
             StockMovement::create([
                 'product_id' => $productId,

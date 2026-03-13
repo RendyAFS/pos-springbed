@@ -13,6 +13,7 @@ class Product extends Model
     use SoftDeletes, Userstamps;
 
     protected $fillable = [
+        'store_setting_id',
         'name',
         'type',
         'selling_price',
@@ -61,13 +62,18 @@ class Product extends Model
         return $this->hasMany(PurchaseOrderItem::class, 'product_id');
     }
 
-    public function inventoryStock()
+    public function inventoryStocks()
     {
-        return $this->hasOne(InventoryStock::class);
+        return $this->hasMany(InventoryStock::class);
     }
 
     public function stockAdjustments()
     {
         return $this->hasMany(StockAdjustment::class);
+    }
+
+    public function storeSetting()
+    {
+        return $this->belongsTo(StoreSetting::class, 'store_setting_id');
     }
 }

@@ -25,6 +25,7 @@ use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -36,6 +37,25 @@ class StoreSettingResource extends Resource
     protected static ?string $navigationLabel = 'Store Settings';
     protected static ?string $pluralLabel = 'Store Settings';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['store_name'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    {
+        return $record->store_name;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Phone'  => $record->phone,
+            'Email'  => $record->email,
+            'Address'  => $record->address,
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {

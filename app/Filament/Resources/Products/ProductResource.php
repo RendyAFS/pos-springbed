@@ -17,6 +17,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class ProductResource extends Resource
 {
@@ -27,7 +28,7 @@ class ProductResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['name'];
+        return ['name', 'sku'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
@@ -40,9 +41,25 @@ class ProductResource extends Resource
         return [
             'Type'          => $record->type->getLabel(),
             'Size'          => $record->size->getLabel(),
+            'SKU'           => $record->sku,
             'Selling Price' => RupiahHelper::format($record->selling_price),
             'Status'        => $record->is_active ? 'Active' : 'Inactive',
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        $storeId = Auth::user()?->store_setting_id;
+
+        if ($storeId) {
+            $query->whereHas('inventoryStocks', function ($q) use ($storeId) {
+                $q->where('store_setting_id', $storeId);
+            });
+        }
+
+        return $query;
     }
 
     public static function form(Schema $schema): Schema
