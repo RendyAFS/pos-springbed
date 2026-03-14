@@ -18,6 +18,8 @@ use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
@@ -231,7 +233,19 @@ class ProductForm
                             ->offColor('danger')
                             ->onColor('success')
                             ->inline(false)
-                            ->default(false),
+                            ->default(false)
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, $livewire, Get $get, Set $set) {
+                                if ($state === true) {
+                                    $items = $get('../../productImages');
+                                    if (is_array($items)) {
+                                        foreach ($items as $key => $item) {
+                                            $set("../../productImages.{$key}.is_primary", false);
+                                        }
+                                    }
+                                    $set('is_primary', true);
+                                }
+                            }),
                     ])
                     ->addActionLabel('Add Image')
                     ->reorderable()
