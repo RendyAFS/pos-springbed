@@ -7,30 +7,20 @@ use App\Models\Promo;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Contracts\View\View;
 
 class ListPromos extends ListRecords
 {
     protected static string $resource = PromoResource::class;
-
-    /**
-     * Livewire property bound to the search input in the blade view.
-     * Named "promoSearch" to avoid conflict with Filament's own $tableSearch.
-     */
     public string $promoSearch = '';
+    public bool $showDeleteModal = false;
+    public ?int $deleteTargetId = null;
 
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make()
-                ->label('Create Promotion')
-                ->icon('heroicon-o-plus'),
         ];
     }
-
-    // ─────────────────────────────────────────────
-    // Override view
-    // ─────────────────────────────────────────────
 
     public function getView(): string
     {
@@ -50,13 +40,6 @@ class ListPromos extends ListRecords
         ];
     }
 
-    // ─────────────────────────────────────────────
-    // Livewire actions called from blade
-    // ─────────────────────────────────────────────
-
-    /**
-     * Toggle is_active for a promo.
-     */
     public function toggleActive(int $id): void
     {
         $promo = Promo::withTrashed()->findOrFail($id);
@@ -68,13 +51,29 @@ class ListPromos extends ListRecords
             ->send();
     }
 
-    /**
-     * Soft-delete a promo.
-     */
-    public function deletePromo(int $id): void
+    public function confirmDeletePromo(int $id): void
     {
-        $promo = Promo::findOrFail($id);
+        $this->deleteTargetId = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showDeleteModal = false;
+        $this->deleteTargetId = null;
+    }
+
+    public function deletePromo(): void
+    {
+        if (! $this->deleteTargetId) {
+            return;
+        }
+
+        $promo = Promo::findOrFail($this->deleteTargetId);
         $promo->delete();
+
+        $this->showDeleteModal = false;
+        $this->deleteTargetId = null;
 
         Notification::make()
             ->title('Promotion deleted')
@@ -82,9 +81,6 @@ class ListPromos extends ListRecords
             ->send();
     }
 
-    /**
-     * Restore a soft-deleted promo.
-     */
     public function restorePromo(int $id): void
     {
         $promo = Promo::withTrashed()->findOrFail($id);
