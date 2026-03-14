@@ -12,7 +12,9 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PromoResource extends Resource
@@ -21,6 +23,26 @@ class PromoResource extends Resource
     protected static ?string $navigationLabel = 'Promos';
     protected static ?string $pluralLabel = 'Promos';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-receipt-percent';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    {
+        return $record->name;
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'Type'       => $record->type->getLabel(),
+            'Start Date' => $record->start_date,
+            'End Date'   => $record->end_date,
+            'Status'     => $record->is_active ? 'Active' : 'Inactive',
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {
