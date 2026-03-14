@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained('products');
+            $table->text('image_product')->nullable();
             $table->boolean('is_primary')->default(false);
         });
     }

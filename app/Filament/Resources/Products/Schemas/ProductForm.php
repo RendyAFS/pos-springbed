@@ -7,16 +7,19 @@ use App\Enums\TypeProductEnum;
 use App\Models\InventoryStock;
 use App\Models\StoreSetting;
 use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+// use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
@@ -212,7 +215,7 @@ class ProductForm
                 Repeater::make('productImages')
                     ->relationship()
                     ->schema([
-                        SpatieMediaLibraryFileUpload::make('images_product')
+                        FileUpload::make('image_product')
                             ->label('Image Product')
                             ->nullable()
                             ->image()
@@ -220,7 +223,7 @@ class ProductForm
                             ->openable()
                             ->downloadable()
                             ->disk('public')
-                            ->collection('images_product')
+                            ->directory('images-product')
                             ->maxSize(2048)
                             ->columnSpanFull(),
                         Toggle::make('is_primary')
@@ -230,7 +233,19 @@ class ProductForm
                             ->offColor('danger')
                             ->onColor('success')
                             ->inline(false)
-                            ->default(false),
+                            ->default(false)
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, $livewire, Get $get, Set $set) {
+                                if ($state === true) {
+                                    $items = $get('../../productImages');
+                                    if (is_array($items)) {
+                                        foreach ($items as $key => $item) {
+                                            $set("../../productImages.{$key}.is_primary", false);
+                                        }
+                                    }
+                                    $set('is_primary', true);
+                                }
+                            }),
                     ])
                     ->addActionLabel('Add Image')
                     ->reorderable()
