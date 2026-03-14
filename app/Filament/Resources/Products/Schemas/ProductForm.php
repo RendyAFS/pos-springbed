@@ -7,10 +7,11 @@ use App\Enums\TypeProductEnum;
 use App\Models\InventoryStock;
 use App\Models\StoreSetting;
 use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+// use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -212,7 +213,7 @@ class ProductForm
                 Repeater::make('productImages')
                     ->relationship()
                     ->schema([
-                        SpatieMediaLibraryFileUpload::make('images_product')
+                        FileUpload::make('image_product')
                             ->label('Image Product')
                             ->nullable()
                             ->image()
@@ -220,7 +221,7 @@ class ProductForm
                             ->openable()
                             ->downloadable()
                             ->disk('public')
-                            ->collection('images_product')
+                            ->directory('images-product')
                             ->maxSize(2048)
                             ->columnSpanFull(),
                         Toggle::make('is_primary')

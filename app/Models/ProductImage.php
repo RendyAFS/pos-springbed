@@ -14,6 +14,7 @@ class ProductImage extends Model implements HasMedia
 
     protected $fillable = [
         'product_id',
+        'image_product',
         'is_primary',
     ];
 
