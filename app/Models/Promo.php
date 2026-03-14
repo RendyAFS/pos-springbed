@@ -41,4 +41,9 @@ class Promo extends Model
     {
         return $this->belongsToMany(Product::class, 'promo_products');
     }
+
+    public function promoProducts()
+    {
+        return $this->hasMany(PromoProduct::class);
+    }
 }
