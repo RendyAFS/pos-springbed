@@ -35,6 +35,12 @@ class UsersTable
                     ->label('Name')
                     ->searchable(),
 
+                    TextColumn::make('storeSetting.store_name')
+                    ->label('Store')
+                    ->badge()
+                    ->color('gray')
+                    ->searchable(),
+
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),

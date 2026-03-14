@@ -193,7 +193,9 @@ class ProductForm
                                     ->searchable()
                                     ->preload()
                                     ->required()
-                                    ->disabled(fn() => Auth::user()->store_setting_id !== null),
+                                    ->default(fn() => Auth::user()?->store_setting_id)
+                                    ->disabled(fn() => Auth::user()?->store_setting_id !== null)
+                                    ->dehydrated(fn() => true),
                                 TextInput::make('quantity')
                                     ->numeric()
                                     ->required(),
