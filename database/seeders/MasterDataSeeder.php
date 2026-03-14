@@ -18,23 +18,23 @@ class MasterDataSeeder extends Seeder
     {
         $categorys = [
             [
-                'name' => 'Springbed',
-                'slug' => 'springbed-' . now()->timestamp,
+                'name' => 'Pocket',
+                'slug' => 'pocket-' . now()->timestamp,
                 'is_active' => true,
             ],
             [
-                'name' => 'Divan',
-                'slug' => 'divan-' . now()->timestamp,
+                'name' => 'Bonnel',
+                'slug' => 'bonnel-' . now()->timestamp,
                 'is_active' => true,
             ],
             [
-                'name' => 'Headboard',
-                'slug' => 'headboard-' . now()->timestamp,
+                'name' => 'Hybird',
+                'slug' => 'hybird-' . now()->timestamp,
                 'is_active' => true,
             ],
             [
-                'name' => 'Bundle',
-                'slug' => 'bundle-' . now()->timestamp,
+                'name' => 'Mattress',
+                'slug' => 'mattress-' . now()->timestamp,
                 'is_active' => true,
             ],
         ];
@@ -46,19 +46,19 @@ class MasterDataSeeder extends Seeder
 
         $brands = [
             [
-                'name' => 'Springbed',
+                'name' => 'King Koil',
                 'is_active' => true,
             ],
             [
-                'name' => 'Divan',
+                'name' => 'Serta',
                 'is_active' => true,
             ],
             [
-                'name' => 'Headboard',
+                'name' => 'Comforta',
                 'is_active' => true,
             ],
             [
-                'name' => 'Bundle',
+                'name' => 'Florence',
                 'is_active' => true,
             ],
         ];
