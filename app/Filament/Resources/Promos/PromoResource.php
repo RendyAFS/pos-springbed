@@ -8,7 +8,6 @@ use App\Filament\Resources\Promos\Pages\ListPromos;
 use App\Filament\Resources\Promos\Schemas\PromoForm;
 use App\Filament\Resources\Promos\Tables\PromosTable;
 use App\Models\Promo;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -16,13 +15,14 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class PromoResource extends Resource
 {
     protected static ?string $model = Promo::class;
     protected static ?string $navigationLabel = 'Promos';
     protected static ?string $pluralLabel = 'Promos';
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-receipt-percent';
+    protected static string | UnitEnum | null $navigationGroup = 'Master Data';
 
     public static function getGloballySearchableAttributes(): array
     {
