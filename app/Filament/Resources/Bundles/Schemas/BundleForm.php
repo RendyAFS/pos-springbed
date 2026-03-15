@@ -73,8 +73,10 @@ class BundleForm
                                     ->label('Quantity')
                                     ->numeric()
                                     ->default(1)
+                                    ->minValue(1)
                                     ->required()
                                     ->live()
+                                    ->debounce(500)
                                     ->afterStateUpdated(function (Get $get, Set $set) {
                                         self::updateBundlePrice($get, $set);
                                     }),
@@ -100,12 +102,20 @@ class BundleForm
     {
         $items = $get('../../bundleItems') ?? [];
 
-        $total = collect($items)->sum(function ($item) {
-            $price = $item['price'] ?? 0;
-            $qty   = $item['qty'] ?? 0;
+        $total = collect($items)
+            ->filter(fn($item) => is_array($item))
+            ->sum(function ($item) {
 
-            return $price * $qty;
-        });
+                $price = isset($item['price']) && is_numeric($item['price'])
+                    ? (float) $item['price']
+                    : 0;
+
+                $qty = isset($item['qty']) && is_numeric($item['qty'])
+                    ? (int) $item['qty']
+                    : 0;
+
+                return $price * $qty;
+            });
 
         $set('../../bundle_price', $total);
     }
