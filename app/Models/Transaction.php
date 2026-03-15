@@ -57,4 +57,9 @@ class Transaction extends Model
     {
         return $this->belongsTo(StoreSetting::class, 'store_setting_id');
     }
+
+    public function transactionShipments()
+    {
+        return $this->hasMany(TransactionShipment::class, 'transaction_id');
+    }
 }
