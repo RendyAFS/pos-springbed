@@ -14,30 +14,20 @@ class CreateTransaction extends CreateRecord
 {
     protected static string $resource = TransactionResource::class;
 
-    /**
-     * Inject store_setting_id & buang semua field virtual sebelum disimpan
-     * ke tabel transactions (courier_id, payment_* bukan kolom transactions).
-     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['store_setting_id'] = Auth::user()?->store_setting_id;
 
         unset(
-            $data['courier_id'],        // → transaction_shipments
-            $data['payment_method'],    // → transaction_payments
-            $data['payment_amount'],    // → transaction_payments
-            $data['payment_status'],    // → transaction_payments
+            $data['courier_id'],
+            $data['payment_method'],
+            $data['payment_amount'],
+            $data['payment_status'],
         );
 
         return $data;
     }
 
-    /**
-     * Setelah Transaction tersimpan:
-     * 1. Simpan TransactionPayment  (hasOne)
-     * 2. Simpan TransactionShipment (hasOne) jika kurir dipilih
-     * 3. Jalankan TransactionService: FIFO stok + PromoUsage
-     */
     protected function afterCreate(): void
     {
         $data = $this->data;
