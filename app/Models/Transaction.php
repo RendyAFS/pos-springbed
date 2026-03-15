@@ -48,6 +48,11 @@ class Transaction extends Model
         return $this->hasMany(TransactionItem::class);
     }
 
+    public function transactionPayment()
+    {
+        return $this->hasOne(TransactionPayment::class);
+    }
+
     public function promoUsages()
     {
         return $this->hasMany(PromoUsage::class);
@@ -58,8 +63,8 @@ class Transaction extends Model
         return $this->belongsTo(StoreSetting::class, 'store_setting_id');
     }
 
-    public function transactionShipments()
+    public function transactionShipment()
     {
-        return $this->hasMany(TransactionShipment::class, 'transaction_id');
+        return $this->hasOne(TransactionShipment::class, 'transaction_id');
     }
 }

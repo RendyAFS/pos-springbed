@@ -6,7 +6,7 @@ use App\Enums\TransactionPaymentMethodEnum;
 use App\Enums\TransactionPaymentStatusEnum;
 use Illuminate\Database\Eloquent\Model;
 
-class TransactionPayments extends Model
+class TransactionPayment extends Model
 {
     protected $fillable = [
         'transaction_id',
