@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Promos\Pages;
 
 use App\Filament\Resources\Promos\PromoResource;
 use App\Models\Promo;
-use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -13,16 +12,29 @@ class ListPromos extends ListRecords
 {
     protected static string $resource = PromoResource::class;
 
-    // ── Livewire public properties (reactive via wire:model) ──────────────
+    // ── Livewire reactive properties ──────────────────────────────────────
     public string $promoSearch = '';
+    public string $promoFilter = 'active'; // 'active' | 'trashed' | 'all'
 
-    /**
-     * Filter state:
-     *   'active'  → hanya data tidak dihapus  (default)
-     *   'trashed' → hanya data yang dihapus
-     *   'all'     → semua data
-     */
-    public string $promoFilter = 'active';
+    // Delete modal state
+    public bool    $showDeleteModal   = false;
+    public ?int    $deleteTargetId    = null;
+    public string  $deleteTargetName  = '';
+
+    // Restore modal state
+    public bool    $showRestoreModal  = false;
+    public ?int    $restoreTargetId   = null;
+    public string  $restoreTargetName = '';
+
+    public function updatingPromoSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPromoFilter(): void
+    {
+        $this->resetPage();
+    }
 
     // ─────────────────────────────────────────────────────────────────────
 
@@ -40,23 +52,21 @@ class ListPromos extends ListRecords
 
     public function getViewData(): array
     {
-        $query = Promo::query();
+        if ($this->promoFilter === 'trashed') {
+            $query = Promo::onlyTrashed();
+        } elseif ($this->promoFilter === 'all') {
+            $query = Promo::withTrashed();
+        } else {
+            $query = Promo::query();
+        }
 
-        // Apply soft-delete filter
-        match ($this->promoFilter) {
-            'trashed' => $query->onlyTrashed(),
-            'all'     => $query->withTrashed(),
-            default   => $query, // 'active' → default (no trashed)
-        };
-
-        // Apply search
         $query->when(
             $this->promoSearch,
-            fn($q) => $q->where('name', 'like', '%' . $this->promoSearch . '%')
+            fn ($q) => $q->where('name', 'like', '%'.$this->promoSearch.'%')
         );
 
         return [
-            'promos' => $query->latest()->paginate(12),
+            'promos' => $query->latest()->paginate(9),
         ];
     }
 
@@ -68,59 +78,106 @@ class ListPromos extends ListRecords
         $promo->update(['is_active' => ! $promo->is_active]);
 
         Notification::make()
-            ->title($promo->is_active ? 'Promosi diaktifkan' : 'Promosi dinonaktifkan')
+            ->title($promo->is_active ? 'Promotion activated' : 'Promotion deactivated')
             ->success()
             ->send();
     }
 
-    // ── Delete (via Filament Action modal — konsisten style) ──────────────
+    // ── Delete modal ──────────────────────────────────────────────────────
 
-    /**
-     * Action ini di-mount ke halaman dan dipanggil dari Blade via:
-     *   $this->mountAction('deletePromo', ['id' => $promo->id])
-     * sehingga modal konfirmasi sepenuhnya menggunakan style Filament.
-     */
-    public function deletePromoAction(): Action
+    public function confirmDelete(int $id): void
     {
-        return Action::make('deletePromo')
-            ->requiresConfirmation()
-            ->modalHeading('Hapus Promosi')
-            ->modalDescription('Yakin ingin menghapus promosi ini? Data masih bisa dipulihkan setelahnya.')
-            ->modalSubmitActionLabel('Ya, Hapus')
-            ->modalCancelActionLabel('Batal')
-            ->color('danger')
-            ->icon('heroicon-o-trash')
-            ->action(function (array $arguments): void {
-                $promo = Promo::findOrFail($arguments['id']);
-                $promo->delete();
+        $promo = Promo::find($id);
 
-                Notification::make()
-                    ->title('Promosi dihapus')
-                    ->success()
-                    ->send();
-            });
+        if (! $promo) {
+            Notification::make()->title('Promotion not found')->danger()->send();
+
+            return;
+        }
+
+        $this->deleteTargetId   = $id;
+        $this->deleteTargetName = $promo->name;
+        $this->showDeleteModal  = true;
     }
 
-    // ── Restore ───────────────────────────────────────────────────────────
-
-    public function restorePromoAction(): Action
+    public function cancelDelete(): void
     {
-        return Action::make('restorePromo')
-            ->requiresConfirmation()
-            ->modalHeading('Pulihkan Promosi')
-            ->modalDescription('Promosi ini akan dipulihkan dan bisa diaktifkan kembali.')
-            ->modalSubmitActionLabel('Ya, Pulihkan')
-            ->modalCancelActionLabel('Batal')
-            ->color('success')
-            ->icon('heroicon-o-arrow-path')
-            ->action(function (array $arguments): void {
-                $promo = Promo::withTrashed()->findOrFail($arguments['id']);
-                $promo->restore();
+        $this->showDeleteModal  = false;
+        $this->deleteTargetId   = null;
+        $this->deleteTargetName = '';
+    }
 
-                Notification::make()
-                    ->title('Promosi dipulihkan')
-                    ->success()
-                    ->send();
-            });
+    public function deletePromo(): void
+    {
+        if (! $this->deleteTargetId) {
+            return;
+        }
+
+        $promo = Promo::find($this->deleteTargetId);
+
+        if (! $promo) {
+            Notification::make()->title('Promotion not found')->danger()->send();
+            $this->cancelDelete();
+
+            return;
+        }
+
+        $name = $promo->name;
+        $promo->delete();
+        $this->cancelDelete();
+
+        Notification::make()
+            ->title("Promotion \"{$name}\" deleted")
+            ->success()
+            ->send();
+    }
+
+    // ── Restore modal ─────────────────────────────────────────────────────
+
+    public function confirmRestore(int $id): void
+    {
+        $promo = Promo::withTrashed()->find($id);
+
+        if (! $promo) {
+            Notification::make()->title('Promotion not found')->danger()->send();
+
+            return;
+        }
+
+        $this->restoreTargetId   = $id;
+        $this->restoreTargetName = $promo->name;
+        $this->showRestoreModal  = true;
+    }
+
+    public function cancelRestore(): void
+    {
+        $this->showRestoreModal  = false;
+        $this->restoreTargetId   = null;
+        $this->restoreTargetName = '';
+    }
+
+    public function restorePromo(): void
+    {
+        if (! $this->restoreTargetId) {
+            return;
+        }
+
+        $promo = Promo::withTrashed()->find($this->restoreTargetId);
+
+        if (! $promo) {
+            Notification::make()->title('Promotion not found')->danger()->send();
+            $this->cancelRestore();
+
+            return;
+        }
+
+        $name = $promo->name;
+        $promo->restore();
+        $this->cancelRestore();
+
+        Notification::make()
+            ->title("Promotion \"{$name}\" restored")
+            ->success()
+            ->send();
     }
 }

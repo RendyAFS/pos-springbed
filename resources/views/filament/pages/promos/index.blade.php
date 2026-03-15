@@ -1,6 +1,16 @@
 <x-filament-panels::page>
 
-    {{-- ── Toolbar: Search + Filter ────────────────────────────────────── --}}
+    {{-- ── Delete Confirmation Modal ───────────────────────────────────── --}}
+    @if ($showDeleteModal)
+        @include('filament.pages.promos._modal-delete')
+    @endif
+
+    {{-- ── Restore Confirmation Modal ──────────────────────────────────── --}}
+    @if ($showRestoreModal)
+        @include('filament.pages.promos._modal-restore')
+    @endif
+
+    {{-- ── Toolbar ──────────────────────────────────────────────────────── --}}
     @include('filament.pages.promos._toolbar')
 
     {{-- ── Grid / Empty state ──────────────────────────────────────────── --}}
@@ -13,7 +23,6 @@
             @endforeach
         </div>
 
-        {{-- ── Pagination (Filament style) ──────────────────────────────── --}}
         <div class="mt-6">
             {{ $promos->links() }}
         </div>
