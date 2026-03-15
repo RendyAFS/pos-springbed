@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\TransactionPaymentMethodEnum;
+use App\Enums\TransactionPaymentStatusEnum;
 use Illuminate\Database\Eloquent\Model;
 
 class TransactionPayments extends Model
@@ -17,6 +19,8 @@ class TransactionPayments extends Model
     protected $casts = [
         'amount'   => 'decimal:2',
         'paid_at'  => 'datetime',
+        'method'   => TransactionPaymentMethodEnum::class,
+        'status'   => TransactionPaymentStatusEnum::class,
     ];
 
     public function transaction()
