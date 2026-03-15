@@ -37,7 +37,7 @@ CREATE TABLE `activity_log` (
   KEY `subject` (`subject_type`,`subject_id`),
   KEY `causer` (`causer_type`,`causer_id`),
   KEY `activity_log_log_name_index` (`log_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=137 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=182 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `activity_log` */
 
@@ -177,7 +177,46 @@ insert  into `activity_log`(`id`,`log_name`,`description`,`subject_type`,`event`
 (133,'Resource','Bundle Updated by Super Admin','App\\Models\\Bundle','Updated',1,'App\\Models\\User',1,'{\"is_active\": false, \"updated_at\": \"2026-03-15 09:18:01\"}',NULL,'2026-03-15 09:18:01','2026-03-15 09:18:01'),
 (134,'Resource','Bundle Updated by Super Admin','App\\Models\\Bundle','Updated',1,'App\\Models\\User',1,'{\"is_active\": true, \"updated_at\": \"2026-03-15 09:18:04\"}',NULL,'2026-03-15 09:18:04','2026-03-15 09:18:04'),
 (135,'Resource','Bundle Deleted by Staff','App\\Models\\Bundle','Deleted',1,'App\\Models\\User',4,'[]',NULL,'2026-03-15 09:23:43','2026-03-15 09:23:43'),
-(136,'Resource','Bundle Updated by Staff','App\\Models\\Bundle','Updated',1,'App\\Models\\User',4,'{\"deleted_at\": null, \"deleted_by\": null, \"updated_at\": \"2026-03-15 09:23:47\", \"updated_by\": 4}',NULL,'2026-03-15 09:23:47','2026-03-15 09:23:47');
+(136,'Resource','Bundle Updated by Staff','App\\Models\\Bundle','Updated',1,'App\\Models\\User',4,'{\"deleted_at\": null, \"deleted_by\": null, \"updated_at\": \"2026-03-15 09:23:47\", \"updated_by\": 4}',NULL,'2026-03-15 09:23:47','2026-03-15 09:23:47'),
+(137,'Resource','Bundle Created by Super Admin','App\\Models\\Bundle','Created',2,'App\\Models\\User',1,'{\"id\": 2, \"name\": \"Bundle 2\", \"is_active\": true, \"created_at\": \"2026-03-15 13:59:28\", \"created_by\": 1, \"updated_at\": \"2026-03-15 13:59:28\", \"updated_by\": 1, \"bundle_price\": 1306000}',NULL,'2026-03-15 13:59:28','2026-03-15 13:59:28'),
+(138,'Resource','Bundle Created by Super Admin','App\\Models\\Bundle','Created',3,'App\\Models\\User',1,'{\"id\": 3, \"name\": \"Bunlde 3\", \"is_active\": true, \"created_at\": \"2026-03-15 13:59:52\", \"created_by\": 1, \"updated_at\": \"2026-03-15 13:59:52\", \"updated_by\": 1, \"bundle_price\": 1566000}',NULL,'2026-03-15 13:59:52','2026-03-15 13:59:52'),
+(139,'Resource','Bundle Updated by Admin','App\\Models\\Bundle','Updated',2,'App\\Models\\User',2,'{\"updated_at\": \"2026-03-15 14:03:04\", \"updated_by\": 2, \"bundle_price\": 453000}',NULL,'2026-03-15 14:03:04','2026-03-15 14:03:04'),
+(140,'Resource','Bundle Updated by Staff','App\\Models\\Bundle','Updated',1,'App\\Models\\User',4,'{\"name\": \"Tes bundle toko 2\", \"updated_at\": \"2026-03-15 14:03:55\", \"bundle_price\": 1800000}',NULL,'2026-03-15 14:03:55','2026-03-15 14:03:55'),
+(141,'Resource','Bundle Updated by Staff','App\\Models\\Bundle','Updated',1,'App\\Models\\User',4,'{\"updated_at\": \"2026-03-15 14:07:38\", \"bundle_price\": 2497400}',NULL,'2026-03-15 14:07:38','2026-03-15 14:07:38'),
+(142,'Resource','Bundle Updated by Staff','App\\Models\\Bundle','Updated',1,'App\\Models\\User',4,'{\"updated_at\": \"2026-03-15 14:07:43\", \"bundle_price\": 1734700}',NULL,'2026-03-15 14:07:43','2026-03-15 14:07:43'),
+(143,'Resource','Bundle Updated by Staff','App\\Models\\Bundle','Updated',1,'App\\Models\\User',4,'{\"updated_at\": \"2026-03-15 14:08:08\", \"bundle_price\": 2706700}',NULL,'2026-03-15 14:08:08','2026-03-15 14:08:08'),
+(144,'Resource','Inventory Stock Deleted by Staff','App\\Models\\InventoryStock','Deleted',4,'App\\Models\\User',4,'[]',NULL,'2026-03-15 14:08:39','2026-03-15 14:08:39'),
+(145,'Resource','Inventory Stock Created by Staff','App\\Models\\InventoryStock','Created',8,'App\\Models\\User',4,'{\"id\": 8, \"quantity\": 22, \"created_at\": \"2026-03-15 14:08:39\", \"product_id\": 4, \"updated_at\": \"2026-03-15 14:08:39\", \"store_setting_id\": 2}',NULL,'2026-03-15 14:08:39','2026-03-15 14:08:39'),
+(146,'Resource','Courier Created by Admin','App\\Models\\Courier','Created',1,'App\\Models\\User',2,'{\"id\": 1, \"name\": \"Courier 1\", \"type\": \"internal\", \"is_active\": true, \"created_at\": \"2026-03-15 14:27:38\", \"created_by\": 2, \"updated_at\": \"2026-03-15 14:27:38\", \"updated_by\": 2, \"shipping_cost\": 100000}',NULL,'2026-03-15 14:27:38','2026-03-15 14:27:38'),
+(147,'Resource','Courier Created by Admin','App\\Models\\Courier','Created',2,'App\\Models\\User',2,'{\"id\": 2, \"name\": \"Courier 2\", \"type\": \"internal\", \"is_active\": true, \"created_at\": \"2026-03-15 14:27:47\", \"created_by\": 2, \"updated_at\": \"2026-03-15 14:27:47\", \"updated_by\": 2, \"shipping_cost\": 120000}',NULL,'2026-03-15 14:27:47','2026-03-15 14:27:47'),
+(148,'Resource','Courier Created by Admin','App\\Models\\Courier','Created',3,'App\\Models\\User',2,'{\"id\": 3, \"name\": \"Courier 3\", \"type\": \"external\", \"is_active\": true, \"created_at\": \"2026-03-15 14:27:58\", \"created_by\": 2, \"updated_at\": \"2026-03-15 14:27:58\", \"updated_by\": 2, \"shipping_cost\": 20000}',NULL,'2026-03-15 14:27:58','2026-03-15 14:27:58'),
+(149,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',1,'App\\Models\\User',2,'{\"id\": 1, \"status\": \"pending\", \"promo_id\": 1, \"subtotal\": 760000, \"created_at\": \"2026-03-15 15:34:32\", \"created_by\": 2, \"updated_at\": \"2026-03-15 15:34:32\", \"updated_by\": 2, \"customer_id\": null, \"grand_total\": 480000, \"shiping_cost\": 100000, \"discount_total\": 380000, \"transaction_code\": \"TRXEZLE1ZTE20260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 15:34:32','2026-03-15 15:34:32'),
+(150,'Resource','Promo Updated by Admin','App\\Models\\Promo','Updated',1,'App\\Models\\User',2,'{\"end_date\": \"2026-03-06 00:00:00\", \"start_date\": \"2026-03-04 00:00:00\", \"updated_at\": \"2026-03-15 15:46:34\", \"updated_by\": 2}',NULL,'2026-03-15 15:46:34','2026-03-15 15:46:34'),
+(151,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',2,'App\\Models\\User',2,'{\"id\": 2, \"status\": \"pending\", \"promo_id\": 3, \"subtotal\": 900000, \"created_at\": \"2026-03-15 15:47:41\", \"created_by\": 2, \"updated_at\": \"2026-03-15 15:47:41\", \"updated_by\": 2, \"customer_id\": 1, \"grand_total\": 900000, \"shiping_cost\": 120000, \"discount_total\": 120000, \"store_setting_id\": 1, \"transaction_code\": \"TRXSTDDSTHT20260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 15:47:41','2026-03-15 15:47:41'),
+(152,'Resource','Inventory Stock Updated by Admin','App\\Models\\InventoryStock','Updated',1,'App\\Models\\User',2,'{\"quantity\": 14, \"updated_at\": \"2026-03-15 15:47:42\"}',NULL,'2026-03-15 15:47:42','2026-03-15 15:47:42'),
+(153,'Resource','Inventory Stock Updated by Admin','App\\Models\\InventoryStock','Updated',7,'App\\Models\\User',2,'{\"quantity\": 114, \"updated_at\": \"2026-03-15 15:47:42\"}',NULL,'2026-03-15 15:47:42','2026-03-15 15:47:42'),
+(154,'Resource','Promo Updated by Admin','App\\Models\\Promo','Updated',3,'App\\Models\\User',2,'{\"updated_by\": 2, \"usage_count\": 1}',NULL,'2026-03-15 15:47:42','2026-03-15 15:47:42'),
+(155,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',3,'App\\Models\\User',2,'{\"id\": 3, \"status\": \"pending\", \"promo_id\": 3, \"subtotal\": 59845000, \"created_at\": \"2026-03-15 15:53:45\", \"created_by\": 2, \"updated_at\": \"2026-03-15 15:53:45\", \"updated_by\": 2, \"customer_id\": 2, \"grand_total\": 59845000, \"shiping_cost\": 120000, \"discount_total\": 120000, \"store_setting_id\": 1, \"transaction_code\": \"TRXAP668RVF20260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 15:53:45','2026-03-15 15:53:45'),
+(157,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',4,'App\\Models\\User',2,'{\"id\": 4, \"status\": \"pending\", \"promo_id\": 3, \"subtotal\": 59845000, \"created_at\": \"2026-03-15 15:54:25\", \"created_by\": 2, \"updated_at\": \"2026-03-15 15:54:25\", \"updated_by\": 2, \"customer_id\": 2, \"grand_total\": 59845000, \"shiping_cost\": 120000, \"discount_total\": 120000, \"store_setting_id\": 1, \"transaction_code\": \"TRXAP668RVF20260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 15:54:25','2026-03-15 15:54:25'),
+(159,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',5,'App\\Models\\User',2,'{\"id\": 5, \"status\": \"pending\", \"promo_id\": 3, \"subtotal\": 59845000, \"created_at\": \"2026-03-15 16:02:11\", \"created_by\": 2, \"updated_at\": \"2026-03-15 16:02:11\", \"updated_by\": 2, \"customer_id\": 2, \"grand_total\": 59845000, \"shiping_cost\": 120000, \"discount_total\": 120000, \"store_setting_id\": 1, \"transaction_code\": \"TRXAP668RVF20260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 16:02:11','2026-03-15 16:02:11'),
+(161,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',6,'App\\Models\\User',2,'{\"id\": 6, \"status\": \"pending\", \"promo_id\": 3, \"subtotal\": 59850000, \"created_at\": \"2026-03-15 16:04:26\", \"created_by\": 2, \"updated_at\": \"2026-03-15 16:04:26\", \"updated_by\": 2, \"customer_id\": 3, \"grand_total\": 59850000, \"shiping_cost\": 120000, \"discount_total\": 120000, \"store_setting_id\": 1, \"transaction_code\": \"TRXF7HFBAGJ20260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 16:04:26','2026-03-15 16:04:26'),
+(163,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',7,'App\\Models\\User',2,'{\"id\": 7, \"status\": \"pending\", \"promo_id\": 3, \"subtotal\": 59850000, \"created_at\": \"2026-03-15 16:08:12\", \"created_by\": 2, \"updated_at\": \"2026-03-15 16:08:12\", \"updated_by\": 2, \"customer_id\": 3, \"grand_total\": 59850000, \"shiping_cost\": 120000, \"discount_total\": 120000, \"store_setting_id\": 1, \"transaction_code\": \"TRXF7HFBAGJ20260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 16:08:12','2026-03-15 16:08:12'),
+(165,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',8,'App\\Models\\User',2,'{\"id\": 8, \"status\": \"pending\", \"promo_id\": 3, \"subtotal\": 59850000, \"created_at\": \"2026-03-15 16:13:24\", \"created_by\": 2, \"updated_at\": \"2026-03-15 16:13:24\", \"updated_by\": 2, \"customer_id\": 3, \"grand_total\": 59850000, \"shiping_cost\": 120000, \"discount_total\": 120000, \"store_setting_id\": 1, \"transaction_code\": \"TRXF7HFBAGJ20260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 16:13:24','2026-03-15 16:13:24'),
+(167,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',9,'App\\Models\\User',2,'{\"id\": 9, \"status\": \"pending\", \"promo_id\": 3, \"subtotal\": 59850000, \"created_at\": \"2026-03-15 16:21:02\", \"created_by\": 2, \"updated_at\": \"2026-03-15 16:21:02\", \"updated_by\": 2, \"customer_id\": 3, \"grand_total\": 59850000, \"shiping_cost\": 120000, \"discount_total\": 120000, \"store_setting_id\": 1, \"transaction_code\": \"TRXF7HFBAGJ20260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 16:21:02','2026-03-15 16:21:02'),
+(168,'Resource','Inventory Stock Updated by Admin','App\\Models\\InventoryStock','Updated',7,'App\\Models\\User',2,'{\"quantity\": 0, \"updated_at\": \"2026-03-15 16:21:02\"}',NULL,'2026-03-15 16:21:02','2026-03-15 16:21:02'),
+(169,'Resource','Promo Updated by Admin','App\\Models\\Promo','Updated',3,'App\\Models\\User',2,'{\"updated_by\": 2, \"usage_count\": 2}',NULL,'2026-03-15 16:21:02','2026-03-15 16:21:02'),
+(170,'Resource','Inventory Stock Deleted by Admin','App\\Models\\InventoryStock','Deleted',7,'App\\Models\\User',2,'[]',NULL,'2026-03-15 16:24:38','2026-03-15 16:24:38'),
+(171,'Resource','Inventory Stock Created by Admin','App\\Models\\InventoryStock','Created',9,'App\\Models\\User',2,'{\"id\": 9, \"quantity\": 44, \"created_at\": \"2026-03-15 16:24:38\", \"product_id\": 6, \"updated_at\": \"2026-03-15 16:24:38\", \"store_setting_id\": 1}',NULL,'2026-03-15 16:24:38','2026-03-15 16:24:38'),
+(172,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',10,'App\\Models\\User',2,'{\"id\": 10, \"status\": \"pending\", \"promo_id\": 3, \"subtotal\": 23445000, \"created_at\": \"2026-03-15 16:26:01\", \"created_by\": 2, \"updated_at\": \"2026-03-15 16:26:01\", \"updated_by\": 2, \"customer_id\": 3, \"grand_total\": 23445000, \"shiping_cost\": 120000, \"discount_total\": 120000, \"store_setting_id\": 1, \"transaction_code\": \"TRXSYMIAG7220260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 16:26:01','2026-03-15 16:26:01'),
+(173,'Resource','Inventory Stock Updated by Admin','App\\Models\\InventoryStock','Updated',9,'App\\Models\\User',2,'{\"quantity\": 0, \"updated_at\": \"2026-03-15 16:26:01\"}',NULL,'2026-03-15 16:26:01','2026-03-15 16:26:01'),
+(174,'Resource','Inventory Stock Updated by Admin','App\\Models\\InventoryStock','Updated',5,'App\\Models\\User',2,'{\"quantity\": 10, \"updated_at\": \"2026-03-15 16:26:01\"}',NULL,'2026-03-15 16:26:01','2026-03-15 16:26:01'),
+(175,'Resource','Promo Updated by Admin','App\\Models\\Promo','Updated',3,'App\\Models\\User',2,'{\"updated_by\": 2, \"usage_count\": 3}',NULL,'2026-03-15 16:26:01','2026-03-15 16:26:01'),
+(176,'Resource','Transaction Created by Admin','App\\Models\\Transaction','Created',11,'App\\Models\\User',2,'{\"id\": 11, \"status\": \"pending\", \"promo_id\": 3, \"subtotal\": 138000, \"created_at\": \"2026-03-15 16:47:37\", \"created_by\": 2, \"updated_at\": \"2026-03-15 16:47:37\", \"updated_by\": 2, \"customer_id\": 3, \"grand_total\": 138000, \"shiping_cost\": 120000, \"discount_total\": 120000, \"store_setting_id\": 1, \"transaction_code\": \"TRXYKJR74MD20260315\", \"transaction_date\": \"2026-03-15 00:00:00\"}',NULL,'2026-03-15 16:47:37','2026-03-15 16:47:37'),
+(177,'Resource','Inventory Stock Updated by Admin','App\\Models\\InventoryStock','Updated',5,'App\\Models\\User',2,'{\"quantity\": 8, \"updated_at\": \"2026-03-15 16:47:37\"}',NULL,'2026-03-15 16:47:37','2026-03-15 16:47:37'),
+(178,'Resource','Promo Updated by Admin','App\\Models\\Promo','Updated',3,'App\\Models\\User',2,'{\"updated_by\": 2, \"usage_count\": 4}',NULL,'2026-03-15 16:47:37','2026-03-15 16:47:37'),
+(179,'Resource','Transaction Updated by Admin','App\\Models\\Transaction','Updated',11,'App\\Models\\User',2,'{\"status\": \"processed\", \"updated_at\": \"2026-03-15 16:58:48\"}',NULL,'2026-03-15 16:58:48','2026-03-15 16:58:48'),
+(180,'Resource','Transaction Updated by Admin','App\\Models\\Transaction','Updated',11,'App\\Models\\User',2,'{\"status\": \"delivered\", \"updated_at\": \"2026-03-15 16:59:00\"}',NULL,'2026-03-15 16:59:00','2026-03-15 16:59:00'),
+(181,'Resource','Transaction Updated by Admin','App\\Models\\Transaction','Updated',11,'App\\Models\\User',2,'{\"status\": \"shipped\", \"updated_at\": \"2026-03-15 17:02:48\"}',NULL,'2026-03-15 17:02:48','2026-03-15 17:02:48');
 
 /*Table structure for table `brands` */
 
@@ -220,13 +259,18 @@ CREATE TABLE `bundle_items` (
   KEY `bundle_items_product_id_foreign` (`product_id`),
   CONSTRAINT `bundle_items_bundle_id_foreign` FOREIGN KEY (`bundle_id`) REFERENCES `bundles` (`id`),
   CONSTRAINT `bundle_items_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `bundle_items` */
 
 insert  into `bundle_items`(`id`,`bundle_id`,`product_id`,`qty`,`created_at`,`updated_at`) values 
-(1,1,3,2,'2026-03-15 08:55:58','2026-03-15 08:55:58'),
-(2,1,1,3,'2026-03-15 08:55:58','2026-03-15 08:55:58');
+(1,1,2,1,'2026-03-15 08:55:58','2026-03-15 14:07:43'),
+(2,1,4,2,'2026-03-15 08:55:58','2026-03-15 14:08:08'),
+(3,2,1,1,'2026-03-15 13:59:28','2026-03-15 13:59:28'),
+(4,2,5,1,'2026-03-15 13:59:28','2026-03-15 14:03:04'),
+(5,3,4,1,'2026-03-15 13:59:52','2026-03-15 13:59:52'),
+(6,3,6,1,'2026-03-15 13:59:52','2026-03-15 13:59:52'),
+(7,3,5,1,'2026-03-15 13:59:52','2026-03-15 13:59:52');
 
 /*Table structure for table `bundles` */
 
@@ -244,12 +288,14 @@ CREATE TABLE `bundles` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `bundles` */
 
 insert  into `bundles`(`id`,`name`,`bundle_price`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
-(1,'Tes bundle 1',1800000.00,1,'2026-03-15 08:55:58','2026-03-15 09:23:47',1,4,NULL,NULL);
+(1,'Tes bundle toko 2',2706700.00,1,'2026-03-15 08:55:58','2026-03-15 14:08:08',1,4,NULL,NULL),
+(2,'Bundle 2',453000.00,1,'2026-03-15 13:59:28','2026-03-15 14:03:04',1,2,NULL,NULL),
+(3,'Bunlde 3',1566000.00,1,'2026-03-15 13:59:52','2026-03-15 13:59:52',1,1,NULL,NULL);
 
 /*Table structure for table `cache` */
 
@@ -305,6 +351,32 @@ insert  into `categories`(`id`,`name`,`slug`,`is_active`,`created_at`,`updated_a
 (2,'Bonnel','bonnel-1773467522',1,'2026-03-14 12:52:02','2026-03-14 12:52:02',NULL,NULL,NULL,NULL),
 (3,'Hybird','hybird-1773467522',1,'2026-03-14 12:52:02','2026-03-14 12:52:02',NULL,NULL,NULL,NULL),
 (4,'Mattress','mattress-1773467522',1,'2026-03-14 12:52:02','2026-03-14 12:52:02',NULL,NULL,NULL,NULL);
+
+/*Table structure for table `couriers` */
+
+DROP TABLE IF EXISTS `couriers`;
+
+CREATE TABLE `couriers` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shipping_cost` decimal(10,2) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+/*Data for the table `couriers` */
+
+insert  into `couriers`(`id`,`name`,`type`,`shipping_cost`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+(1,'Courier 1','internal',100000.00,1,'2026-03-15 14:27:38','2026-03-15 14:27:38',2,2,NULL,NULL),
+(2,'Courier 2','internal',120000.00,1,'2026-03-15 14:27:47','2026-03-15 14:27:47',2,2,NULL,NULL),
+(3,'Courier 3','external',20000.00,1,'2026-03-15 14:27:58','2026-03-15 14:27:58',2,2,NULL,NULL);
 
 /*Table structure for table `customers` */
 
@@ -366,17 +438,17 @@ CREATE TABLE `inventory_stocks` (
   KEY `inventory_stocks_store_setting_id_foreign` (`store_setting_id`),
   CONSTRAINT `inventory_stocks_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `inventory_stocks_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `inventory_stocks` */
 
 insert  into `inventory_stocks`(`id`,`product_id`,`store_setting_id`,`quantity`,`created_at`,`updated_at`) values 
-(1,1,1,15,'2026-03-14 12:53:12','2026-03-14 14:09:26'),
+(1,1,1,14,'2026-03-14 12:53:12','2026-03-15 15:47:42'),
 (2,2,2,22,'2026-03-14 12:53:42','2026-03-14 12:53:42'),
 (3,3,3,33,'2026-03-14 12:54:27','2026-03-14 12:54:27'),
-(4,4,2,2,'2026-03-14 12:55:08','2026-03-14 12:55:08'),
-(5,5,1,15,'2026-03-14 12:55:42','2026-03-14 14:09:26'),
-(7,6,1,115,'2026-03-14 13:32:22','2026-03-14 14:09:26');
+(5,5,1,8,'2026-03-14 12:55:42','2026-03-15 16:47:37'),
+(8,4,2,22,'2026-03-15 14:08:39','2026-03-15 14:08:39'),
+(9,6,1,0,'2026-03-15 16:24:38','2026-03-15 16:26:01');
 
 /*Table structure for table `job_batches` */
 
@@ -461,7 +533,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `migrations` */
 
@@ -496,7 +568,9 @@ insert  into `migrations`(`id`,`migration`,`batch`) values
 (28,'2026_03_07_104950_create_transaction_item_costs_table',1),
 (29,'2026_03_10_191314_create_stock_adjustments_table',1),
 (30,'2026_03_11_081431_add_store_setting_to_users',1),
-(31,'2026_03_13_082405_add_store_setting_id_some_table',1);
+(31,'2026_03_13_082405_add_store_setting_id_some_table',1),
+(32,'2026_03_15_141019_create_couriers_table',2),
+(33,'2026_03_15_141807_create_transaction_shipments_table',2);
 
 /*Table structure for table `model_has_permissions` */
 
@@ -559,7 +633,7 @@ CREATE TABLE `permissions` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `permissions_name_guard_name_unique` (`name`,`guard_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=147 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=158 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `permissions` */
 
@@ -709,7 +783,18 @@ insert  into `permissions`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) v
 (143,'ForceDeleteAny:InventoryStock','web','2026-03-15 09:34:24','2026-03-15 09:34:24'),
 (144,'RestoreAny:InventoryStock','web','2026-03-15 09:34:24','2026-03-15 09:34:24'),
 (145,'Replicate:InventoryStock','web','2026-03-15 09:34:24','2026-03-15 09:34:24'),
-(146,'Reorder:InventoryStock','web','2026-03-15 09:34:24','2026-03-15 09:34:24');
+(146,'Reorder:InventoryStock','web','2026-03-15 09:34:24','2026-03-15 09:34:24'),
+(147,'ViewAny:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35'),
+(148,'View:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35'),
+(149,'Create:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35'),
+(150,'Update:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35'),
+(151,'Delete:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35'),
+(152,'Restore:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35'),
+(153,'ForceDelete:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35'),
+(154,'ForceDeleteAny:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35'),
+(155,'RestoreAny:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35'),
+(156,'Replicate:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35'),
+(157,'Reorder:Courier','web','2026-03-15 14:24:35','2026-03-15 14:24:35');
 
 /*Table structure for table `product_images` */
 
@@ -827,9 +912,12 @@ CREATE TABLE `promo_usages` (
   KEY `promo_usages_transaction_id_foreign` (`transaction_id`),
   CONSTRAINT `promo_usages_promo_id_foreign` FOREIGN KEY (`promo_id`) REFERENCES `promos` (`id`),
   CONSTRAINT `promo_usages_transaction_id_foreign` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `promo_usages` */
+
+insert  into `promo_usages`(`id`,`promo_id`,`transaction_id`,`discount_amount`,`created_at`,`updated_at`) values 
+(4,3,11,120000.00,'2026-03-15 16:47:37','2026-03-15 16:47:37');
 
 /*Table structure for table `promos` */
 
@@ -859,9 +947,9 @@ CREATE TABLE `promos` (
 /*Data for the table `promos` */
 
 insert  into `promos`(`id`,`name`,`type`,`discount_type`,`discount_value`,`min_purchase`,`usage_limit`,`usage_count`,`start_date`,`end_date`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
-(1,'Tes nominal','flash_sale','percentage',50.00,100000.00,20,15,'2026-03-14 00:00:00','2026-03-18 00:00:00',1,'2026-03-14 19:54:28','2026-03-15 08:17:17',2,1,NULL,NULL),
+(1,'Tes nominal','flash_sale','percentage',50.00,100000.00,20,15,'2026-03-04 00:00:00','2026-03-06 00:00:00',1,'2026-03-14 19:54:28','2026-03-15 15:46:34',2,2,NULL,NULL),
 (2,'Tes 2','voucher','percentage',2.00,100000.00,15,5,'2026-03-14 00:00:00','2026-03-20 00:00:00',1,'2026-03-14 20:19:46','2026-03-15 08:17:13',2,1,NULL,NULL),
-(3,'tes free shipping','free_shipping','nominal',120000.00,100000.00,10,0,'2026-03-14 00:00:00','2026-03-21 00:00:00',1,'2026-03-14 21:49:12','2026-03-15 08:28:53',2,1,NULL,NULL),
+(3,'tes free shipping','free_shipping','nominal',120000.00,100000.00,10,4,'2026-03-14 00:00:00','2026-03-21 00:00:00',1,'2026-03-14 21:49:12','2026-03-15 16:47:37',2,1,NULL,NULL),
 (4,'tes promo','voucher','nominal',20000.00,150000.00,5,5,'2026-03-14 00:00:00','2026-03-26 00:00:00',1,'2026-03-14 21:49:47','2026-03-15 08:22:18',2,1,NULL,NULL),
 (5,'Karly Lawson','voucher','nominal',12222.00,22222.00,22,0,'2026-03-15 00:00:00','2026-03-24 00:00:00',1,'2026-03-15 08:29:30','2026-03-15 08:29:30',1,1,NULL,NULL),
 (6,'Kristen Wolfe','flash_sale','nominal',123233.00,232344.00,12,0,'2026-03-15 00:00:00','2026-03-19 00:00:00',1,'2026-03-15 08:29:49','2026-03-15 08:29:49',1,1,NULL,NULL),
@@ -893,9 +981,9 @@ CREATE TABLE `purchase_order_items` (
 /*Data for the table `purchase_order_items` */
 
 insert  into `purchase_order_items`(`id`,`purchase_order_id`,`product_id`,`qty_purchased`,`qty_remaining`,`cost_price`,`created_at`,`updated_at`) values 
-(4,3,1,4,4,300000.00,'2026-03-14 14:09:26','2026-03-14 14:09:26'),
-(5,3,5,5,5,60000.00,'2026-03-14 14:09:26','2026-03-14 14:09:26'),
-(6,3,6,6,6,500000.00,'2026-03-14 14:09:26','2026-03-14 14:09:26');
+(4,3,1,4,3,300000.00,'2026-03-14 14:09:26','2026-03-15 15:47:42'),
+(5,3,5,5,0,60000.00,'2026-03-14 14:09:26','2026-03-15 16:26:01'),
+(6,3,6,6,0,500000.00,'2026-03-14 14:09:26','2026-03-15 16:21:02');
 
 /*Table structure for table `purchase_orders` */
 
@@ -1086,6 +1174,17 @@ insert  into `role_has_permissions`(`permission_id`,`role_id`) values
 (144,1),
 (145,1),
 (146,1),
+(147,1),
+(148,1),
+(149,1),
+(150,1),
+(151,1),
+(152,1),
+(153,1),
+(154,1),
+(155,1),
+(156,1),
+(157,1),
 (1,2),
 (2,2),
 (3,2),
@@ -1232,6 +1331,17 @@ insert  into `role_has_permissions`(`permission_id`,`role_id`) values
 (144,2),
 (145,2),
 (146,2),
+(147,2),
+(148,2),
+(149,2),
+(150,2),
+(151,2),
+(152,2),
+(153,2),
+(154,2),
+(155,2),
+(156,2),
+(157,2),
 (1,4),
 (2,4),
 (3,4),
@@ -1366,7 +1476,29 @@ insert  into `role_has_permissions`(`permission_id`,`role_id`) values
 (132,4),
 (133,4),
 (134,4),
-(135,4);
+(135,4),
+(136,4),
+(137,4),
+(138,4),
+(139,4),
+(140,4),
+(141,4),
+(142,4),
+(143,4),
+(144,4),
+(145,4),
+(146,4),
+(147,4),
+(148,4),
+(149,4),
+(150,4),
+(151,4),
+(152,4),
+(153,4),
+(154,4),
+(155,4),
+(156,4),
+(157,4);
 
 /*Table structure for table `roles` */
 
@@ -1427,7 +1559,7 @@ CREATE TABLE `stock_adjustments` (
   KEY `stock_adjustments_store_setting_id_foreign` (`store_setting_id`),
   CONSTRAINT `stock_adjustments_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `stock_adjustments_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `stock_adjustments` */
 
@@ -1438,7 +1570,9 @@ insert  into `stock_adjustments`(`id`,`store_setting_id`,`product_id`,`qty_befor
 (4,2,4,0,2,2,'add 2','2026-03-14 12:55:08','2026-03-14 12:55:08'),
 (5,1,5,0,10,10,'add 10','2026-03-14 12:55:42','2026-03-14 12:55:42'),
 (6,1,6,0,111,111,'tes admin 111','2026-03-14 13:31:15','2026-03-14 13:31:15'),
-(7,1,6,111,109,-2,'decrease 109\n','2026-03-14 13:32:22','2026-03-14 13:32:22');
+(7,1,6,111,109,-2,'decrease 109\n','2026-03-14 13:32:22','2026-03-14 13:32:22'),
+(8,2,4,2,22,20,'add 22','2026-03-15 14:08:39','2026-03-15 14:08:39'),
+(9,1,6,0,44,44,'add 44','2026-03-15 16:24:38','2026-03-15 16:24:38');
 
 /*Table structure for table `stock_movements` */
 
@@ -1461,7 +1595,7 @@ CREATE TABLE `stock_movements` (
   KEY `stock_movements_reference_type_reference_id_index` (`reference_type`,`reference_id`),
   CONSTRAINT `stock_movements_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `stock_movements_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `stock_movements` */
 
@@ -1475,7 +1609,12 @@ insert  into `stock_movements`(`id`,`product_id`,`store_setting_id`,`type`,`refe
 (7,6,1,'adjustment','App\\Models\\StockAdjustment',7,-2,NULL,'2026-03-14 13:32:22','2026-03-14 13:32:22'),
 (8,1,1,'in','App\\Models\\PurchaseOrder',3,4,300000.00,'2026-03-14 14:09:26','2026-03-14 14:09:26'),
 (9,5,1,'in','App\\Models\\PurchaseOrder',3,5,60000.00,'2026-03-14 14:09:26','2026-03-14 14:09:26'),
-(10,6,1,'in','App\\Models\\PurchaseOrder',3,6,500000.00,'2026-03-14 14:09:26','2026-03-14 14:09:26');
+(10,6,1,'in','App\\Models\\PurchaseOrder',3,6,500000.00,'2026-03-14 14:09:26','2026-03-14 14:09:26'),
+(11,4,2,'adjustment','App\\Models\\StockAdjustment',8,20,NULL,'2026-03-15 14:08:39','2026-03-15 14:08:39'),
+(15,6,1,'adjustment','App\\Models\\StockAdjustment',9,44,NULL,'2026-03-15 16:24:38','2026-03-15 16:24:38'),
+(16,6,1,'out','App\\Models\\Transaction',10,44,NULL,'2026-03-15 16:26:01','2026-03-15 16:26:01'),
+(17,5,1,'out','App\\Models\\Transaction',10,5,NULL,'2026-03-15 16:26:01','2026-03-15 16:26:01'),
+(18,5,1,'out','App\\Models\\Transaction',11,2,NULL,'2026-03-15 16:47:37','2026-03-15 16:47:37');
 
 /*Table structure for table `store_settings` */
 
@@ -1520,7 +1659,7 @@ CREATE TABLE `transaction_item_costs` (
   KEY `transaction_item_costs_purchase_order_item_id_foreign` (`purchase_order_item_id`),
   CONSTRAINT `transaction_item_costs_purchase_order_item_id_foreign` FOREIGN KEY (`purchase_order_item_id`) REFERENCES `purchase_order_items` (`id`),
   CONSTRAINT `transaction_item_costs_transaction_item_id_foreign` FOREIGN KEY (`transaction_item_id`) REFERENCES `transaction_items` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `transaction_item_costs` */
 
@@ -1533,9 +1672,9 @@ CREATE TABLE `transaction_items` (
   `transaction_id` bigint unsigned DEFAULT NULL,
   `product_id` bigint unsigned DEFAULT NULL,
   `qty` int NOT NULL,
-  `selling_price` decimal(10,2) NOT NULL,
-  `discount` decimal(10,2) NOT NULL,
-  `subtotal` decimal(10,2) NOT NULL,
+  `selling_price` decimal(10,2) DEFAULT NULL,
+  `discount` decimal(10,2) DEFAULT NULL,
+  `subtotal` decimal(10,2) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1543,9 +1682,12 @@ CREATE TABLE `transaction_items` (
   KEY `transaction_items_product_id_foreign` (`product_id`),
   CONSTRAINT `transaction_items_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `transaction_items_transaction_id_foreign` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `transaction_items` */
+
+insert  into `transaction_items`(`id`,`transaction_id`,`product_id`,`qty`,`selling_price`,`discount`,`subtotal`,`created_at`,`updated_at`) values 
+(13,11,5,2,69000.00,0.00,138000.00,'2026-03-15 16:47:37','2026-03-15 16:47:37');
 
 /*Table structure for table `transaction_payments` */
 
@@ -1563,9 +1705,36 @@ CREATE TABLE `transaction_payments` (
   PRIMARY KEY (`id`),
   KEY `transaction_payments_transaction_id_foreign` (`transaction_id`),
   CONSTRAINT `transaction_payments_transaction_id_foreign` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `transaction_payments` */
+
+insert  into `transaction_payments`(`id`,`transaction_id`,`method`,`amount`,`status`,`paid_at`,`created_at`,`updated_at`) values 
+(11,11,'qris',138000.00,'paid','2026-03-15 16:47:37','2026-03-15 16:47:37','2026-03-15 16:47:37');
+
+/*Table structure for table `transaction_shipments` */
+
+DROP TABLE IF EXISTS `transaction_shipments`;
+
+CREATE TABLE `transaction_shipments` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `transaction_id` bigint unsigned NOT NULL,
+  `courier_id` bigint unsigned NOT NULL,
+  `tracking_number` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `transaction_shipments_transaction_id_foreign` (`transaction_id`),
+  KEY `transaction_shipments_courier_id_foreign` (`courier_id`),
+  CONSTRAINT `transaction_shipments_courier_id_foreign` FOREIGN KEY (`courier_id`) REFERENCES `couriers` (`id`),
+  CONSTRAINT `transaction_shipments_transaction_id_foreign` FOREIGN KEY (`transaction_id`) REFERENCES `transactions` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+/*Data for the table `transaction_shipments` */
+
+insert  into `transaction_shipments`(`id`,`transaction_id`,`courier_id`,`tracking_number`,`status`,`created_at`,`updated_at`) values 
+(1,11,2,NULL,'pending','2026-03-15 16:47:37','2026-03-15 17:02:56');
 
 /*Table structure for table `transactions` */
 
@@ -1596,9 +1765,12 @@ CREATE TABLE `transactions` (
   CONSTRAINT `transactions_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`),
   CONSTRAINT `transactions_promo_id_foreign` FOREIGN KEY (`promo_id`) REFERENCES `customers` (`id`),
   CONSTRAINT `transactions_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `transactions` */
+
+insert  into `transactions`(`id`,`store_setting_id`,`customer_id`,`transaction_code`,`subtotal`,`discount_total`,`shiping_cost`,`grand_total`,`status`,`promo_id`,`transaction_date`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+(11,1,3,'TRXYKJR74MD20260315',138000.00,120000.00,120000.00,138000.00,'shipped',3,'2026-03-15','2026-03-15 16:47:37','2026-03-15 17:02:48',2,2,NULL,NULL);
 
 /*Table structure for table `users` */
 
