@@ -10,6 +10,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
@@ -131,13 +132,17 @@ class PromoForm
                                     ->native(false)
                                     ->seconds(false)
                                     ->suffixIcon(Heroicon::Calendar)
-                                    ->closeOnDateSelection(),
+                                    ->closeOnDateSelection()
+                                    ->live(),
+
                                 DateTimePicker::make('end_date')
                                     ->label('End Date')
                                     ->native(false)
                                     ->seconds(false)
                                     ->suffixIcon(Heroicon::Calendar)
-                                    ->closeOnDateSelection(),
+                                    ->closeOnDateSelection()
+                                    ->after('start_date')
+                                    ->minDate(fn(Get $get) => $get('start_date')),
                             ]),
                         Toggle::make('is_active')
                             ->label('Active Promo')
