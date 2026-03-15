@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Filament\Resources\PurchaseOrders\Pages;
+
+use App\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
+use App\Services\PurchaseOrderService;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Resources\Pages\EditRecord;
+
+class EditPurchaseOrder extends EditRecord
+{
+    protected static string $resource = PurchaseOrderResource::class;
+
+    protected function afterSave(): void
+    {
+        app(PurchaseOrderService::class)->receiveStock($this->record);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+            ForceDeleteAction::make(),
+            RestoreAction::make(),
+        ];
+    }
+}

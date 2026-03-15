@@ -7,7 +7,9 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -31,6 +33,12 @@ class UsersTable
             ->columns([
                 TextColumn::make('name')
                     ->label('Name')
+                    ->searchable(),
+
+                    TextColumn::make('storeSetting.store_name')
+                    ->label('Store')
+                    ->badge()
+                    ->color('gray')
                     ->searchable(),
 
                 TextColumn::make('email')
@@ -59,6 +67,8 @@ class UsersTable
                     Impersonate::make()
                         ->redirectTo(route('filament.admin.pages.dashboard')),
                     DeleteAction::make(),
+                    ForceDeleteAction::make(),
+                    RestoreAction::make(),
                 ])
                     ->icon(Heroicon::OutlinedEllipsisHorizontal)
             ])

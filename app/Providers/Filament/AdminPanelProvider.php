@@ -22,8 +22,12 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
+use Hydrat\TableLayoutToggle\TableLayoutTogglePlugin;
+use Hydrat\TableLayoutToggle\Persisters\LocalStoragePersister;
 use Filament\Enums\ThemeMode;
 use Filament\Navigation\NavigationGroup;
+use Filament\Support\Enums\Platform;
 use Filament\Support\Icons\Heroicon;
 use Jacobtims\FilamentLogger\FilamentLoggerPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
@@ -54,6 +58,13 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->globalSearchDebounce('750ms')
+            ->globalSearchFieldSuffix(fn(): ?string => match (Platform::detect()) {
+                Platform::Windows, Platform::Linux => 'ctrl + k',
+                Platform::Mac => '⌘ k',
+                default => null,
+            })
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -69,16 +80,21 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->navigationGroups([
+                NavigationGroup::make('Master Data')
+                    ->label('Master Data')
+                    ->icon(Heroicon::OutlinedServerStack)
+                    ->collapsed(),
                 NavigationGroup::make()
                     ->label('Access Control')
-                    ->icon(Heroicon::ShieldCheck)
+                    ->icon(Heroicon::OutlinedShieldCheck)
                     ->collapsed(),
             ])
             ->plugins([
+                GlobalSearchModalPlugin::make(),
                 FilamentLoggerPlugin::make(),
                 FilamentShieldPlugin::make()
                     ->navigationLabel('Role')
-                    ->pluralModelLabel('Manage Roles')
+                    ->pluralModelLabel('Roles')
                     ->navigationIcon(false)
                     ->navigationGroup('Access Control'),
                 FilamentUiSwitcherPlugin::make()
@@ -93,7 +109,19 @@ class AdminPanelProvider extends PanelProvider
                         navigationGroup: 'Settings', // Sets the navigation group for the My Profile page (default = null)
                         hasAvatars: false, // Enables the avatar upload form component (default = false)
                         slug: 'my-profile' // Sets the slug for the profile page (default = 'my-profile')
-                    )
+                    ),
+                // TableLayoutTogglePlugin::make()
+                //     ->setDefaultLayout('list') // default layout for user seeing the table for the first time
+                //     ->persistLayoutUsing(
+                //         persister: LocalStoragePersister::class, // chose a persister to save the layout preference of the user
+                //         cacheStore: 'redis', // optional, change the cache store for the Cache persister
+                //         cacheTtl: 60 * 24, // optional, change the cache time for the Cache persister
+                //     )
+                //     ->shareLayoutBetweenPages(false) // allow all tables to share the layout option for this user
+                //     ->displayToggleAction() // used to display the toggle action button automatically
+                //     ->toggleActionHook('tables::toolbar.search.after') // chose the Filament view hook to render the button on
+                //     ->listLayoutButtonIcon('heroicon-o-list-bullet')
+                //     ->gridLayoutButtonIcon('heroicon-o-squares-2x2'),
             ]);
     }
 }

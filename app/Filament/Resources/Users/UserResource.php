@@ -21,12 +21,12 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static ?string $navigationLabel = 'User';
-    protected static ?string $pluralLabel = 'Manage Users';
+    protected static ?string $pluralLabel = 'Users';
     protected static string | UnitEnum | null $navigationGroup = 'Access Control';
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['name', 'email', 'is_active'];
+        return ['name', 'email'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
