@@ -20,7 +20,7 @@ class TransactionResource extends Resource
     protected static ?string $model = Transaction::class;
     protected static ?string $navigationLabel = 'Transactions';
     protected static ?string $pluralLabel = 'Transactions';
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-archive-box';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
     public static function form(Schema $schema): Schema
     {
