@@ -1,16 +1,13 @@
 <div class="fixed inset-0 z-9999 flex items-center justify-center" @keydown.escape.window="$wire.cancelRestore()">
 
-    {{-- Backdrop --}}
     <div class="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" wire:click="cancelRestore"></div>
 
-    {{-- Dialog --}}
     <div class="relative z-10 w-full max-w-md mx-4 rounded-xl shadow-2xl overflow-hidden
                 bg-white dark:bg-gray-900
                 border border-gray-200 dark:border-white/10
                 text-center"
         role="alertdialog" aria-modal="true">
 
-        {{-- Header --}}
         <div class="flex flex-col items-center gap-4 px-6 pt-6 pb-4">
             <div
                 class="w-16 h-16 rounded-full flex items-center justify-center
@@ -31,9 +28,7 @@
 
         <div class="h-px bg-gray-100 dark:bg-white/10 mx-6"></div>
 
-        {{-- Footer --}}
         <div class="flex items-center gap-3 px-6 py-4">
-            {{-- Cancel --}}
             <button wire:click="cancelDelete" type="button"
                 class="flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-medium
                        bg-white dark:bg-white/5
@@ -44,7 +39,6 @@
                 Batal
             </button>
 
-            {{-- Confirm Restore --}}
             <button wire:click="restorePromo" wire:loading.attr="disabled" wire:target="restorePromo" type="button"
                 class="flex w-full flex-row items-center justify-center gap-2 px-4 py-3 bg-success-600 hover:bg-success-700 text-white rounded-lg text-sm font-medium shadow-sm disabled:opacity-70 disabled:cursor-not-allowed transition">
                 <span wire:loading.remove wire:target="restorePromo" class="inline-flex items-center space-x-2">

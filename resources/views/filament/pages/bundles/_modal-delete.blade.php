@@ -16,7 +16,7 @@
             </div>
 
             <h3 class="text-lg font-semibold text-gray-950 dark:text-white leading-tight">
-                Delete Promotion
+                Delete Bundle
             </h3>
 
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -24,7 +24,7 @@
                 <span class="font-semibold text-gray-800 dark:text-gray-200">
                     "{{ $deleteTargetName }}"
                 </span>?
-                The data can still be restored afterward.
+                It can be restored later.
             </p>
         </div>
 
@@ -38,17 +38,18 @@
                        border border-gray-300 dark:border-white/10
                        shadow-sm hover:bg-gray-50 dark:hover:bg-white/10
                        focus:outline-none focus:ring-2 focus:ring-primary-500 transition">
-                Batal
+                Cancel
             </button>
 
-            <button wire:click="deletePromo" wire:loading.attr="disabled" wire:target="deletePromo" type="button"
+            <button wire:click="deleteBundle" wire:loading.attr="disabled" wire:target="deleteBundle" type="button"
                 class="flex w-full flex-row items-center justify-center gap-2 px-4 py-3 bg-danger-600 hover:bg-danger-700 text-white rounded-lg text-sm font-medium shadow-sm disabled:opacity-70 disabled:cursor-not-allowed transition">
-                <span wire:loading.remove wire:target="deletePromo" class="inline-flex items-center space-x-2">
+
+                <span wire:loading.remove wire:target="deleteBundle" class="inline-flex items-center space-x-2">
                     <x-heroicon-o-trash class="w-5 h-5 inline-block" />
                     <span>Delete</span>
                 </span>
 
-                <span wire:loading wire:target="deletePromo" class="inline-flex items-center space-x-2">
+                <span wire:loading wire:target="deleteBundle" class="inline-flex items-center space-x-2">
                     <svg class="animate-spin w-5 h-5 inline-block" viewBox="0 0 24 24" fill="none">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                             stroke-width="4" />
@@ -57,6 +58,7 @@
                     </svg>
                     <span>Deleting…</span>
                 </span>
+
             </button>
         </div>
     </div>

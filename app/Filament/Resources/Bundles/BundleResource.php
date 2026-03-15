@@ -46,21 +46,6 @@ class BundleResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        $query = parent::getEloquentQuery();
-
-        $storeId = Auth::user()?->store_setting_id;
-
-        if ($storeId) {
-            $query->whereHas('storeSetting', function ($q) use ($storeId) {
-                $q->where('id', $storeId);
-            });
-        }
-
-        return $query;
-    }
-
     public static function form(Schema $schema): Schema
     {
         return BundleForm::configure($schema);
