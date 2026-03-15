@@ -2,25 +2,29 @@
 
 namespace App\Models;
 
+use App\Enums\StatusTransactionShipmentEnum;
 use Illuminate\Database\Eloquent\Model;
 
-class TransactionPayments extends Model
+class TransactionShipment extends Model
 {
     protected $fillable = [
         'transaction_id',
-        'method',
-        'amount',
+        'courier_id',
+        'tracking_number',
         'status',
-        'paid_at',
     ];
 
     protected $casts = [
-        'amount'   => 'decimal:2',
-        'paid_at'  => 'datetime',
+        'status' => StatusTransactionShipmentEnum::class,
     ];
 
     public function transaction()
     {
         return $this->belongsTo(Transaction::class);
+    }
+
+    public function courier()
+    {
+        return $this->belongsTo(Courier::class);
     }
 }

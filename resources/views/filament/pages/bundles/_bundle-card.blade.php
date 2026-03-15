@@ -92,7 +92,10 @@
                 @php
                     $storeId = auth()->user()?->store_setting_id;
                     $product = $item->product;
-                    $stock = $product?->inventoryStocks->where('store_setting_id', $storeId)->sum('quantity') ?? 0;
+                    $stocks = $product?->inventoryStocks ?? collect();
+                    $stock = $storeId
+                        ? $stocks->where('store_setting_id', $storeId)->sum('quantity')
+                        : $stocks->sum('quantity');
                     $price = ($product?->selling_price ?? 0) * $item->qty;
                 @endphp
                 <div class="flex items-center justify-between py-2.5 gap-3">
