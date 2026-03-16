@@ -23,30 +23,22 @@ class TransactionService
             foreach ($transaction->transactionItems as $item) {
 
                 if ($item->bundle_id) {
-                    $bundle = $item->bundle;
+                    $bundle = Bundle::with('bundleItems')->find($item->bundle_id);
 
                     if ($bundle) {
                         foreach ($bundle->bundleItems as $bundleItem) {
+                            // qty bundle × qty per item dalam bundle
                             $totalQty = $item->qty * $bundleItem->qty;
 
-                            $childItem = TransactionItem::create([
-                                'transaction_id' => $transaction->id,
-                                'product_id'     => $bundleItem->product_id,
-                                'bundle_id'      => $item->bundle_id,
-                                'qty'            => $totalQty,
-                                'selling_price'  => $bundleItem->price,
-                                'discount'       => $item['discount'],
-                                'subtotal'       => $item['subtotal'],
-                            ]);
-
+                            // ✅ Kurangi stok menggunakan $item yang sudah ada
+                            // JANGAN buat TransactionItem baru & JANGAN delete $item
                             $inventoryService->decreaseStock(
                                 productId: $bundleItem->product_id,
                                 qty: $totalQty,
                                 storeReference: $transaction,
-                                transactionItem: $childItem
+                                transactionItem: $item // pakai item yang ada sebagai referensi
                             );
                         }
-                        $item->delete();
                     }
                 } else {
                     $inventoryService->decreaseStock(
@@ -58,7 +50,7 @@ class TransactionService
                 }
             }
 
-            // ── Catat pemakaian promo & tambah usage_count ──────────────────
+            // ── Promo usage (tidak berubah) ──────────────────────────────────
             if ($transaction->promo_id) {
                 $promo = Promo::lockForUpdate()->find($transaction->promo_id);
 

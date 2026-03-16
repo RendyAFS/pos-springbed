@@ -28,29 +28,36 @@ class EditProduct extends EditRecord
     {
         $data = $this->form->getState()['stock_adjustment_temp'] ?? null;
 
-        if (!$data) {
-            return;
-        }
+        if (!$data) return;
 
         $product = $this->record;
 
-        $stock = InventoryStock::where([
-            'product_id' => $product->id,
-            'store_setting_id' => $data['store_setting_id']
-        ])->first();
+        $stocks = isset($data[0]) ? $data : [$data];
 
-        $qtyBefore = $stock?->quantity ?? 0;
-        $qtyAfter = $data['quantity'];
+        foreach ($stocks as $item) {
+            if (empty($item['store_setting_id'])) continue;
 
-        $adjustment = StockAdjustment::create([
-            'store_setting_id' => $data['store_setting_id'],
-            'product_id' => $product->id,
-            'qty_before' => $qtyBefore,
-            'qty_after' => $qtyAfter,
-            'qty_difference' => $qtyAfter - $qtyBefore,
-            'reason' => $data['reason'],
-        ]);
+            $stock = InventoryStock::where([
+                'product_id'       => $product->id,
+                'store_setting_id' => $item['store_setting_id'],
+            ])->first();
 
-        app(StockAdjustmentService::class)->adjust($adjustment);
+            $qtyBefore  = $stock?->quantity ?? 0;
+            $qtyAfter   = (int) $item['quantity'];
+            $difference = $qtyAfter - $qtyBefore;
+
+            if ($difference === 0) continue;
+
+            $adjustment = StockAdjustment::create([
+                'store_setting_id' => $item['store_setting_id'],
+                'product_id'       => $product->id,
+                'qty_before'       => $qtyBefore,
+                'qty_after'        => $qtyAfter,
+                'qty_difference'   => $difference,
+                'reason'           => $item['reason'],
+            ]);
+
+            app(StockAdjustmentService::class)->adjust($adjustment);
+        }
     }
 }

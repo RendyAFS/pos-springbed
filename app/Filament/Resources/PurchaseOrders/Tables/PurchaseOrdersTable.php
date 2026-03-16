@@ -34,7 +34,7 @@ class PurchaseOrdersTable
                     ->copyMessage('SKU copied')
                     ->copyMessageDuration(1500),
                 TextColumn::make('purchase_date')
-                    ->dateTime()
+                    ->date()
                     ->sortable(),
                 TextColumn::make('total_amount')
                     ->numeric()

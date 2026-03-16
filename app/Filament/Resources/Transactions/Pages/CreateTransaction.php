@@ -27,34 +27,10 @@ class CreateTransaction extends CreateRecord
         );
 
         if (isset($data['transactionItems'])) {
-            $expandedItems = [];
-
-            foreach ($data['transactionItems'] as $item) {
+            foreach ($data['transactionItems'] as &$item) {
                 unset($item['item_type']);
-
-                if (! empty($item['bundle_id'])) {
-                    $bundle = Bundle::with('bundleItems')->find($item['bundle_id']);
-
-                    if ($bundle) {
-                        foreach ($bundle->bundleItems as $bundleItem) {
-                            $qtyTotal = $item['qty'] * $bundleItem->qty;
-
-                            $expandedItems[] = [
-                                'product_id'    => $bundleItem->product_id,
-                                'bundle_id'     => $item['bundle_id'],
-                                'qty'           => $qtyTotal,
-                                'selling_price' => $bundleItem->price,
-                                'discount'      => $item['discount'],
-                                'subtotal'      => $item['subtotal'],
-                            ];
-                        }
-                    }
-                } else {
-                    $expandedItems[] = $item;
-                }
             }
-
-            $data['transactionItems'] = $expandedItems;
+            unset($item);
         }
 
         return $data;
