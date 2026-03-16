@@ -15,6 +15,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ViewField;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
@@ -103,117 +104,158 @@ class ProductForm
                             ->dehydrated(true)
                     ])->columns(2),
                 Section::make('Inventory')
+                    ->icon(Heroicon::ArchiveBox)
+                    ->description('Manage stock per store location')
                     ->schema([
-                        TextEntry::make('stock_info')
-                            ->label('Stock Information')
-                            ->html()
-                            ->state(function ($get, $record) {
+                        ViewField::make('stock_summary')
+                            ->view('filament.components.stock-summary')
+                            ->viewData(function ($record, $get) {
+                                $temp        = $get('stock_adjustment_temp') ?? [];
+                                $userStoreId = Auth::user()?->store_setting_id;
 
-                                $temp = $get('stock_adjustment_temp');
+                                $dbStocks = $record
+                                    ? InventoryStock::with('storeSetting')
+                                    ->where('product_id', $record->id)
+                                    ->when($userStoreId, fn($q) => $q->where('store_setting_id', $userStoreId))
+                                    ->get()
+                                    ->keyBy('store_setting_id')
+                                    : collect();
 
-                                if (!$record && !$temp) {
-                                    return '<span class="text-gray-500">Stock not set yet</span>';
+                                if ($temp === [] && $dbStocks->isEmpty()) {
+                                    return ['stocks' => collect(), 'pending' => []];
                                 }
 
-                                $storeId = Auth::user()?->store_setting_id;
+                                $pendingMap = collect($temp)->keyBy('store_setting_id');
 
-                                if (!$storeId && $record) {
-                                    $storeId = InventoryStock::query()
-                                        ->where('product_id', $record->id)
-                                        ->value('store_setting_id');
-                                }
+                                $storeIds = $pendingMap->keys()
+                                    ->merge($dbStocks->keys())
+                                    ->unique();
 
-                                $store = StoreSetting::find($storeId);
-                                $storeName = $store?->store_name ?? 'Unknown Store';
+                                $stocks = $storeIds->map(function ($storeId) use ($dbStocks, $pendingMap) {
+                                    $dbQty      = $dbStocks->get($storeId)?->quantity ?? 0;
+                                    $pending    = $pendingMap->get($storeId);
+                                    $pendingQty = $pending ? (int) $pending['quantity'] : null;
 
-                                if ($temp) {
-                                    $qty = $temp['quantity'];
-                                    $storeName = StoreSetting::find($temp['store_setting_id'])?->store_name ?? 'Unknown Store';
-                                } else {
-                                    $qty = InventoryStock::query()
-                                        ->where('product_id', $record->id)
-                                        ->when($storeId, fn($q) => $q->where('store_setting_id', $storeId))
-                                        ->sum('quantity');
-                                }
+                                    return (object) [
+                                        'store_setting_id' => $storeId,
+                                        'quantity'         => $pendingQty ?? $dbQty,
+                                        'qty_before'       => $dbQty,
+                                        'has_pending'      => $pendingQty !== null && $pendingQty !== $dbQty,
+                                        'storeSetting'     => StoreSetting::find($storeId),
+                                    ];
+                                })->values();
 
-                                if ($qty <= 5) {
-                                    $bg = 'bg-danger-100';
-                                    $text = 'text-danger-700';
-                                } elseif ($qty <= 10) {
-                                    $bg = 'bg-warning-100';
-                                    $text = 'text-warning-700';
-                                } else {
-                                    $bg = 'bg-success-100';
-                                    $text = 'text-success-700';
-                                }
-
-                                return "
-                                    <div class='flex flex-col gap-1'>
-                                        <span class='text-sm text-gray-500'>Store</span>
-                                        <span class='font-semibold text-primary-600'>{$storeName}</span>
-                                        <span class='text-sm text-gray-500 mt-2'>Current Stock</span>
-                                        <span class='inline-flex items-center px-2 py-1 text-sm font-bold {$bg} {$text} rounded'>
-                                            {$qty} pcs
-                                        </span>
-                                    </div>
-                                ";
+                                return [
+                                    'stocks'  => $stocks,
+                                    'pending' => $pendingMap->toArray(),
+                                ];
                             })
-                            ->reactive(),
+                            ->live()
+                            ->columnSpanFull()
+                            ->hidden(fn($record, $get) => !$record && empty($get('stock_adjustment_temp'))),
+
+                        Hidden::make('stock_adjustment_temp')
+                            ->dehydrated(true),
                     ])
                     ->headerActions([
                         Action::make('adjustStock')
                             ->label('Edit Stock')
                             ->color('primary')
-                            ->icon('heroicon-o-pencil')
+                            ->icon('heroicon-o-adjustments-horizontal')
                             ->modalHeading('Stock Adjustment')
+                            ->modalWidth('2xl')
                             ->fillForm(function ($livewire) {
                                 $state = $livewire->form->getState();
-                                $temp = $state['stock_adjustment_temp'] ?? null;
+                                $temp  = $state['stock_adjustment_temp'] ?? null;
+
                                 if ($temp) {
-                                    return $temp;
+                                    return ['stocks' => $temp];
                                 }
-                                $userStore = Auth::user()->store_setting_id;
-                                if ($userStore) {
+
+                                $userStoreId = Auth::user()?->store_setting_id;
+                                $record      = $livewire->record;
+
+                                if ($userStoreId) {
+                                    $qty = $record
+                                        ? InventoryStock::where('product_id', $record->id)
+                                        ->where('store_setting_id', $userStoreId)
+                                        ->value('quantity') ?? 0
+                                        : 0;
+
                                     return [
-                                        'store_setting_id' => $userStore,
+                                        'stocks' => [[
+                                            'store_setting_id' => $userStoreId,
+                                            'quantity'         => $qty,
+                                            'reason'           => '',
+                                        ]],
                                     ];
                                 }
-                                $record = $livewire->record;
-                                if (!$record) {
-                                    return [];
-                                }
-                                $storeId = InventoryStock::where('product_id', $record->id)->value('store_setting_id');
+
+                                $stores = StoreSetting::all();
+
                                 return [
-                                    'store_setting_id' => $storeId,
+                                    'stocks' => $stores->map(function ($store) use ($record) {
+                                        $qty = $record
+                                            ? InventoryStock::where('product_id', $record->id)
+                                            ->where('store_setting_id', $store->id)
+                                            ->value('quantity') ?? 0
+                                            : 0;
+
+                                        return [
+                                            'store_setting_id' => $store->id,
+                                            'quantity'         => $qty,
+                                            'reason'           => '',
+                                        ];
+                                    })->toArray(),
                                 ];
                             })
                             ->schema([
-                                Select::make('store_setting_id')
-                                    ->relationship('storeSetting', 'store_name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->default(fn() => Auth::user()?->store_setting_id)
-                                    ->disabled(fn() => Auth::user()?->store_setting_id !== null)
-                                    ->dehydrated(fn() => true),
-                                TextInput::make('quantity')
-                                    ->numeric()
-                                    ->required(),
-                                Textarea::make('reason')
-                                    ->required(),
-                            ])
+                                Repeater::make('stocks')
+                                    ->label('')
+                                    ->schema([
+                                        Select::make('store_setting_id')
+                                            ->label('Store')
+                                            ->options(StoreSetting::pluck('store_name', 'id'))
+                                            ->disabled()
+                                            ->dehydrated(true)
+                                            ->columnSpan(2),
 
+                                        TextInput::make('quantity')
+                                            ->label('New Stock Quantity')
+                                            ->numeric()
+                                            ->minValue(0)
+                                            ->required()
+                                            ->suffix('pcs')
+                                            ->columnSpan(1),
+
+                                        Textarea::make('reason')
+                                            ->label('Reason')
+                                            ->nullable()
+                                            ->rows(2)
+                                            ->columnSpan(3),
+                                    ])
+                                    ->columns(3)
+                                    ->addable(false)
+                                    ->deletable(false)
+                                    ->reorderable(false)
+                                    ->itemLabel(
+                                        fn($state) =>
+                                        StoreSetting::find($state['store_setting_id'])?->store_name ?? 'Store'
+                                    )
+                                    ->collapsible()
+                            ])
                             ->action(function ($data, $livewire) {
                                 $state = $livewire->form->getState();
-                                $state['stock_adjustment_temp'] = $data;
+                                $state['stock_adjustment_temp'] = $data['stocks'];
                                 $livewire->form->fill($state);
+
                                 Notification::make()
-                                    ->title('Stock adjustment saved')
-                                    ->body('Stock temporary successfully saved. Data will be processed when the product is saved.')
+                                    ->title('Stock adjustment staged')
+                                    ->body('Stock data will be saved when product is submitted.')
                                     ->success()
                                     ->send();
-                            })
-                    ]),
+                            }),
+                    ])->columnSpanFull(),
                 Repeater::make('productImages')
                     ->relationship()
                     ->schema([
