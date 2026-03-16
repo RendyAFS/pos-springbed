@@ -3,14 +3,14 @@
 namespace App\Filament\Resources\InventoryStocks\Tables;
 
 use App\Helpers\RupiahHelper;
-use Filament\Tables;
+use App\Models\StoreSetting;
 use Filament\Tables\Table;
-use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 
 class InventoryStocksTable
@@ -19,6 +19,12 @@ class InventoryStocksTable
     {
         return $table
             ->columns([
+                TextColumn::make('storeSetting.store_name')
+                    ->label('Store')
+                    ->badge()
+                    ->color('gray')
+                    ->sortable()
+                    ->visible(fn() => Auth::user()?->store_setting_id === null),
 
                 TextColumn::make('product.sku')
                     ->label('SKU')
@@ -80,7 +86,6 @@ class InventoryStocksTable
                         'success' => 'OK',
                         'warning' => 'Low',
                     ]),
-
             ])
             ->defaultSort('quantity', 'desc');
     }
