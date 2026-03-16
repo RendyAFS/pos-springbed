@@ -52,7 +52,11 @@ class BundleForm
                                     ->preload()
                                     ->required()
                                     ->live()
-                                    ->afterStateHydrated(function ($state, Set $set) {
+                                    ->afterStateHydrated(function ($state, Get $get, Set $set) {
+                                        if ($get('price')) {
+                                            return;
+                                        }
+
                                         if ($state) {
                                             $price = Product::find($state)?->selling_price ?? 0;
                                             $set('price', $price);
@@ -67,8 +71,11 @@ class BundleForm
                                     ->label('Price')
                                     ->numeric()
                                     ->prefix('Rp.')
-                                    ->readOnly()
-                                    ->dehydrated(false),
+                                    ->live()
+                                    ->debounce(500)
+                                    ->afterStateUpdated(function (Get $get, Set $set) {
+                                        self::updateBundlePrice($get, $set);
+                                    }),
                                 TextInput::make('qty')
                                     ->label('Quantity')
                                     ->numeric()

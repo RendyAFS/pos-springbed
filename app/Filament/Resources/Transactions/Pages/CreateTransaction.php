@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Transactions\Pages;
 
 use App\Enums\StatusTransactionShipmentEnum;
 use App\Filament\Resources\Transactions\TransactionResource;
+use App\Models\Bundle;
 use App\Models\TransactionPayment;
 use App\Models\TransactionShipment;
 use App\Services\TransactionService;
@@ -25,6 +26,37 @@ class CreateTransaction extends CreateRecord
             $data['payment_status'],
         );
 
+        if (isset($data['transactionItems'])) {
+            $expandedItems = [];
+
+            foreach ($data['transactionItems'] as $item) {
+                unset($item['item_type']);
+
+                if (! empty($item['bundle_id'])) {
+                    $bundle = Bundle::with('bundleItems')->find($item['bundle_id']);
+
+                    if ($bundle) {
+                        foreach ($bundle->bundleItems as $bundleItem) {
+                            $qtyTotal = $item['qty'] * $bundleItem->qty;
+
+                            $expandedItems[] = [
+                                'product_id'    => $bundleItem->product_id,
+                                'bundle_id'     => $item['bundle_id'],
+                                'qty'           => $qtyTotal,
+                                'selling_price' => $bundleItem->price,
+                                'discount'      => $item['discount'],
+                                'subtotal'      => $item['subtotal'],
+                            ];
+                        }
+                    }
+                } else {
+                    $expandedItems[] = $item;
+                }
+            }
+
+            $data['transactionItems'] = $expandedItems;
+        }
+
         return $data;
     }
 
@@ -44,9 +76,9 @@ class CreateTransaction extends CreateRecord
 
         if (filled($data['courier_id'] ?? null)) {
             TransactionShipment::create([
-                'transaction_id'  => $this->record->id,
-                'courier_id'      => $data['courier_id'],
-                'status'          => StatusTransactionShipmentEnum::PENDING,
+                'transaction_id' => $this->record->id,
+                'courier_id'     => $data['courier_id'],
+                'status'         => StatusTransactionShipmentEnum::PENDING,
             ]);
         }
 
