@@ -17,11 +17,17 @@ class Bundle extends Model
     ];
 
     protected $casts = [
+        'bundle_price' => 'decimal:2',
         'is_active' => 'boolean',
     ];
 
     public function bundleItems()
     {
         return $this->hasMany(BundleItem::class);
+    }
+
+    public function transactionItems()
+    {
+        return $this->hasMany(TransactionItem::class);
     }
 }

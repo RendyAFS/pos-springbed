@@ -9,6 +9,7 @@ class TransactionItem extends Model
     protected $fillable = [
         'transaction_id',
         'product_id',
+        'bundle_id',
         'qty',
         'selling_price',
         'discount',
@@ -35,5 +36,10 @@ class TransactionItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function bundle()
+    {
+        return $this->belongsTo(Bundle::class);
     }
 }

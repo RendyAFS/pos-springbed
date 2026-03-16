@@ -10,6 +10,11 @@ class BundleItem extends Model
         'bundle_id',
         'product_id',
         'qty',
+        'price',
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
     ];
 
     public function bundle()
