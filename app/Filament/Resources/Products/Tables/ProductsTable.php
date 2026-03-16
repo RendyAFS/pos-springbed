@@ -73,6 +73,7 @@ class ProductsTable
                 TextColumn::make('inventoryStocks.quantity')
                     ->label('Stock')
                     ->badge()
+                    ->default(0)
                     ->color(function ($state) {
                         if ($state <= 5) {
                             return 'danger';
