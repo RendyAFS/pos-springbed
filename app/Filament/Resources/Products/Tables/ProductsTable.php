@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 
 class ProductsTable
@@ -43,11 +44,6 @@ class ProductsTable
                         </div>
                     ");
                     }),
-                TextColumn::make('storeSetting.store_name')
-                    ->label('Store')
-                    ->badge()
-                    ->color('gray')
-                    ->searchable(),
                 TextColumn::make('sku')
                     ->label('SKU')
                     ->fontFamily(FontFamily::Mono)
@@ -70,9 +66,18 @@ class ProductsTable
                     ->label('Selling Price')
                     ->sortable()
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
-                TextColumn::make('inventoryStocks.quantity')
+                TextColumn::make('stock')
                     ->label('Stock')
                     ->badge()
+                    ->state(function ($record) {
+                        $storeId = Auth::user()?->store_setting_id;
+                        if ($storeId) {
+                            return $record->inventoryStocks
+                                ->where('store_setting_id', $storeId)
+                                ->sum('quantity');
+                        }
+                        return $record->inventoryStocks->sum('quantity');
+                    })
                     ->default(0)
                     ->color(function ($state) {
                         if ($state <= 5) {

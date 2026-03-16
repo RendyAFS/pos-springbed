@@ -53,11 +53,11 @@ class ProductResource extends Resource
 
         $storeId = Auth::user()?->store_setting_id;
 
-        if ($storeId) {
-            $query->whereHas('inventoryStocks', function ($q) use ($storeId) {
+        $query->with(['inventoryStocks' => function ($q) use ($storeId) {
+            if ($storeId) {
                 $q->where('store_setting_id', $storeId);
-            });
-        }
+            }
+        }]);
 
         return $query;
     }
