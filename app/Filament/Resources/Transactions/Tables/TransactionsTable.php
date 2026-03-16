@@ -17,6 +17,8 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
@@ -77,7 +79,7 @@ class TransactionsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('transactionPayment.status')
-                    ->label('Pembayaran')
+                    ->label('Payment')
                     ->badge()
                     ->formatStateUsing(
                         fn($state) => $state instanceof TransactionPaymentStatusEnum
@@ -93,7 +95,7 @@ class TransactionsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('transactionShipment.status')
-                    ->label('Pengiriman')
+                    ->label('Delivery')
                     ->badge()
                     ->formatStateUsing(
                         fn($state) => $state instanceof StatusTransactionShipmentEnum
@@ -130,12 +132,12 @@ class TransactionsTable
                         ->label('Update Status')
                         ->icon(Heroicon::ArrowPath)
                         ->color('warning')
-                        ->modalHeading('Update Status Transaksi')
-                        ->modalDescription(fn($record) => "Transaksi: {$record->transaction_code}")
+                        ->modalHeading('Update Status Transaction')
+                        ->modalDescription(fn($record) => "Transaction: {$record->transaction_code}")
                         ->modalWidth('sm')
                         ->schema([
                             Select::make('status')
-                                ->label('Status Transaksi')
+                                ->label('Status Transaction')
                                 ->options(
                                     collect(TransactionStatusEnum::cases())
                                         ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
@@ -145,7 +147,7 @@ class TransactionsTable
                                 ->native(false),
 
                             Select::make('payment_status')
-                                ->label('Status Pembayaran')
+                                ->label('Status Payment')
                                 ->options(
                                     collect(TransactionPaymentStatusEnum::cases())
                                         ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
@@ -155,8 +157,13 @@ class TransactionsTable
                                 ->visible(fn($record) => $record->transactionPayment !== null)
                                 ->native(false),
 
+                            TextInput::make('tracking_number')
+                                ->label('No. Resi')
+                                ->default(fn($record) => $record->transactionShipment?->tracking_number)
+                                ->visible(fn($record) => $record->transactionShipment !== null),
+
                             Select::make('shipment_status')
-                                ->label('Status Pengiriman')
+                                ->label('Status Delivery')
                                 ->options(
                                     collect(StatusTransactionShipmentEnum::cases())
                                         ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
@@ -183,8 +190,14 @@ class TransactionsTable
                             if (!empty($data['shipment_status']) && $record->transactionShipment) {
                                 $record->transactionShipment->update([
                                     'status' => $data['shipment_status'],
+                                    'tracking_number' => $data['tracking_number'],
                                 ]);
                             }
+                            Notification::make()
+                                ->title('Update status transaction successfully')
+                                ->body('Status transaction successfully updated.')
+                                ->success()
+                                ->send();
                         })
                         ->modalSubmitActionLabel('Simpan'),
                     EditAction::make(),

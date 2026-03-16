@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Transactions\Pages;
 
 use App\Enums\StatusTransactionShipmentEnum;
 use App\Filament\Resources\Transactions\TransactionResource;
+use App\Models\Bundle;
 use App\Models\TransactionPayment;
 use App\Models\TransactionShipment;
 use App\Services\TransactionService;
@@ -14,30 +15,51 @@ class CreateTransaction extends CreateRecord
 {
     protected static string $resource = TransactionResource::class;
 
-    /**
-     * Inject store_setting_id & buang semua field virtual sebelum disimpan
-     * ke tabel transactions (courier_id, payment_* bukan kolom transactions).
-     */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['store_setting_id'] = Auth::user()?->store_setting_id;
 
         unset(
-            $data['courier_id'],        // → transaction_shipments
-            $data['payment_method'],    // → transaction_payments
-            $data['payment_amount'],    // → transaction_payments
-            $data['payment_status'],    // → transaction_payments
+            $data['courier_id'],
+            $data['payment_method'],
+            $data['payment_amount'],
+            $data['payment_status'],
         );
+
+        if (isset($data['transactionItems'])) {
+            $expandedItems = [];
+
+            foreach ($data['transactionItems'] as $item) {
+                unset($item['item_type']);
+
+                if (! empty($item['bundle_id'])) {
+                    $bundle = Bundle::with('bundleItems')->find($item['bundle_id']);
+
+                    if ($bundle) {
+                        foreach ($bundle->bundleItems as $bundleItem) {
+                            $qtyTotal = $item['qty'] * $bundleItem->qty;
+
+                            $expandedItems[] = [
+                                'product_id'    => $bundleItem->product_id,
+                                'bundle_id'     => $item['bundle_id'],
+                                'qty'           => $qtyTotal,
+                                'selling_price' => $bundleItem->price,
+                                'discount'      => $item['discount'],
+                                'subtotal'      => $item['subtotal'],
+                            ];
+                        }
+                    }
+                } else {
+                    $expandedItems[] = $item;
+                }
+            }
+
+            $data['transactionItems'] = $expandedItems;
+        }
 
         return $data;
     }
 
-    /**
-     * Setelah Transaction tersimpan:
-     * 1. Simpan TransactionPayment  (hasOne)
-     * 2. Simpan TransactionShipment (hasOne) jika kurir dipilih
-     * 3. Jalankan TransactionService: FIFO stok + PromoUsage
-     */
     protected function afterCreate(): void
     {
         $data = $this->data;
@@ -54,9 +76,9 @@ class CreateTransaction extends CreateRecord
 
         if (filled($data['courier_id'] ?? null)) {
             TransactionShipment::create([
-                'transaction_id'  => $this->record->id,
-                'courier_id'      => $data['courier_id'],
-                'status'          => StatusTransactionShipmentEnum::PENDING,
+                'transaction_id' => $this->record->id,
+                'courier_id'     => $data['courier_id'],
+                'status'         => StatusTransactionShipmentEnum::PENDING,
             ]);
         }
 
