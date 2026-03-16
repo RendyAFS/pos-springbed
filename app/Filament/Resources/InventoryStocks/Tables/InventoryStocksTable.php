@@ -55,6 +55,7 @@ class InventoryStocksTable
 
                 TextColumn::make('quantity')
                     ->label('Stock')
+                    ->default(0)
                     ->alignCenter()
                     ->weight('bold'),
 
