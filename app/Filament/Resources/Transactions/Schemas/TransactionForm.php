@@ -65,6 +65,7 @@ class TransactionForm
                                         ->columnSpan(1),
                                     Select::make('customer_id')
                                         ->label('Pelanggan')
+                                        ->required()
                                         ->relationship('customer', 'name')
                                         ->searchable(['name', 'phone', 'email'])
                                         ->preload()
@@ -442,8 +443,8 @@ class TransactionForm
                                     Section::make('Ringkasan Harga')
                                         ->icon(Heroicon::ReceiptRefund)
                                         ->schema([
-                                            TextInput::make('subtotal')->label('Subtotal')->numeric()->readOnly()->prefix('Rp'),
-                                            TextInput::make('discount_total')->label('Total Diskon')->numeric()->readOnly()->prefix('Rp'),
+                                            TextInput::make('subtotal')->label('Subtotal + Discount')->numeric()->readOnly()->prefix('Rp'),
+                                            TextInput::make('promo_total')->label('Potongan Promo')->numeric()->readOnly()->prefix('Rp'),
                                             TextInput::make('shiping_cost')->label('Ongkos Kirim')->numeric()->readOnly()->prefix('Rp'),
                                             TextInput::make('grand_total')->label('Grand Total')->numeric()->readOnly()->prefix('Rp'),
                                         ]),
@@ -542,12 +543,12 @@ class TransactionForm
         $items    = $get('transactionItems') ?? [];
         $subtotal = collect($items)->sum(fn($i) => (float) ($i['subtotal'] ?? 0));
 
-        $discountTotal = 0.0;
+        $promoTotal = 0.0;
         $promoId       = $get('promo_id');
         if ($promoId) {
             $promo = Promo::find($promoId);
             if ($promo && $subtotal >= (float) ($promo->min_purchase ?? 0)) {
-                $discountTotal = $promo->discount_type === PromoDiscountEnum::PERCENTAGE
+                $promoTotal = $promo->discount_type === PromoDiscountEnum::PERCENTAGE
                     ? round($subtotal * ($promo->discount_value / 100), 2)
                     : min((float) $promo->discount_value, $subtotal);
             }
@@ -555,7 +556,7 @@ class TransactionForm
 
         $shippingCost = (float) ($get('shiping_cost') ?? 0);
         $set('subtotal',       round($subtotal, 2));
-        $set('discount_total', round($discountTotal, 2));
-        $set('grand_total',    round(max(0, $subtotal - $discountTotal + $shippingCost), 2));
+        $set('promo_total', round($promoTotal, 2));
+        $set('grand_total',    round(max(0, $subtotal - $promoTotal + $shippingCost), 2));
     }
 }

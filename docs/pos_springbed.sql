@@ -1,6 +1,6 @@
 /*
-SQLyog Ultimate v13.1.1 (32 bit)
-MySQL - 10.11.16-MariaDB-log : Database - pos_springbed
+SQLyog Ultimate v13.1.1 (64 bit)
+MySQL - 8.0.30 : Database - pos_springbed
 *********************************************************************
 */
 
@@ -12,7 +12,7 @@ MySQL - 10.11.16-MariaDB-log : Database - pos_springbed
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`pos_springbed` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/`pos_springbed` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 
 USE `pos_springbed`;
 
@@ -21,23 +21,24 @@ USE `pos_springbed`;
 DROP TABLE IF EXISTS `activity_log`;
 
 CREATE TABLE `activity_log` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `log_name` varchar(255) DEFAULT NULL,
-  `description` text NOT NULL,
-  `subject_type` varchar(255) DEFAULT NULL,
-  `event` varchar(255) DEFAULT NULL,
-  `subject_id` bigint(20) unsigned DEFAULT NULL,
-  `causer_type` varchar(255) DEFAULT NULL,
-  `causer_id` bigint(20) unsigned DEFAULT NULL,
-  `properties` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`properties`)),
-  `batch_uuid` char(36) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `log_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `event` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subject_id` bigint unsigned DEFAULT NULL,
+  `causer_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `causer_id` bigint unsigned DEFAULT NULL,
+  `properties` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `batch_uuid` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `subject` (`subject_type`,`subject_id`),
   KEY `causer` (`causer_type`,`causer_id`),
-  KEY `activity_log_log_name_index` (`log_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `activity_log_log_name_index` (`log_name`),
+  CONSTRAINT `activity_log_chk_1` CHECK (json_valid(`properties`))
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `activity_log` */
 
@@ -55,22 +56,58 @@ insert  into `activity_log`(`id`,`log_name`,`description`,`subject_type`,`event`
 (11,'Resource','Product Updated by Super Admin','App\\Models\\Product','Updated',3,'App\\Models\\User',1,'{\"category_id\":2}',NULL,'2026-03-16 13:58:19','2026-03-16 13:58:19'),
 (12,'Resource','Product Created by Super Admin','App\\Models\\Product','Created',4,'App\\Models\\User',1,'{\"size\":\"single\",\"type\":\"springbed\",\"name\":\"Kasur 4\",\"selling_price\":800000,\"sku\":\"LOP-133\",\"weight\":7.2,\"color\":\"Orange\",\"is_active\":true,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 13:59:53\",\"created_at\":\"2026-03-16 13:59:53\",\"id\":4}',NULL,'2026-03-16 13:59:53','2026-03-16 13:59:53'),
 (13,'Resource','Product Updated by Super Admin','App\\Models\\Product','Updated',4,'App\\Models\\User',1,'{\"brand_id\":4}',NULL,'2026-03-16 13:59:53','2026-03-16 13:59:53'),
-(14,'Resource','Product Updated by Super Admin','App\\Models\\Product','Updated',4,'App\\Models\\User',1,'{\"category_id\":4}',NULL,'2026-03-16 13:59:53','2026-03-16 13:59:53');
+(14,'Resource','Product Updated by Super Admin','App\\Models\\Product','Updated',4,'App\\Models\\User',1,'{\"category_id\":4}',NULL,'2026-03-16 13:59:53','2026-03-16 13:59:53'),
+(15,'Access','Super Admin logged in','App\\Models\\User','Login',1,'App\\Models\\User',1,'{\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/145.0.0.0 Safari\\/537.36\"}',NULL,'2026-03-16 19:03:04','2026-03-16 19:03:04'),
+(16,'Resource','Product Updated by Super Admin','App\\Models\\Product','Updated',1,'App\\Models\\User',1,'{\"is_active\":false,\"updated_at\":\"2026-03-16 19:03:23\"}',NULL,'2026-03-16 19:03:23','2026-03-16 19:03:23'),
+(17,'Resource','Product Updated by Super Admin','App\\Models\\Product','Updated',1,'App\\Models\\User',1,'{\"is_active\":true,\"updated_at\":\"2026-03-16 19:03:40\"}',NULL,'2026-03-16 19:03:40','2026-03-16 19:03:40'),
+(18,'Resource','Product Updated by Super Admin','App\\Models\\Product','Updated',1,'App\\Models\\User',1,'{\"is_active\":false,\"updated_at\":\"2026-03-16 19:04:36\"}',NULL,'2026-03-16 19:04:36','2026-03-16 19:04:36'),
+(19,'Resource','Product Updated by Super Admin','App\\Models\\Product','Updated',1,'App\\Models\\User',1,'{\"is_active\":true,\"updated_at\":\"2026-03-16 19:07:35\"}',NULL,'2026-03-16 19:07:35','2026-03-16 19:07:35'),
+(20,'Resource','Purchase Order Created by Super Admin','App\\Models\\PurchaseOrder','Created',1,'App\\Models\\User',1,'{\"store_setting_id\":1,\"supplier_name\":\"Supplier 1\",\"invoice_number\":\"INVNEICFGXZ1773662857\",\"purchase_date\":\"2026-03-16 00:00:00\",\"total_amount\":95000000,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 19:08:49\",\"created_at\":\"2026-03-16 19:08:49\",\"id\":1}',NULL,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(21,'Resource','Inventory Stock Created by Super Admin','App\\Models\\InventoryStock','Created',1,'App\\Models\\User',1,'{\"product_id\":1,\"store_setting_id\":1,\"quantity\":0,\"updated_at\":\"2026-03-16 19:08:49\",\"created_at\":\"2026-03-16 19:08:49\",\"id\":1}',NULL,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(22,'Resource','Inventory Stock Updated by Super Admin','App\\Models\\InventoryStock','Updated',1,'App\\Models\\User',1,'{\"quantity\":50}',NULL,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(23,'Resource','Inventory Stock Created by Super Admin','App\\Models\\InventoryStock','Created',2,'App\\Models\\User',1,'{\"product_id\":2,\"store_setting_id\":1,\"quantity\":0,\"updated_at\":\"2026-03-16 19:08:49\",\"created_at\":\"2026-03-16 19:08:49\",\"id\":2}',NULL,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(24,'Resource','Inventory Stock Updated by Super Admin','App\\Models\\InventoryStock','Updated',2,'App\\Models\\User',1,'{\"quantity\":50}',NULL,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(25,'Resource','Purchase Order Created by Super Admin','App\\Models\\PurchaseOrder','Created',2,'App\\Models\\User',1,'{\"store_setting_id\":2,\"supplier_name\":\"Supplier 2\",\"invoice_number\":\"INV8S62HJHD1773663059\",\"purchase_date\":\"2026-03-16 00:00:00\",\"total_amount\":50500000,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 19:13:39\",\"created_at\":\"2026-03-16 19:13:39\",\"id\":2}',NULL,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(26,'Resource','Inventory Stock Created by Super Admin','App\\Models\\InventoryStock','Created',3,'App\\Models\\User',1,'{\"product_id\":1,\"store_setting_id\":2,\"quantity\":0,\"updated_at\":\"2026-03-16 19:13:39\",\"created_at\":\"2026-03-16 19:13:39\",\"id\":3}',NULL,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(27,'Resource','Inventory Stock Updated by Super Admin','App\\Models\\InventoryStock','Updated',3,'App\\Models\\User',1,'{\"quantity\":25}',NULL,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(28,'Resource','Inventory Stock Created by Super Admin','App\\Models\\InventoryStock','Created',4,'App\\Models\\User',1,'{\"product_id\":2,\"store_setting_id\":2,\"quantity\":0,\"updated_at\":\"2026-03-16 19:13:39\",\"created_at\":\"2026-03-16 19:13:39\",\"id\":4}',NULL,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(29,'Resource','Inventory Stock Updated by Super Admin','App\\Models\\InventoryStock','Updated',4,'App\\Models\\User',1,'{\"quantity\":25}',NULL,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(30,'Resource','Purchase Order Created by Super Admin','App\\Models\\PurchaseOrder','Created',3,'App\\Models\\User',1,'{\"store_setting_id\":3,\"supplier_name\":\"Supplier 2\",\"invoice_number\":\"INVBYU4OLPY1773663219\",\"purchase_date\":\"2026-03-16 00:00:00\",\"total_amount\":81000000,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 19:14:10\",\"created_at\":\"2026-03-16 19:14:10\",\"id\":3}',NULL,'2026-03-16 19:14:10','2026-03-16 19:14:10'),
+(31,'Resource','Inventory Stock Created by Super Admin','App\\Models\\InventoryStock','Created',5,'App\\Models\\User',1,'{\"product_id\":3,\"store_setting_id\":3,\"quantity\":0,\"updated_at\":\"2026-03-16 19:14:10\",\"created_at\":\"2026-03-16 19:14:10\",\"id\":5}',NULL,'2026-03-16 19:14:10','2026-03-16 19:14:10'),
+(32,'Resource','Inventory Stock Updated by Super Admin','App\\Models\\InventoryStock','Updated',5,'App\\Models\\User',1,'{\"quantity\":30}',NULL,'2026-03-16 19:14:10','2026-03-16 19:14:10'),
+(33,'Resource','Inventory Stock Created by Super Admin','App\\Models\\InventoryStock','Created',6,'App\\Models\\User',1,'{\"product_id\":4,\"store_setting_id\":3,\"quantity\":0,\"updated_at\":\"2026-03-16 19:14:10\",\"created_at\":\"2026-03-16 19:14:10\",\"id\":6}',NULL,'2026-03-16 19:14:10','2026-03-16 19:14:10'),
+(34,'Resource','Inventory Stock Updated by Super Admin','App\\Models\\InventoryStock','Updated',6,'App\\Models\\User',1,'{\"quantity\":30}',NULL,'2026-03-16 19:14:10','2026-03-16 19:14:10'),
+(35,'Resource','User Updated by Super Admin','App\\Models\\User','Updated',2,'App\\Models\\User',1,'{\"store_setting_id\":1,\"updated_at\":\"2026-03-16 19:26:32\",\"updated_by\":1}',NULL,'2026-03-16 19:26:32','2026-03-16 19:26:32'),
+(36,'Resource','User Updated by Super Admin','App\\Models\\User','Updated',4,'App\\Models\\User',1,'{\"store_setting_id\":2,\"updated_at\":\"2026-03-16 19:26:42\",\"updated_by\":1}',NULL,'2026-03-16 19:26:42','2026-03-16 19:26:42'),
+(37,'Resource','Product Created by Super Admin','App\\Models\\Product','Created',5,'App\\Models\\User',1,'{\"size\":\"single\",\"type\":\"springbed\",\"name\":\"Tes Product 1\",\"selling_price\":111,\"sku\":\"OASI-111\",\"weight\":111,\"color\":\"Red\",\"is_active\":true,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 19:54:14\",\"created_at\":\"2026-03-16 19:54:14\",\"id\":5}',NULL,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(38,'Resource','Product Updated by Super Admin','App\\Models\\Product','Updated',5,'App\\Models\\User',1,'{\"brand_id\":3}',NULL,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(39,'Resource','Product Updated by Super Admin','App\\Models\\Product','Updated',5,'App\\Models\\User',1,'{\"category_id\":2}',NULL,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(40,'Resource','Inventory Stock Created by Super Admin','App\\Models\\InventoryStock','Created',7,'App\\Models\\User',1,'{\"product_id\":5,\"store_setting_id\":1,\"quantity\":10,\"updated_at\":\"2026-03-16 19:54:14\",\"created_at\":\"2026-03-16 19:54:14\",\"id\":7}',NULL,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(41,'Resource','Inventory Stock Created by Super Admin','App\\Models\\InventoryStock','Created',8,'App\\Models\\User',1,'{\"product_id\":5,\"store_setting_id\":2,\"quantity\":5,\"updated_at\":\"2026-03-16 19:54:14\",\"created_at\":\"2026-03-16 19:54:14\",\"id\":8}',NULL,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(42,'Resource','Inventory Stock Created by Super Admin','App\\Models\\InventoryStock','Created',9,'App\\Models\\User',1,'{\"product_id\":5,\"store_setting_id\":3,\"quantity\":2,\"updated_at\":\"2026-03-16 19:54:14\",\"created_at\":\"2026-03-16 19:54:14\",\"id\":9}',NULL,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(43,'Resource','Inventory Stock Deleted by Super Admin','App\\Models\\InventoryStock','Deleted',9,'App\\Models\\User',1,'[]',NULL,'2026-03-16 19:58:47','2026-03-16 19:58:47'),
+(44,'Resource','Inventory Stock Created by Super Admin','App\\Models\\InventoryStock','Created',10,'App\\Models\\User',1,'{\"product_id\":5,\"store_setting_id\":3,\"quantity\":11,\"updated_at\":\"2026-03-16 19:58:47\",\"created_at\":\"2026-03-16 19:58:47\",\"id\":10}',NULL,'2026-03-16 19:58:47','2026-03-16 19:58:47'),
+(45,'Resource','Promo Created by Super Admin','App\\Models\\Promo','Created',1,'App\\Models\\User',1,'{\"name\":\"Promo Kasur 1 nominal\",\"type\":\"flash_sale\",\"discount_type\":\"nominal\",\"discount_value\":500000,\"min_purchase\":100000,\"start_date\":\"2026-03-09 00:00:00\",\"end_date\":\"2026-03-30 00:00:00\",\"is_active\":true,\"usage_limit\":10,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 20:47:31\",\"created_at\":\"2026-03-16 20:47:31\",\"id\":1}',NULL,'2026-03-16 20:47:31','2026-03-16 20:47:31'),
+(46,'Resource','Promo Created by Super Admin','App\\Models\\Promo','Created',2,'App\\Models\\User',1,'{\"name\":\"Promo Kasur 1 percentage\",\"type\":\"flash_sale\",\"discount_type\":\"percentage\",\"discount_value\":50,\"min_purchase\":100000,\"start_date\":\"2026-03-09 00:00:00\",\"end_date\":\"2026-03-30 00:00:00\",\"is_active\":true,\"usage_limit\":10,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 20:48:05\",\"created_at\":\"2026-03-16 20:48:05\",\"id\":2}',NULL,'2026-03-16 20:48:05','2026-03-16 20:48:05'),
+(47,'Resource','Promo Created by Super Admin','App\\Models\\Promo','Created',3,'App\\Models\\User',1,'{\"name\":\"Promo 1\",\"type\":\"free_shipping\",\"discount_type\":\"nominal\",\"discount_value\":120000,\"min_purchase\":100000,\"start_date\":\"2026-03-09 00:00:00\",\"end_date\":\"2026-03-30 00:00:00\",\"is_active\":true,\"usage_limit\":10,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 20:49:23\",\"created_at\":\"2026-03-16 20:49:23\",\"id\":3}',NULL,'2026-03-16 20:49:23','2026-03-16 20:49:23'),
+(48,'Resource','Bundle Created by Super Admin','App\\Models\\Bundle','Created',1,'App\\Models\\User',1,'{\"name\":\"Bundle 1\",\"bundle_price\":2300000,\"is_active\":true,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 20:49:55\",\"created_at\":\"2026-03-16 20:49:55\",\"id\":1}',NULL,'2026-03-16 20:49:55','2026-03-16 20:49:55'),
+(49,'Resource','Bundle Created by Super Admin','App\\Models\\Bundle','Created',2,'App\\Models\\User',1,'{\"name\":\"Bundle 2\",\"bundle_price\":2600000,\"is_active\":true,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 20:50:18\",\"created_at\":\"2026-03-16 20:50:18\",\"id\":2}',NULL,'2026-03-16 20:50:18','2026-03-16 20:50:18'),
+(50,'Resource','Bundle Created by Super Admin','App\\Models\\Bundle','Created',3,'App\\Models\\User',1,'{\"name\":\"Bundle 3\",\"bundle_price\":3800000,\"is_active\":true,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 20:50:49\",\"created_at\":\"2026-03-16 20:50:49\",\"id\":3}',NULL,'2026-03-16 20:50:49','2026-03-16 20:50:49');
 
 /*Table structure for table `brands` */
 
 DROP TABLE IF EXISTS `brands`;
 
 CREATE TABLE `brands` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -87,10 +124,10 @@ insert  into `brands`(`id`,`name`,`is_active`,`created_at`,`updated_at`,`created
 DROP TABLE IF EXISTS `bundle_items`;
 
 CREATE TABLE `bundle_items` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `bundle_id` bigint(20) unsigned DEFAULT NULL,
-  `product_id` bigint(20) unsigned DEFAULT NULL,
-  `qty` int(11) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `bundle_id` bigint unsigned DEFAULT NULL,
+  `product_id` bigint unsigned DEFAULT NULL,
+  `qty` int DEFAULT NULL,
   `price` decimal(10,2) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -99,38 +136,51 @@ CREATE TABLE `bundle_items` (
   KEY `bundle_items_product_id_foreign` (`product_id`),
   CONSTRAINT `bundle_items_bundle_id_foreign` FOREIGN KEY (`bundle_id`) REFERENCES `bundles` (`id`),
   CONSTRAINT `bundle_items_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `bundle_items` */
+
+insert  into `bundle_items`(`id`,`bundle_id`,`product_id`,`qty`,`price`,`created_at`,`updated_at`) values 
+(1,1,1,1,1400000.00,'2026-03-16 20:49:55','2026-03-16 20:49:55'),
+(2,1,2,1,900000.00,'2026-03-16 20:49:55','2026-03-16 20:49:55'),
+(3,2,3,1,2000000.00,'2026-03-16 20:50:18','2026-03-16 20:50:18'),
+(4,2,4,1,600000.00,'2026-03-16 20:50:18','2026-03-16 20:50:18'),
+(5,3,1,2,1000000.00,'2026-03-16 20:50:49','2026-03-16 20:50:49'),
+(6,3,2,2,900000.00,'2026-03-16 20:50:49','2026-03-16 20:50:49');
 
 /*Table structure for table `bundles` */
 
 DROP TABLE IF EXISTS `bundles`;
 
 CREATE TABLE `bundles` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `bundle_price` decimal(10,2) DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `bundles` */
+
+insert  into `bundles`(`id`,`name`,`bundle_price`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+(1,'Bundle 1',2300000.00,1,'2026-03-16 20:49:55','2026-03-16 20:49:55',1,1,NULL,NULL),
+(2,'Bundle 2',2600000.00,1,'2026-03-16 20:50:18','2026-03-16 20:50:18',1,1,NULL,NULL),
+(3,'Bundle 3',3800000.00,1,'2026-03-16 20:50:49','2026-03-16 20:50:49',1,1,NULL,NULL);
 
 /*Table structure for table `cache` */
 
 DROP TABLE IF EXISTS `cache`;
 
 CREATE TABLE `cache` (
-  `key` varchar(255) NOT NULL,
-  `value` mediumtext NOT NULL,
-  `expiration` int(11) NOT NULL,
+  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expiration` int NOT NULL,
   PRIMARY KEY (`key`),
   KEY `cache_expiration_index` (`expiration`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -142,9 +192,9 @@ CREATE TABLE `cache` (
 DROP TABLE IF EXISTS `cache_locks`;
 
 CREATE TABLE `cache_locks` (
-  `key` varchar(255) NOT NULL,
-  `owner` varchar(255) NOT NULL,
-  `expiration` int(11) NOT NULL,
+  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `owner` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expiration` int NOT NULL,
   PRIMARY KEY (`key`),
   KEY `cache_locks_expiration_index` (`expiration`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -156,16 +206,16 @@ CREATE TABLE `cache_locks` (
 DROP TABLE IF EXISTS `categories`;
 
 CREATE TABLE `categories` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
-  `slug` varchar(255) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `is_active` tinyint(1) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `categories_slug_unique` (`slug`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -183,17 +233,17 @@ insert  into `categories`(`id`,`name`,`slug`,`is_active`,`created_at`,`updated_a
 DROP TABLE IF EXISTS `couriers`;
 
 CREATE TABLE `couriers` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `shipping_cost` decimal(10,2) DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -210,17 +260,17 @@ insert  into `couriers`(`id`,`name`,`type`,`shipping_cost`,`is_active`,`created_
 DROP TABLE IF EXISTS `customers`;
 
 CREATE TABLE `customers` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `phone` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `address` varchar(255) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -236,13 +286,13 @@ insert  into `customers`(`id`,`name`,`phone`,`email`,`address`,`created_at`,`upd
 DROP TABLE IF EXISTS `failed_jobs`;
 
 CREATE TABLE `failed_jobs` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `uuid` varchar(255) NOT NULL,
-  `connection` text NOT NULL,
-  `queue` text NOT NULL,
-  `payload` longtext NOT NULL,
-  `exception` longtext NOT NULL,
-  `failed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -254,10 +304,10 @@ CREATE TABLE `failed_jobs` (
 DROP TABLE IF EXISTS `inventory_stocks`;
 
 CREATE TABLE `inventory_stocks` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) unsigned DEFAULT NULL,
-  `store_setting_id` bigint(20) unsigned DEFAULT NULL,
-  `quantity` int(11) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `product_id` bigint unsigned DEFAULT NULL,
+  `store_setting_id` bigint unsigned DEFAULT NULL,
+  `quantity` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -265,25 +315,36 @@ CREATE TABLE `inventory_stocks` (
   KEY `inventory_stocks_store_setting_id_foreign` (`store_setting_id`),
   CONSTRAINT `inventory_stocks_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `inventory_stocks_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `inventory_stocks` */
+
+insert  into `inventory_stocks`(`id`,`product_id`,`store_setting_id`,`quantity`,`created_at`,`updated_at`) values 
+(1,1,1,50,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(2,2,1,50,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(3,1,2,25,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(4,2,2,25,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(5,3,3,30,'2026-03-16 19:14:10','2026-03-16 19:14:10'),
+(6,4,3,30,'2026-03-16 19:14:10','2026-03-16 19:14:10'),
+(7,5,1,10,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(8,5,2,5,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(10,5,3,11,'2026-03-16 19:58:47','2026-03-16 19:58:47');
 
 /*Table structure for table `job_batches` */
 
 DROP TABLE IF EXISTS `job_batches`;
 
 CREATE TABLE `job_batches` (
-  `id` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `total_jobs` int(11) NOT NULL,
-  `pending_jobs` int(11) NOT NULL,
-  `failed_jobs` int(11) NOT NULL,
-  `failed_job_ids` longtext NOT NULL,
-  `options` mediumtext DEFAULT NULL,
-  `cancelled_at` int(11) DEFAULT NULL,
-  `created_at` int(11) NOT NULL,
-  `finished_at` int(11) DEFAULT NULL,
+  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `total_jobs` int NOT NULL,
+  `pending_jobs` int NOT NULL,
+  `failed_jobs` int NOT NULL,
+  `failed_job_ids` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `options` mediumtext COLLATE utf8mb4_unicode_ci,
+  `cancelled_at` int DEFAULT NULL,
+  `created_at` int NOT NULL,
+  `finished_at` int DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -294,13 +355,13 @@ CREATE TABLE `job_batches` (
 DROP TABLE IF EXISTS `jobs`;
 
 CREATE TABLE `jobs` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `queue` varchar(255) NOT NULL,
-  `payload` longtext NOT NULL,
-  `attempts` tinyint(3) unsigned NOT NULL,
-  `reserved_at` int(10) unsigned DEFAULT NULL,
-  `available_at` int(10) unsigned NOT NULL,
-  `created_at` int(10) unsigned NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `queue` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attempts` tinyint unsigned NOT NULL,
+  `reserved_at` int unsigned DEFAULT NULL,
+  `available_at` int unsigned NOT NULL,
+  `created_at` int unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `jobs_queue_index` (`queue`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -312,28 +373,32 @@ CREATE TABLE `jobs` (
 DROP TABLE IF EXISTS `media`;
 
 CREATE TABLE `media` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `model_type` varchar(255) NOT NULL,
-  `model_id` bigint(20) unsigned NOT NULL,
-  `uuid` char(36) DEFAULT NULL,
-  `collection_name` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `file_name` varchar(255) NOT NULL,
-  `mime_type` varchar(255) DEFAULT NULL,
-  `disk` varchar(255) NOT NULL,
-  `conversions_disk` varchar(255) DEFAULT NULL,
-  `size` bigint(20) unsigned NOT NULL,
-  `manipulations` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`manipulations`)),
-  `custom_properties` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`custom_properties`)),
-  `generated_conversions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`generated_conversions`)),
-  `responsive_images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`responsive_images`)),
-  `order_column` int(10) unsigned DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint unsigned NOT NULL,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `collection_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mime_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `disk` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `conversions_disk` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `size` bigint unsigned NOT NULL,
+  `manipulations` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `custom_properties` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `generated_conversions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `responsive_images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `order_column` int unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `media_uuid_unique` (`uuid`),
   KEY `media_model_type_model_id_index` (`model_type`,`model_id`),
-  KEY `media_order_column_index` (`order_column`)
+  KEY `media_order_column_index` (`order_column`),
+  CONSTRAINT `media_chk_1` CHECK (json_valid(`manipulations`)),
+  CONSTRAINT `media_chk_2` CHECK (json_valid(`custom_properties`)),
+  CONSTRAINT `media_chk_3` CHECK (json_valid(`generated_conversions`)),
+  CONSTRAINT `media_chk_4` CHECK (json_valid(`responsive_images`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `media` */
@@ -343,9 +408,9 @@ CREATE TABLE `media` (
 DROP TABLE IF EXISTS `migrations`;
 
 CREATE TABLE `migrations` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `migration` varchar(255) NOT NULL,
-  `batch` int(11) NOT NULL,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -393,9 +458,9 @@ insert  into `migrations`(`id`,`migration`,`batch`) values
 DROP TABLE IF EXISTS `model_has_permissions`;
 
 CREATE TABLE `model_has_permissions` (
-  `permission_id` bigint(20) unsigned NOT NULL,
-  `model_type` varchar(255) NOT NULL,
-  `model_id` bigint(20) unsigned NOT NULL,
+  `permission_id` bigint unsigned NOT NULL,
+  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint unsigned NOT NULL,
   PRIMARY KEY (`permission_id`,`model_id`,`model_type`),
   KEY `model_has_permissions_model_id_model_type_index` (`model_id`,`model_type`),
   CONSTRAINT `model_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE
@@ -408,9 +473,9 @@ CREATE TABLE `model_has_permissions` (
 DROP TABLE IF EXISTS `model_has_roles`;
 
 CREATE TABLE `model_has_roles` (
-  `role_id` bigint(20) unsigned NOT NULL,
-  `model_type` varchar(255) NOT NULL,
-  `model_id` bigint(20) unsigned NOT NULL,
+  `role_id` bigint unsigned NOT NULL,
+  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint unsigned NOT NULL,
   PRIMARY KEY (`role_id`,`model_id`,`model_type`),
   KEY `model_has_roles_model_id_model_type_index` (`model_id`,`model_type`),
   CONSTRAINT `model_has_roles_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
@@ -429,8 +494,8 @@ insert  into `model_has_roles`(`role_id`,`model_type`,`model_id`) values
 DROP TABLE IF EXISTS `password_reset_tokens`;
 
 CREATE TABLE `password_reset_tokens` (
-  `email` varchar(255) NOT NULL,
-  `token` varchar(255) NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -442,9 +507,9 @@ CREATE TABLE `password_reset_tokens` (
 DROP TABLE IF EXISTS `permissions`;
 
 CREATE TABLE `permissions` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `guard_name` varchar(255) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -617,14 +682,14 @@ insert  into `permissions`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) v
 DROP TABLE IF EXISTS `product_images`;
 
 CREATE TABLE `product_images` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) unsigned NOT NULL,
-  `image_product` text DEFAULT NULL,
-  `is_primary` tinyint(1) NOT NULL DEFAULT 0,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `product_id` bigint unsigned NOT NULL,
+  `image_product` text COLLATE utf8mb4_unicode_ci,
+  `is_primary` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `product_images_product_id_foreign` (`product_id`),
   CONSTRAINT `product_images_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `product_images` */
 
@@ -632,31 +697,33 @@ insert  into `product_images`(`id`,`product_id`,`image_product`,`is_primary`) va
 (2,1,NULL,0),
 (4,2,NULL,0),
 (6,3,NULL,0),
-(8,4,NULL,0);
+(8,4,NULL,0),
+(10,5,'images-product/01KKVC1BKH23ECDHH9CH2KVZF3.jpg',0),
+(11,5,'images-product/01KKVC1BKM98BK1JB408MHZ7JQ.jpg',1);
 
 /*Table structure for table `products` */
 
 DROP TABLE IF EXISTS `products`;
 
 CREATE TABLE `products` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `store_setting_id` bigint(20) unsigned DEFAULT NULL,
-  `brand_id` bigint(20) unsigned DEFAULT NULL,
-  `category_id` bigint(20) unsigned DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `store_setting_id` bigint unsigned DEFAULT NULL,
+  `brand_id` bigint unsigned DEFAULT NULL,
+  `category_id` bigint unsigned DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `selling_price` decimal(10,2) DEFAULT NULL,
-  `sku` varchar(255) DEFAULT NULL,
-  `size` varchar(255) DEFAULT NULL,
+  `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `size` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `weight` decimal(10,2) DEFAULT NULL,
-  `color` varchar(255) DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `color` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `products_brand_id_foreign` (`brand_id`),
   KEY `products_category_id_foreign` (`category_id`),
@@ -664,24 +731,25 @@ CREATE TABLE `products` (
   CONSTRAINT `products_brand_id_foreign` FOREIGN KEY (`brand_id`) REFERENCES `brands` (`id`),
   CONSTRAINT `products_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
   CONSTRAINT `products_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `products` */
 
 insert  into `products`(`id`,`store_setting_id`,`brand_id`,`category_id`,`name`,`type`,`selling_price`,`sku`,`size`,`weight`,`color`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
-(1,NULL,3,2,'Kasur 1','headboard',1500000.00,'SK-09','single',12.00,'Red',1,'2026-03-16 13:53:54','2026-03-16 13:53:54',1,1,NULL,NULL),
-(2,NULL,1,3,'Kasur 2','headboard',950000.00,'KIK-019','custom',10.00,'Blue',1,'2026-03-16 13:57:47','2026-03-16 13:57:47',1,1,NULL,NULL),
-(3,NULL,2,2,'Kasur 3','bundle',2100000.00,'OPO-01','queen',15.00,'Green',1,'2026-03-16 13:58:19','2026-03-16 13:58:19',1,1,NULL,NULL),
-(4,NULL,4,4,'Kasur 4','springbed',800000.00,'LOP-133','single',7.20,'Orange',1,'2026-03-16 13:59:53','2026-03-16 13:59:53',1,1,NULL,NULL);
+(1,1,3,2,'Kasur 1','headboard',1500000.00,'SK-09','single',12.00,'Red',1,'2026-03-16 13:53:54','2026-03-16 19:08:49',1,1,NULL,NULL),
+(2,1,1,3,'Kasur 2','headboard',950000.00,'KIK-019','custom',10.00,'Blue',1,'2026-03-16 13:57:47','2026-03-16 19:08:49',1,1,NULL,NULL),
+(3,3,2,2,'Kasur 3','bundle',2100000.00,'OPO-01','queen',15.00,'Green',1,'2026-03-16 13:58:19','2026-03-16 19:14:10',1,1,NULL,NULL),
+(4,3,4,4,'Kasur 4','springbed',800000.00,'LOP-133','single',7.20,'Orange',1,'2026-03-16 13:59:53','2026-03-16 19:14:10',1,1,NULL,NULL),
+(5,1,3,2,'Tes Product 1','springbed',111.00,'OASI-111','single',111.00,'Red',1,'2026-03-16 19:54:14','2026-03-16 19:54:14',1,1,NULL,NULL);
 
 /*Table structure for table `promo_products` */
 
 DROP TABLE IF EXISTS `promo_products`;
 
 CREATE TABLE `promo_products` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `promo_id` bigint(20) unsigned DEFAULT NULL,
-  `product_id` bigint(20) unsigned DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `promo_id` bigint unsigned DEFAULT NULL,
+  `product_id` bigint unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -689,18 +757,22 @@ CREATE TABLE `promo_products` (
   KEY `promo_products_product_id_foreign` (`product_id`),
   CONSTRAINT `promo_products_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `promo_products_promo_id_foreign` FOREIGN KEY (`promo_id`) REFERENCES `promos` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `promo_products` */
+
+insert  into `promo_products`(`id`,`promo_id`,`product_id`,`created_at`,`updated_at`) values 
+(1,1,1,NULL,NULL),
+(2,2,1,NULL,NULL);
 
 /*Table structure for table `promo_usages` */
 
 DROP TABLE IF EXISTS `promo_usages`;
 
 CREATE TABLE `promo_usages` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `promo_id` bigint(20) unsigned DEFAULT NULL,
-  `transaction_id` bigint(20) unsigned DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `promo_id` bigint unsigned DEFAULT NULL,
+  `transaction_id` bigint unsigned DEFAULT NULL,
   `discount_amount` decimal(10,2) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -718,38 +790,43 @@ CREATE TABLE `promo_usages` (
 DROP TABLE IF EXISTS `promos`;
 
 CREATE TABLE `promos` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `discount_type` varchar(255) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `discount_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `discount_value` decimal(10,2) DEFAULT NULL,
   `min_purchase` decimal(10,2) DEFAULT NULL,
-  `usage_limit` int(11) DEFAULT NULL,
-  `usage_count` int(11) NOT NULL DEFAULT 0,
+  `usage_limit` int DEFAULT NULL,
+  `usage_count` int NOT NULL DEFAULT '0',
   `start_date` datetime DEFAULT NULL,
   `end_date` datetime DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `promos` */
+
+insert  into `promos`(`id`,`name`,`type`,`discount_type`,`discount_value`,`min_purchase`,`usage_limit`,`usage_count`,`start_date`,`end_date`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+(1,'Promo Kasur 1 nominal','flash_sale','nominal',500000.00,100000.00,10,0,'2026-03-09 00:00:00','2026-03-30 00:00:00',1,'2026-03-16 20:47:31','2026-03-16 20:47:31',1,1,NULL,NULL),
+(2,'Promo Kasur 1 percentage','flash_sale','percentage',50.00,100000.00,10,0,'2026-03-09 00:00:00','2026-03-30 00:00:00',1,'2026-03-16 20:48:05','2026-03-16 20:48:05',1,1,NULL,NULL),
+(3,'Promo 1','free_shipping','nominal',120000.00,100000.00,10,0,'2026-03-09 00:00:00','2026-03-30 00:00:00',1,'2026-03-16 20:49:23','2026-03-16 20:49:23',1,1,NULL,NULL);
 
 /*Table structure for table `purchase_order_items` */
 
 DROP TABLE IF EXISTS `purchase_order_items`;
 
 CREATE TABLE `purchase_order_items` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `purchase_order_id` bigint(20) unsigned DEFAULT NULL,
-  `product_id` bigint(20) unsigned DEFAULT NULL,
-  `qty_purchased` int(11) NOT NULL,
-  `qty_remaining` int(11) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `purchase_order_id` bigint unsigned DEFAULT NULL,
+  `product_id` bigint unsigned DEFAULT NULL,
+  `qty_purchased` int NOT NULL,
+  `qty_remaining` int NOT NULL,
   `cost_price` decimal(10,2) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -758,41 +835,54 @@ CREATE TABLE `purchase_order_items` (
   KEY `purchase_order_items_product_id_foreign` (`product_id`),
   CONSTRAINT `purchase_order_items_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `purchase_order_items_purchase_order_id_foreign` FOREIGN KEY (`purchase_order_id`) REFERENCES `purchase_orders` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `purchase_order_items` */
+
+insert  into `purchase_order_items`(`id`,`purchase_order_id`,`product_id`,`qty_purchased`,`qty_remaining`,`cost_price`,`created_at`,`updated_at`) values 
+(1,1,1,50,50,1000000.00,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(2,1,2,50,50,900000.00,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(3,2,1,25,25,1100000.00,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(4,2,2,25,25,920000.00,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(5,3,3,30,30,2000000.00,'2026-03-16 19:14:10','2026-03-16 19:14:10'),
+(6,3,4,30,30,700000.00,'2026-03-16 19:14:10','2026-03-16 19:14:10');
 
 /*Table structure for table `purchase_orders` */
 
 DROP TABLE IF EXISTS `purchase_orders`;
 
 CREATE TABLE `purchase_orders` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `store_setting_id` bigint(20) unsigned DEFAULT NULL,
-  `supplier_name` varchar(255) DEFAULT NULL,
-  `invoice_number` varchar(255) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `store_setting_id` bigint unsigned DEFAULT NULL,
+  `supplier_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `invoice_number` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `purchase_date` datetime DEFAULT NULL,
-  `total_amount` int(11) DEFAULT NULL,
+  `total_amount` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `purchase_orders_store_setting_id_foreign` (`store_setting_id`),
   CONSTRAINT `purchase_orders_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `purchase_orders` */
+
+insert  into `purchase_orders`(`id`,`store_setting_id`,`supplier_name`,`invoice_number`,`purchase_date`,`total_amount`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+(1,1,'Supplier 1','INVNEICFGXZ1773662857','2026-03-16 00:00:00',95000000,'2026-03-16 19:08:49','2026-03-16 19:08:49',1,1,NULL,NULL),
+(2,2,'Supplier 2','INV8S62HJHD1773663059','2026-03-16 00:00:00',50500000,'2026-03-16 19:13:39','2026-03-16 19:13:39',1,1,NULL,NULL),
+(3,3,'Supplier 2','INVBYU4OLPY1773663219','2026-03-16 00:00:00',81000000,'2026-03-16 19:14:10','2026-03-16 19:14:10',1,1,NULL,NULL);
 
 /*Table structure for table `role_has_permissions` */
 
 DROP TABLE IF EXISTS `role_has_permissions`;
 
 CREATE TABLE `role_has_permissions` (
-  `permission_id` bigint(20) unsigned NOT NULL,
-  `role_id` bigint(20) unsigned NOT NULL,
+  `permission_id` bigint unsigned NOT NULL,
+  `role_id` bigint unsigned NOT NULL,
   PRIMARY KEY (`permission_id`,`role_id`),
   KEY `role_has_permissions_role_id_foreign` (`role_id`),
   CONSTRAINT `role_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
@@ -958,16 +1048,330 @@ insert  into `role_has_permissions`(`permission_id`,`role_id`) values
 (154,1),
 (155,1),
 (156,1),
-(157,1);
+(157,1),
+(1,2),
+(2,2),
+(3,2),
+(4,2),
+(5,2),
+(6,2),
+(7,2),
+(8,2),
+(9,2),
+(10,2),
+(11,2),
+(12,2),
+(13,2),
+(14,2),
+(15,2),
+(16,2),
+(17,2),
+(18,2),
+(19,2),
+(20,2),
+(21,2),
+(22,2),
+(23,2),
+(24,2),
+(25,2),
+(26,2),
+(27,2),
+(28,2),
+(29,2),
+(30,2),
+(31,2),
+(32,2),
+(33,2),
+(34,2),
+(35,2),
+(36,2),
+(37,2),
+(38,2),
+(39,2),
+(40,2),
+(41,2),
+(42,2),
+(43,2),
+(44,2),
+(45,2),
+(46,2),
+(47,2),
+(48,2),
+(49,2),
+(50,2),
+(51,2),
+(52,2),
+(53,2),
+(54,2),
+(55,2),
+(56,2),
+(57,2),
+(58,2),
+(59,2),
+(60,2),
+(61,2),
+(62,2),
+(63,2),
+(64,2),
+(65,2),
+(66,2),
+(67,2),
+(68,2),
+(69,2),
+(70,2),
+(71,2),
+(72,2),
+(73,2),
+(74,2),
+(75,2),
+(76,2),
+(77,2),
+(78,2),
+(79,2),
+(80,2),
+(81,2),
+(82,2),
+(83,2),
+(84,2),
+(85,2),
+(86,2),
+(87,2),
+(88,2),
+(89,2),
+(90,2),
+(91,2),
+(92,2),
+(93,2),
+(94,2),
+(95,2),
+(96,2),
+(97,2),
+(98,2),
+(99,2),
+(100,2),
+(101,2),
+(102,2),
+(103,2),
+(104,2),
+(105,2),
+(106,2),
+(107,2),
+(108,2),
+(109,2),
+(110,2),
+(111,2),
+(112,2),
+(113,2),
+(114,2),
+(115,2),
+(116,2),
+(117,2),
+(118,2),
+(119,2),
+(120,2),
+(121,2),
+(122,2),
+(123,2),
+(124,2),
+(125,2),
+(126,2),
+(127,2),
+(128,2),
+(129,2),
+(130,2),
+(131,2),
+(132,2),
+(133,2),
+(134,2),
+(135,2),
+(136,2),
+(137,2),
+(138,2),
+(139,2),
+(140,2),
+(141,2),
+(142,2),
+(143,2),
+(144,2),
+(145,2),
+(146,2),
+(147,2),
+(148,2),
+(149,2),
+(150,2),
+(151,2),
+(152,2),
+(153,2),
+(154,2),
+(155,2),
+(156,2),
+(157,2),
+(1,4),
+(2,4),
+(3,4),
+(4,4),
+(5,4),
+(6,4),
+(7,4),
+(8,4),
+(9,4),
+(10,4),
+(11,4),
+(12,4),
+(13,4),
+(14,4),
+(15,4),
+(16,4),
+(17,4),
+(18,4),
+(19,4),
+(20,4),
+(21,4),
+(22,4),
+(23,4),
+(24,4),
+(25,4),
+(26,4),
+(27,4),
+(28,4),
+(29,4),
+(30,4),
+(31,4),
+(32,4),
+(33,4),
+(34,4),
+(35,4),
+(36,4),
+(37,4),
+(38,4),
+(39,4),
+(40,4),
+(41,4),
+(42,4),
+(43,4),
+(44,4),
+(45,4),
+(46,4),
+(47,4),
+(48,4),
+(49,4),
+(50,4),
+(51,4),
+(52,4),
+(53,4),
+(54,4),
+(55,4),
+(56,4),
+(57,4),
+(58,4),
+(59,4),
+(60,4),
+(61,4),
+(62,4),
+(63,4),
+(64,4),
+(65,4),
+(66,4),
+(67,4),
+(68,4),
+(69,4),
+(70,4),
+(71,4),
+(72,4),
+(73,4),
+(74,4),
+(75,4),
+(76,4),
+(77,4),
+(78,4),
+(79,4),
+(80,4),
+(81,4),
+(82,4),
+(83,4),
+(84,4),
+(85,4),
+(86,4),
+(87,4),
+(88,4),
+(89,4),
+(90,4),
+(91,4),
+(92,4),
+(93,4),
+(94,4),
+(95,4),
+(96,4),
+(97,4),
+(98,4),
+(99,4),
+(100,4),
+(101,4),
+(102,4),
+(103,4),
+(104,4),
+(105,4),
+(106,4),
+(107,4),
+(108,4),
+(109,4),
+(110,4),
+(111,4),
+(112,4),
+(113,4),
+(114,4),
+(115,4),
+(116,4),
+(117,4),
+(118,4),
+(119,4),
+(120,4),
+(121,4),
+(122,4),
+(123,4),
+(124,4),
+(125,4),
+(126,4),
+(127,4),
+(128,4),
+(129,4),
+(130,4),
+(131,4),
+(132,4),
+(133,4),
+(134,4),
+(135,4),
+(136,4),
+(137,4),
+(138,4),
+(139,4),
+(140,4),
+(141,4),
+(142,4),
+(143,4),
+(144,4),
+(145,4),
+(146,4),
+(147,4),
+(148,4),
+(149,4),
+(150,4),
+(151,4),
+(152,4),
+(153,4),
+(154,4),
+(155,4),
+(156,4),
+(157,4);
 
 /*Table structure for table `roles` */
 
 DROP TABLE IF EXISTS `roles`;
 
 CREATE TABLE `roles` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `guard_name` varchar(255) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -987,12 +1391,12 @@ insert  into `roles`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) values
 DROP TABLE IF EXISTS `sessions`;
 
 CREATE TABLE `sessions` (
-  `id` varchar(255) NOT NULL,
-  `user_id` bigint(20) unsigned DEFAULT NULL,
-  `ip_address` varchar(45) DEFAULT NULL,
-  `user_agent` text DEFAULT NULL,
-  `payload` longtext NOT NULL,
-  `last_activity` int(11) NOT NULL,
+  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_activity` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `sessions_user_id_index` (`user_id`),
   KEY `sessions_last_activity_index` (`last_activity`)
@@ -1008,13 +1412,13 @@ insert  into `sessions`(`id`,`user_id`,`ip_address`,`user_agent`,`payload`,`last
 DROP TABLE IF EXISTS `stock_adjustments`;
 
 CREATE TABLE `stock_adjustments` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `store_setting_id` bigint(20) unsigned DEFAULT NULL,
-  `product_id` bigint(20) unsigned DEFAULT NULL,
-  `qty_before` int(11) DEFAULT NULL,
-  `qty_after` int(11) DEFAULT NULL,
-  `qty_difference` int(11) DEFAULT NULL,
-  `reason` text DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `store_setting_id` bigint unsigned DEFAULT NULL,
+  `product_id` bigint unsigned DEFAULT NULL,
+  `qty_before` int DEFAULT NULL,
+  `qty_after` int DEFAULT NULL,
+  `qty_difference` int DEFAULT NULL,
+  `reason` text COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1022,22 +1426,28 @@ CREATE TABLE `stock_adjustments` (
   KEY `stock_adjustments_store_setting_id_foreign` (`store_setting_id`),
   CONSTRAINT `stock_adjustments_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `stock_adjustments_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `stock_adjustments` */
+
+insert  into `stock_adjustments`(`id`,`store_setting_id`,`product_id`,`qty_before`,`qty_after`,`qty_difference`,`reason`,`created_at`,`updated_at`) values 
+(1,1,5,0,10,10,'Super admin add Adjustment 10','2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(2,2,5,0,5,5,'Super admin add Adjustment 5','2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(3,3,5,0,2,2,'Super admin add Adjustment 2','2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(4,3,5,2,11,9,'adjustment to 11 toko 3 ','2026-03-16 19:58:47','2026-03-16 19:58:47');
 
 /*Table structure for table `stock_movements` */
 
 DROP TABLE IF EXISTS `stock_movements`;
 
 CREATE TABLE `stock_movements` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) unsigned DEFAULT NULL,
-  `store_setting_id` bigint(20) unsigned DEFAULT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `reference_type` varchar(255) NOT NULL,
-  `reference_id` bigint(20) unsigned NOT NULL,
-  `qty` int(11) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `product_id` bigint unsigned DEFAULT NULL,
+  `store_setting_id` bigint unsigned DEFAULT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reference_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reference_id` bigint unsigned NOT NULL,
+  `qty` int DEFAULT NULL,
   `cost_price_snapshot` decimal(10,2) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1047,26 +1457,38 @@ CREATE TABLE `stock_movements` (
   KEY `stock_movements_reference_type_reference_id_index` (`reference_type`,`reference_id`),
   CONSTRAINT `stock_movements_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `stock_movements_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `stock_movements` */
+
+insert  into `stock_movements`(`id`,`product_id`,`store_setting_id`,`type`,`reference_type`,`reference_id`,`qty`,`cost_price_snapshot`,`created_at`,`updated_at`) values 
+(1,1,1,'in','App\\Models\\PurchaseOrder',1,50,1000000.00,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(2,2,1,'in','App\\Models\\PurchaseOrder',1,50,900000.00,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
+(3,1,2,'in','App\\Models\\PurchaseOrder',2,25,1100000.00,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(4,2,2,'in','App\\Models\\PurchaseOrder',2,25,920000.00,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
+(5,3,3,'in','App\\Models\\PurchaseOrder',3,30,2000000.00,'2026-03-16 19:14:10','2026-03-16 19:14:10'),
+(6,4,3,'in','App\\Models\\PurchaseOrder',3,30,700000.00,'2026-03-16 19:14:10','2026-03-16 19:14:10'),
+(7,5,1,'adjustment','App\\Models\\StockAdjustment',1,10,NULL,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(8,5,2,'adjustment','App\\Models\\StockAdjustment',2,5,NULL,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(9,5,3,'adjustment','App\\Models\\StockAdjustment',3,2,NULL,'2026-03-16 19:54:14','2026-03-16 19:54:14'),
+(10,5,3,'adjustment','App\\Models\\StockAdjustment',4,9,NULL,'2026-03-16 19:58:47','2026-03-16 19:58:47');
 
 /*Table structure for table `store_settings` */
 
 DROP TABLE IF EXISTS `store_settings`;
 
 CREATE TABLE `store_settings` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `store_name` varchar(255) DEFAULT NULL,
-  `phone` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `address` longtext DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `store_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address` longtext COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1082,10 +1504,10 @@ insert  into `store_settings`(`id`,`store_name`,`phone`,`email`,`address`,`creat
 DROP TABLE IF EXISTS `transaction_item_costs`;
 
 CREATE TABLE `transaction_item_costs` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `transaction_item_id` bigint(20) unsigned DEFAULT NULL,
-  `purchase_order_item_id` bigint(20) unsigned DEFAULT NULL,
-  `qty_taken` int(11) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `transaction_item_id` bigint unsigned DEFAULT NULL,
+  `purchase_order_item_id` bigint unsigned DEFAULT NULL,
+  `qty_taken` int DEFAULT NULL,
   `cost_price` decimal(10,2) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1103,11 +1525,11 @@ CREATE TABLE `transaction_item_costs` (
 DROP TABLE IF EXISTS `transaction_items`;
 
 CREATE TABLE `transaction_items` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `transaction_id` bigint(20) unsigned DEFAULT NULL,
-  `product_id` bigint(20) unsigned DEFAULT NULL,
-  `bundle_id` bigint(20) unsigned DEFAULT NULL,
-  `qty` int(11) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `transaction_id` bigint unsigned DEFAULT NULL,
+  `product_id` bigint unsigned DEFAULT NULL,
+  `bundle_id` bigint unsigned DEFAULT NULL,
+  `qty` int NOT NULL,
   `selling_price` decimal(10,2) DEFAULT NULL,
   `discount` decimal(10,2) DEFAULT NULL,
   `subtotal` decimal(10,2) DEFAULT NULL,
@@ -1129,11 +1551,11 @@ CREATE TABLE `transaction_items` (
 DROP TABLE IF EXISTS `transaction_payments`;
 
 CREATE TABLE `transaction_payments` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `transaction_id` bigint(20) unsigned DEFAULT NULL,
-  `method` varchar(255) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `transaction_id` bigint unsigned DEFAULT NULL,
+  `method` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `amount` decimal(10,2) DEFAULT NULL,
-  `status` varchar(255) DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `paid_at` datetime DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -1149,11 +1571,11 @@ CREATE TABLE `transaction_payments` (
 DROP TABLE IF EXISTS `transaction_shipments`;
 
 CREATE TABLE `transaction_shipments` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `transaction_id` bigint(20) unsigned NOT NULL,
-  `courier_id` bigint(20) unsigned NOT NULL,
-  `tracking_number` varchar(255) DEFAULT NULL,
-  `status` varchar(255) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `transaction_id` bigint unsigned NOT NULL,
+  `courier_id` bigint unsigned NOT NULL,
+  `tracking_number` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1170,23 +1592,23 @@ CREATE TABLE `transaction_shipments` (
 DROP TABLE IF EXISTS `transactions`;
 
 CREATE TABLE `transactions` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `store_setting_id` bigint(20) unsigned DEFAULT NULL,
-  `customer_id` bigint(20) unsigned DEFAULT NULL,
-  `transaction_code` varchar(255) DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `store_setting_id` bigint unsigned DEFAULT NULL,
+  `customer_id` bigint unsigned DEFAULT NULL,
+  `transaction_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `subtotal` decimal(10,2) DEFAULT NULL,
   `discount_total` decimal(10,2) DEFAULT NULL,
   `shiping_cost` decimal(10,2) DEFAULT NULL,
   `grand_total` decimal(10,2) DEFAULT NULL,
-  `status` varchar(255) DEFAULT NULL,
-  `promo_id` bigint(20) unsigned DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `promo_id` bigint unsigned DEFAULT NULL,
   `transaction_date` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
+  `deleted_by` bigint unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `transactions_customer_id_foreign` (`customer_id`),
   KEY `transactions_promo_id_foreign` (`promo_id`),
@@ -1203,34 +1625,35 @@ CREATE TABLE `transactions` (
 DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email_verified_at` timestamp NULL DEFAULT NULL,
-  `password` varchar(255) NOT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 0,
-  `store_setting_id` bigint(20) unsigned DEFAULT NULL,
-  `remember_token` varchar(100) DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0',
+  `store_setting_id` bigint unsigned DEFAULT NULL,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `updated_by` bigint(20) unsigned DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `updated_by` bigint unsigned DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `deleted_by` bigint(20) unsigned DEFAULT NULL,
-  `ui_preferences` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`ui_preferences`)),
+  `deleted_by` bigint unsigned DEFAULT NULL,
+  `ui_preferences` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_email_unique` (`email`),
   KEY `users_store_setting_id_foreign` (`store_setting_id`),
-  CONSTRAINT `users_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`)
+  CONSTRAINT `users_store_setting_id_foreign` FOREIGN KEY (`store_setting_id`) REFERENCES `store_settings` (`id`),
+  CONSTRAINT `users_chk_1` CHECK (json_valid(`ui_preferences`))
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Data for the table `users` */
 
 insert  into `users`(`id`,`name`,`email`,`email_verified_at`,`password`,`is_active`,`store_setting_id`,`remember_token`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`,`ui_preferences`) values 
 (1,'Super Admin','superadmin@springbed.id',NULL,'$2y$12$Z76zA490/7lL3SdvtcEsIO4k5IFQn.e4L6JXPRICnxfBEOxVdOTGC',1,NULL,NULL,'2026-03-16 09:02:05','2026-03-16 09:02:05',NULL,NULL,NULL,NULL,NULL),
-(2,'Admin','admin@springbed.id',NULL,'$2y$12$XQ8RrYRpi1NODZ.mrKNHHeQy4OmrzvrcZX8J9D0NgFJpz8mdtUYLi',1,NULL,NULL,'2026-03-16 09:02:05','2026-03-16 09:02:05',NULL,NULL,NULL,NULL,NULL),
+(2,'Admin','admin@springbed.id',NULL,'$2y$12$XQ8RrYRpi1NODZ.mrKNHHeQy4OmrzvrcZX8J9D0NgFJpz8mdtUYLi',1,1,NULL,'2026-03-16 09:02:05','2026-03-16 19:26:32',NULL,1,NULL,NULL,NULL),
 (3,'Owner','owner@springbed.id',NULL,'$2y$12$tx7nLgi7Oy6gBYeLOckpbu4rSm9.lJxoonMdoDmODDuIAUuOJT7rO',1,NULL,NULL,'2026-03-16 09:02:05','2026-03-16 09:02:05',NULL,NULL,NULL,NULL,NULL),
-(4,'Staff','staff@springbed.id',NULL,'$2y$12$CbaPoHpdkyXUDY2ebMlNKO4YV6Oes.3rWobmJGYTByhGfOmXoMiNu',1,NULL,NULL,'2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL,NULL);
+(4,'Staff','staff@springbed.id',NULL,'$2y$12$CbaPoHpdkyXUDY2ebMlNKO4YV6Oes.3rWobmJGYTByhGfOmXoMiNu',1,2,NULL,'2026-03-16 09:02:06','2026-03-16 19:26:42',NULL,1,NULL,NULL,NULL);
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

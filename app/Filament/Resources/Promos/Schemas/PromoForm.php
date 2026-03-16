@@ -52,7 +52,7 @@ class PromoForm
                             )
                             ->preload()
                             ->searchable()
-                            ->required()
+                            ->nullable()
                             ->label('Products Included')
                             ->helperText('Leave empty if promo applies to all products')
                             ->columnSpanFull(),
