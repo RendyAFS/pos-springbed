@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\TypeCourierEnum;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Courier;
 use App\Models\Customer;
 use App\Models\StoreSetting;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -65,6 +67,37 @@ class MasterDataSeeder extends Seeder
 
         foreach ($brands as $brand) {
             Brand::create($brand);
+        }
+
+        $couriers = [
+            [
+                'name' => 'JNE',
+                'type' => TypeCourierEnum::EXTERNAL,
+                'shipping_cost' => 100000,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'SiCepat',
+                'type' => TypeCourierEnum::EXTERNAL,
+                'shipping_cost' => 120000,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'J&T',
+                'type' => TypeCourierEnum::INTERNAL,
+                'shipping_cost' => 130000,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Kurir Toko',
+                'type' => TypeCourierEnum::INTERNAL,
+                'shipping_cost' => 140000,
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($couriers as $courier) {
+            Courier::create($courier);
         }
 
         $customers = [
