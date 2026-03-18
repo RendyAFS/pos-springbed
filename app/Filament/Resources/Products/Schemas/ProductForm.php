@@ -108,7 +108,7 @@ class ProductForm
                     ->description('Manage stock per store location')
                     ->schema([
                         ViewField::make('stock_summary')
-                            ->view('filament.components.stock-summary')
+                            ->view('filament.components.products.stock-summary')
                             ->viewData(function ($record, $get) {
                                 $temp        = $get('stock_adjustment_temp') ?? [];
                                 $userStoreId = Auth::user()?->store_setting_id;
