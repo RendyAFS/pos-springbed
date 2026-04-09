@@ -200,6 +200,12 @@ class TransactionsTable
                                 ->send();
                         })
                         ->modalSubmitActionLabel('Simpan'),
+                    Action::make('print')
+                        ->label('Cetak Struk')
+                        ->icon(Heroicon::Printer)
+                        ->color('success')
+                        ->url(fn($record) => route('transactions.print', $record))
+                        ->openUrlInNewTab(),
                     EditAction::make(),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),
