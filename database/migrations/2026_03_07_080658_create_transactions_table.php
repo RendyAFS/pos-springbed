@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('shiping_cost', 10, 2)->nullable();
             $table->decimal('grand_total', 10, 2)->nullable();
             $table->string('status')->nullable();
-            $table->foreignId('promo_id')->nullable()->constrained('customers');
+            $table->foreignId('promo_id')->nullable()->constrained('promos');
             $table->date('transaction_date')->nullable();
             $table->timestamps();
             $table->userstamps();
