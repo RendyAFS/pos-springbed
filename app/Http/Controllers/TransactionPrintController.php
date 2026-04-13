@@ -10,7 +10,7 @@ class TransactionPrintController extends Controller
     {
         $transaction->load([
             'transactionItems.product',
-            'transactionItems.bundle',
+            'transactionItems.bundle.bundleItems.product',
             'transactionPayment',
             'transactionShipment.courier',
             'customer',

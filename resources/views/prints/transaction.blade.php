@@ -32,7 +32,7 @@
         pre {
             margin: 0;
             white-space: pre;
-            line-height: 1.2;
+            line-height: 1;
         }
 
         @media print {
@@ -74,8 +74,8 @@
     @endphp
 
     <div class="paper">
-    <pre>
-{{ center(strtoupper($transaction->storeSetting->name ?? 'TOKO')) }}
+        <pre>
+{{ center(strtoupper($transaction->storeSetting->store_name ?? '-')) }}
 {{ center($transaction->storeSetting->address ?? '-') }}
 
 {{ separator() }}
@@ -88,10 +88,23 @@
 
 @foreach ($transaction->transactionItems as $item)
 @php
+    $isBundle = !is_null($item->bundle_id);
     $name = $item->product->name ?? $item->bundle->name;
 @endphp
 {{ substr($name, 0, 32) }}
 {{ line($item->qty . ' x ' . number_format($item->selling_price, 0, ',', '.'), number_format($item->subtotal, 0, ',', '.')) }}
+@if ($isBundle)
+@foreach ($item->bundle->bundleItems as $bundleItem)
+@php
+    $bundleProduct = $bundleItem->product->name ?? '-';
+    $qty = $bundleItem->qty * $item->qty;
+    $price = $bundleItem->price;
+    $subtotal = $price * $qty;
+@endphp
+{{ ' - ' . substr($bundleProduct, 0, 29) }}
+{{ line('   ' . $qty . ' x ' . number_format($price, 0, ',', '.'), number_format($subtotal, 0, ',', '.')) }}
+@endforeach
+@endif
 @endforeach
 
 {{ separator() }}
@@ -114,7 +127,7 @@
 {{ center('Terima kasih 🙏') }}
 {{ center('Selamat datang kembali') }}
 </pre>
-</div>
+    </div>
 
     <script>
         window.onafterprint = function() {
