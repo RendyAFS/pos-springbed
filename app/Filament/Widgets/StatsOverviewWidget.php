@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\TransactionStatusEnum;
+use App\Filament\Widgets\Concerns\HasStoreFilter;
 use App\Helpers\RupiahHelper;
 use App\Models\Transaction;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -11,60 +12,51 @@ use Illuminate\Support\Carbon;
 
 class StatsOverviewWidget extends BaseWidget
 {
+    use HasStoreFilter;
+
     protected static ?int $sort = 1;
+
+    private function transactionQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return $this->applyStoreFilter(
+            Transaction::query()->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
+        );
+    }
 
     protected function getStats(): array
     {
-        $today = Carbon::today();
-        $yesterday = Carbon::yesterday();
-        $thisMonth = Carbon::now()->startOfMonth();
-        $lastMonth = Carbon::now()->subMonth()->startOfMonth();
+        $today        = Carbon::today();
+        $yesterday    = Carbon::yesterday();
+        $thisMonth    = Carbon::now()->startOfMonth();
+        $lastMonth    = Carbon::now()->subMonth()->startOfMonth();
         $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
 
-        // Total Sales Today
-        $salesToday = Transaction::whereDate('transaction_date', $today)
-            ->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
-            ->sum('grand_total');
-
-        $salesYesterday = Transaction::whereDate('transaction_date', $yesterday)
-            ->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
-            ->sum('grand_total');
-
+        // Sales Today
+        $salesToday     = (clone $this->transactionQuery())->whereDate('transaction_date', $today)->sum('grand_total');
+        $salesYesterday = (clone $this->transactionQuery())->whereDate('transaction_date', $yesterday)->sum('grand_total');
         $salesTodayChange = $salesYesterday > 0
             ? (($salesToday - $salesYesterday) / $salesYesterday) * 100
             : 0;
 
-        // Total Sales This Month
-        $salesThisMonth = Transaction::whereBetween('transaction_date', [$thisMonth, Carbon::now()])
-            ->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
-            ->sum('grand_total');
-
-        $salesLastMonth = Transaction::whereBetween('transaction_date', [$lastMonth, $lastMonthEnd])
-            ->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
-            ->sum('grand_total');
-
+        // Sales This Month
+        $salesThisMonth = (clone $this->transactionQuery())->whereBetween('transaction_date', [$thisMonth, Carbon::now()])->sum('grand_total');
+        $salesLastMonth = (clone $this->transactionQuery())->whereBetween('transaction_date', [$lastMonth, $lastMonthEnd])->sum('grand_total');
         $salesMonthChange = $salesLastMonth > 0
             ? (($salesThisMonth - $salesLastMonth) / $salesLastMonth) * 100
             : 0;
 
         // Total Transactions
-        $totalTransactions = Transaction::whereNotIn('status', [TransactionStatusEnum::CANCELLED])
-            ->count();
-
-        $totalTransactionsLastMonth = Transaction::whereBetween('transaction_date', [$lastMonth, $lastMonthEnd])
-            ->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
-            ->count();
-
-        $totalTransactionsThisMonth = Transaction::whereBetween('transaction_date', [$thisMonth, Carbon::now()])
-            ->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
-            ->count();
-
-        $transactionChange = $totalTransactionsLastMonth > 0
-            ? (($totalTransactionsThisMonth - $totalTransactionsLastMonth) / $totalTransactionsLastMonth) * 100
+        $totalTransactions      = (clone $this->transactionQuery())->count();
+        $transactionsThisMonth  = (clone $this->transactionQuery())->whereBetween('transaction_date', [$thisMonth, Carbon::now()])->count();
+        $transactionsLastMonth  = (clone $this->transactionQuery())->whereBetween('transaction_date', [$lastMonth, $lastMonthEnd])->count();
+        $transactionChange = $transactionsLastMonth > 0
+            ? (($transactionsThisMonth - $transactionsLastMonth) / $transactionsLastMonth) * 100
             : 0;
 
         // Pending Orders
-        $pendingOrders = Transaction::where('status', TransactionStatusEnum::PENDING)->count();
+        $pendingOrders = $this->applyStoreFilter(
+            Transaction::query()->where('status', TransactionStatusEnum::PENDING)
+        )->count();
 
         return [
             Stat::make('Total Sales Today', RupiahHelper::format($salesToday))

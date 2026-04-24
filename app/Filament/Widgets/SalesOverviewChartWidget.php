@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\TransactionStatusEnum;
+use App\Filament\Widgets\Concerns\HasStoreFilter;
 use App\Models\Transaction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -16,13 +17,14 @@ use Illuminate\Support\Carbon;
 class SalesOverviewChartWidget extends ChartWidget
 {
     use HasFiltersSchema;
+    use HasStoreFilter;
 
-    protected static ?int $sort = 2;
-    protected ?string $heading = 'Sales Overview';
-    protected ?string $maxHeight = '365px';
-    protected string $color = 'primary';
+    protected static ?int $sort            = 2;
+    protected ?string $heading             = 'Sales Overview';
+    protected ?string $maxHeight           = '365px';
+    protected string $color                = 'primary';
     protected int|string|array $columnSpan = 2;
-    protected ?string $pollingInterval = '30s';
+    protected ?string $pollingInterval     = '30s';
 
     public function filtersSchema(Schema $schema): Schema
     {
@@ -64,6 +66,13 @@ class SalesOverviewChartWidget extends ChartWidget
         ]);
     }
 
+    private function baseQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return $this->applyStoreFilter(
+            Transaction::query()->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
+        );
+    }
+
     protected function getData(): array
     {
         $period = $this->filters['period'] ?? 'daily';
@@ -85,8 +94,8 @@ class SalesOverviewChartWidget extends ChartWidget
             $current = $startDate->copy();
             while ($current->lte($endDate)) {
                 $labels[] = $current->format('d M');
-                $data[]   = (float) Transaction::whereDate('transaction_date', $current)
-                    ->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
+                $data[]   = (float) (clone $this->baseQuery())
+                    ->whereDate('transaction_date', $current)
                     ->sum('grand_total');
                 $current->addDay();
             }
@@ -95,27 +104,25 @@ class SalesOverviewChartWidget extends ChartWidget
             $end     = $endDate->copy()->startOfMonth();
             while ($current->lte($end)) {
                 $labels[] = $current->format('M Y');
-                $data[]   = (float) Transaction::whereYear('transaction_date', $current->year)
+                $data[]   = (float) (clone $this->baseQuery())
+                    ->whereYear('transaction_date', $current->year)
                     ->whereMonth('transaction_date', $current->month)
-                    ->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
                     ->sum('grand_total');
                 $current->addMonth();
             }
         }
 
         return [
-            'datasets' => [
-                [
-                    'label'                     => 'Sales (Rp)',
-                    'data'                      => $data,
-                    'fill'                      => true,
-                    'tension'                   => 0.4,
-                    'pointRadius'               => 5,
-                    'pointHoverRadius'          => 8,
-                    'pointHoverBackgroundColor' => '#ffffff',
-                    'pointHoverBorderWidth'     => 3,
-                ],
-            ],
+            'datasets' => [[
+                'label'                     => 'Sales (Rp)',
+                'data'                      => $data,
+                'fill'                      => true,
+                'tension'                   => 0.4,
+                'pointRadius'               => 5,
+                'pointHoverRadius'          => 8,
+                'pointHoverBackgroundColor' => '#ffffff',
+                'pointHoverBorderWidth'     => 3,
+            ]],
             'labels' => $labels,
         ];
     }
@@ -129,29 +136,13 @@ class SalesOverviewChartWidget extends ChartWidget
     {
         return RawJs::make(<<<JS
             {
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                hover: {
-                    mode: 'index',
-                    intersect: false,
-                },
+                interaction: { mode: 'index', intersect: false },
+                hover: { mode: 'index', intersect: false },
                 scales: {
-                    x: {
-                        grid: {
-                            display: false,
-                        },
-                        ticks: {
-                            font: { size: 12 },
-                            maxRotation: 45,
-                        },
-                    },
+                    x: { grid: { display: false }, ticks: { font: { size: 12 }, maxRotation: 45 } },
                     y: {
                         beginAtZero: true,
-                        grid: {
-                            borderDash: [4, 4],
-                        },
+                        grid: { borderDash: [4, 4] },
                         ticks: {
                             callback: (value) => {
                                 if (value >= 1000000000) return (value / 1000000000) + 'B';
@@ -163,9 +154,7 @@ class SalesOverviewChartWidget extends ChartWidget
                     },
                 },
                 plugins: {
-                    legend: {
-                        display: false,
-                    },
+                    legend: { display: false },
                     tooltip: {
                         backgroundColor: 'rgba(17, 24, 39, 0.9)',
                         titleColor: '#f9fafb',
@@ -176,10 +165,7 @@ class SalesOverviewChartWidget extends ChartWidget
                         displayColors: false,
                         callbacks: {
                             title: (items) => items[0]?.label ?? '',
-                            label: (context) => {
-                                const value = context.parsed.y;
-                                return '  Rp ' + new Intl.NumberFormat('id-ID').format(value);
-                            },
+                            label: (context) => '  Rp ' + new Intl.NumberFormat('id-ID').format(context.parsed.y),
                         },
                     },
                 },

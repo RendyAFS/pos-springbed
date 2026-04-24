@@ -20,8 +20,6 @@ class Dashboard extends BaseDashboard
         return [
             StatsOverviewWidget::class,
             SalesOverviewChartWidget::class,
-            // LowStockAlertWidget::class,
-            // ActivePromotionsWidget::class,
             RightPanelWidget::class,
         ];
     }

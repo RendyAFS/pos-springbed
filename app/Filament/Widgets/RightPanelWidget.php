@@ -2,30 +2,46 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\HasStoreFilter;
+use App\Helpers\RupiahHelper;
 use App\Models\InventoryStock;
 use App\Models\Promo;
-use App\Helpers\RupiahHelper;
 use Filament\Widgets\Widget;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
 class RightPanelWidget extends Widget
 {
+    use HasStoreFilter;
+
     protected static ?int $sort = 3;
-
     protected int|string|array $columnSpan = 1;
-
     protected string $view = 'filament.widgets.right-panel-widget';
 
-    public function getLowStockItems(): \Illuminate\Database\Eloquent\Collection
+    public function getLowStockItems(): Collection
     {
-        return InventoryStock::query()
-            ->with('product')
-            ->where('quantity', '<=', 5)
+        return $this->applyStoreFilter(
+            InventoryStock::query()->with('product')->where('quantity', '<=', 5),
+            'store_setting_id'
+        )
             ->orderBy('quantity', 'asc')
             ->get();
     }
 
-    public function getActivePromotions(): \Illuminate\Database\Eloquent\Collection
+    // public function getActivePromotions(): Collection
+    // {
+    //     return $this->applyStoreFilter(
+    //         Promo::query()
+    //             ->where('is_active', true)
+    //             ->where('start_date', '<=', Carbon::now())
+    //             ->where('end_date', '>=', Carbon::now()),
+    //         'store_setting_id'
+    //     )
+    //         ->orderBy('end_date', 'asc')
+    //         ->get();
+    // }
+
+    public function getActivePromotions(): Collection
     {
         return Promo::query()
             ->where('is_active', true)
