@@ -3,12 +3,9 @@
 namespace App\Filament\Resources\InventoryStocks\Pages;
 
 use App\Filament\Resources\InventoryStocks\InventoryStockResource;
-use App\Filament\Widgets\InventoryStatsWidget;
-use App\Models\StoreSetting;
+use App\Filament\Resources\InventoryStocks\Widgets\InventoryStatsWidget;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Support\Facades\Auth;
 
 class ListInventoryStocks extends ListRecords
 {

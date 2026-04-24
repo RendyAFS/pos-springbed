@@ -13,6 +13,8 @@ MySQL - 8.0.30 : Database - pos_springbed
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 CREATE DATABASE /*!32312 IF NOT EXISTS*/`pos_springbed` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+-- mariaDB
+-- CREATE DATABASE /*!32312 IF NOT EXISTS*/`pos_springbed` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 
 USE `pos_springbed`;
 
@@ -42,7 +44,7 @@ CREATE TABLE `activity_log` (
 
 /*Data for the table `activity_log` */
 
-insert  into `activity_log`(`id`,`log_name`,`description`,`subject_type`,`event`,`subject_id`,`causer_type`,`causer_id`,`properties`,`batch_uuid`,`created_at`,`updated_at`) values 
+insert  into `activity_log`(`id`,`log_name`,`description`,`subject_type`,`event`,`subject_id`,`causer_type`,`causer_id`,`properties`,`batch_uuid`,`created_at`,`updated_at`) values
 (1,'Access','Super Admin logged in','App\\Models\\User','Login',1,'App\\Models\\User',1,'{\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Linux; Android 6.0; Nexus 5 Build\\/MRA58N) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/145.0.0.0 Mobile Safari\\/537.36\"}',NULL,'2026-03-16 09:02:33','2026-03-16 09:02:33'),
 (2,'Access','Super Admin logged in','App\\Models\\User','Login',1,'App\\Models\\User',1,'{\"ip\":\"127.0.0.1\",\"user_agent\":\"Mozilla\\/5.0 (Linux; Android 6.0; Nexus 5 Build\\/MRA58N) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/145.0.0.0 Mobile Safari\\/537.36\"}',NULL,'2026-03-16 13:50:55','2026-03-16 13:50:55'),
 (3,'Resource','Product Created by Super Admin','App\\Models\\Product','Created',1,'App\\Models\\User',1,'{\"size\":\"single\",\"type\":\"headboard\",\"name\":\"Kasur 1\",\"selling_price\":1500000,\"sku\":\"SK-09\",\"weight\":12,\"color\":\"Red\",\"is_active\":true,\"created_by\":1,\"updated_by\":1,\"updated_at\":\"2026-03-16 13:53:54\",\"created_at\":\"2026-03-16 13:53:54\",\"id\":1}',NULL,'2026-03-16 13:53:54','2026-03-16 13:53:54'),
@@ -113,7 +115,7 @@ CREATE TABLE `brands` (
 
 /*Data for the table `brands` */
 
-insert  into `brands`(`id`,`name`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `brands`(`id`,`name`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'King Koil',1,'2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
 (2,'Serta',1,'2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
 (3,'Comforta',1,'2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
@@ -140,7 +142,7 @@ CREATE TABLE `bundle_items` (
 
 /*Data for the table `bundle_items` */
 
-insert  into `bundle_items`(`id`,`bundle_id`,`product_id`,`qty`,`price`,`created_at`,`updated_at`) values 
+insert  into `bundle_items`(`id`,`bundle_id`,`product_id`,`qty`,`price`,`created_at`,`updated_at`) values
 (1,1,1,1,1400000.00,'2026-03-16 20:49:55','2026-03-16 20:49:55'),
 (2,1,2,1,900000.00,'2026-03-16 20:49:55','2026-03-16 20:49:55'),
 (3,2,3,1,2000000.00,'2026-03-16 20:50:18','2026-03-16 20:50:18'),
@@ -168,7 +170,7 @@ CREATE TABLE `bundles` (
 
 /*Data for the table `bundles` */
 
-insert  into `bundles`(`id`,`name`,`bundle_price`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `bundles`(`id`,`name`,`bundle_price`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'Bundle 1',2300000.00,1,'2026-03-16 20:49:55','2026-03-16 20:49:55',1,1,NULL,NULL),
 (2,'Bundle 2',2600000.00,1,'2026-03-16 20:50:18','2026-03-16 20:50:18',1,1,NULL,NULL),
 (3,'Bundle 3',3800000.00,1,'2026-03-16 20:50:49','2026-03-16 20:50:49',1,1,NULL,NULL);
@@ -222,7 +224,7 @@ CREATE TABLE `categories` (
 
 /*Data for the table `categories` */
 
-insert  into `categories`(`id`,`name`,`slug`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `categories`(`id`,`name`,`slug`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'Pocket','pocket-1773626526',1,'2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
 (2,'Bonnel','bonnel-1773626526',1,'2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
 (3,'Hybird','hybird-1773626526',1,'2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
@@ -249,7 +251,7 @@ CREATE TABLE `couriers` (
 
 /*Data for the table `couriers` */
 
-insert  into `couriers`(`id`,`name`,`type`,`shipping_cost`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `couriers`(`id`,`name`,`type`,`shipping_cost`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'JNE','external',100000.00,1,'2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
 (2,'SiCepat','external',120000.00,1,'2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
 (3,'J&T','internal',130000.00,1,'2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
@@ -276,7 +278,7 @@ CREATE TABLE `customers` (
 
 /*Data for the table `customers` */
 
-insert  into `customers`(`id`,`name`,`phone`,`email`,`address`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `customers`(`id`,`name`,`phone`,`email`,`address`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'John Doe','1234567890','johndoe@yahoo.com','123 Main St','2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
 (2,'Jane Doe','123153242','janedoe@yahoo.com','123 Main St','2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
 (3,'David Smith','64646546','david@yahoo.com','123 Main St','2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL);
@@ -319,7 +321,7 @@ CREATE TABLE `inventory_stocks` (
 
 /*Data for the table `inventory_stocks` */
 
-insert  into `inventory_stocks`(`id`,`product_id`,`store_setting_id`,`quantity`,`created_at`,`updated_at`) values 
+insert  into `inventory_stocks`(`id`,`product_id`,`store_setting_id`,`quantity`,`created_at`,`updated_at`) values
 (1,1,1,50,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
 (2,2,1,50,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
 (3,1,2,25,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
@@ -416,7 +418,7 @@ CREATE TABLE `migrations` (
 
 /*Data for the table `migrations` */
 
-insert  into `migrations`(`id`,`migration`,`batch`) values 
+insert  into `migrations`(`id`,`migration`,`batch`) values
 (1,'0001_01_01_000000_create_users_table',1),
 (2,'0001_01_01_000001_create_cache_table',1),
 (3,'0001_01_01_000002_create_jobs_table',1),
@@ -483,7 +485,7 @@ CREATE TABLE `model_has_roles` (
 
 /*Data for the table `model_has_roles` */
 
-insert  into `model_has_roles`(`role_id`,`model_type`,`model_id`) values 
+insert  into `model_has_roles`(`role_id`,`model_type`,`model_id`) values
 (1,'App\\Models\\User',1),
 (2,'App\\Models\\User',2),
 (3,'App\\Models\\User',3),
@@ -518,7 +520,7 @@ CREATE TABLE `permissions` (
 
 /*Data for the table `permissions` */
 
-insert  into `permissions`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) values 
+insert  into `permissions`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) values
 (1,'ViewAny:Brand','web','2026-03-16 09:02:17','2026-03-16 09:02:17'),
 (2,'View:Brand','web','2026-03-16 09:02:17','2026-03-16 09:02:17'),
 (3,'Create:Brand','web','2026-03-16 09:02:17','2026-03-16 09:02:17'),
@@ -693,7 +695,7 @@ CREATE TABLE `product_images` (
 
 /*Data for the table `product_images` */
 
-insert  into `product_images`(`id`,`product_id`,`image_product`,`is_primary`) values 
+insert  into `product_images`(`id`,`product_id`,`image_product`,`is_primary`) values
 (2,1,NULL,0),
 (4,2,NULL,0),
 (6,3,NULL,0),
@@ -735,7 +737,7 @@ CREATE TABLE `products` (
 
 /*Data for the table `products` */
 
-insert  into `products`(`id`,`store_setting_id`,`brand_id`,`category_id`,`name`,`type`,`selling_price`,`sku`,`size`,`weight`,`color`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `products`(`id`,`store_setting_id`,`brand_id`,`category_id`,`name`,`type`,`selling_price`,`sku`,`size`,`weight`,`color`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,1,3,2,'Kasur 1','headboard',1500000.00,'SK-09','single',12.00,'Red',1,'2026-03-16 13:53:54','2026-03-16 19:08:49',1,1,NULL,NULL),
 (2,1,1,3,'Kasur 2','headboard',950000.00,'KIK-019','custom',10.00,'Blue',1,'2026-03-16 13:57:47','2026-03-16 19:08:49',1,1,NULL,NULL),
 (3,3,2,2,'Kasur 3','bundle',2100000.00,'OPO-01','queen',15.00,'Green',1,'2026-03-16 13:58:19','2026-03-16 19:14:10',1,1,NULL,NULL),
@@ -761,7 +763,7 @@ CREATE TABLE `promo_products` (
 
 /*Data for the table `promo_products` */
 
-insert  into `promo_products`(`id`,`promo_id`,`product_id`,`created_at`,`updated_at`) values 
+insert  into `promo_products`(`id`,`promo_id`,`product_id`,`created_at`,`updated_at`) values
 (1,1,1,NULL,NULL),
 (2,2,1,NULL,NULL);
 
@@ -812,7 +814,7 @@ CREATE TABLE `promos` (
 
 /*Data for the table `promos` */
 
-insert  into `promos`(`id`,`name`,`type`,`discount_type`,`discount_value`,`min_purchase`,`usage_limit`,`usage_count`,`start_date`,`end_date`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `promos`(`id`,`name`,`type`,`discount_type`,`discount_value`,`min_purchase`,`usage_limit`,`usage_count`,`start_date`,`end_date`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'Promo Kasur 1 nominal','flash_sale','nominal',500000.00,100000.00,10,0,'2026-03-09 00:00:00','2026-03-30 00:00:00',1,'2026-03-16 20:47:31','2026-03-16 20:47:31',1,1,NULL,NULL),
 (2,'Promo Kasur 1 percentage','flash_sale','percentage',50.00,100000.00,10,0,'2026-03-09 00:00:00','2026-03-30 00:00:00',1,'2026-03-16 20:48:05','2026-03-16 20:48:05',1,1,NULL,NULL),
 (3,'Promo 1','free_shipping','nominal',120000.00,100000.00,10,0,'2026-03-09 00:00:00','2026-03-30 00:00:00',1,'2026-03-16 20:49:23','2026-03-16 20:49:23',1,1,NULL,NULL);
@@ -839,7 +841,7 @@ CREATE TABLE `purchase_order_items` (
 
 /*Data for the table `purchase_order_items` */
 
-insert  into `purchase_order_items`(`id`,`purchase_order_id`,`product_id`,`qty_purchased`,`qty_remaining`,`cost_price`,`created_at`,`updated_at`) values 
+insert  into `purchase_order_items`(`id`,`purchase_order_id`,`product_id`,`qty_purchased`,`qty_remaining`,`cost_price`,`created_at`,`updated_at`) values
 (1,1,1,50,50,1000000.00,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
 (2,1,2,50,50,900000.00,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
 (3,2,1,25,25,1100000.00,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
@@ -871,7 +873,7 @@ CREATE TABLE `purchase_orders` (
 
 /*Data for the table `purchase_orders` */
 
-insert  into `purchase_orders`(`id`,`store_setting_id`,`supplier_name`,`invoice_number`,`purchase_date`,`total_amount`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `purchase_orders`(`id`,`store_setting_id`,`supplier_name`,`invoice_number`,`purchase_date`,`total_amount`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,1,'Supplier 1','INVNEICFGXZ1773662857','2026-03-16 00:00:00',95000000,'2026-03-16 19:08:49','2026-03-16 19:08:49',1,1,NULL,NULL),
 (2,2,'Supplier 2','INV8S62HJHD1773663059','2026-03-16 00:00:00',50500000,'2026-03-16 19:13:39','2026-03-16 19:13:39',1,1,NULL,NULL),
 (3,3,'Supplier 2','INVBYU4OLPY1773663219','2026-03-16 00:00:00',81000000,'2026-03-16 19:14:10','2026-03-16 19:14:10',1,1,NULL,NULL);
@@ -891,7 +893,7 @@ CREATE TABLE `role_has_permissions` (
 
 /*Data for the table `role_has_permissions` */
 
-insert  into `role_has_permissions`(`permission_id`,`role_id`) values 
+insert  into `role_has_permissions`(`permission_id`,`role_id`) values
 (1,1),
 (2,1),
 (3,1),
@@ -1380,7 +1382,7 @@ CREATE TABLE `roles` (
 
 /*Data for the table `roles` */
 
-insert  into `roles`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) values 
+insert  into `roles`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) values
 (1,'Super Admin','web','2026-03-16 09:02:05','2026-03-16 09:02:05'),
 (2,'Admin','web','2026-03-16 09:02:05','2026-03-16 09:02:05'),
 (3,'Owner','web','2026-03-16 09:02:05','2026-03-16 09:02:05'),
@@ -1404,7 +1406,7 @@ CREATE TABLE `sessions` (
 
 /*Data for the table `sessions` */
 
-insert  into `sessions`(`id`,`user_id`,`ip_address`,`user_agent`,`payload`,`last_activity`) values 
+insert  into `sessions`(`id`,`user_id`,`ip_address`,`user_agent`,`payload`,`last_activity`) values
 ('kvOLOvllN0TFQOv9FUd0neuCa8QJnRcRbJTLWxGH',1,'127.0.0.1','Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Mobile Safari/537.36','YTo4OntzOjY6Il90b2tlbiI7czo0MDoiTzgyenpRZUtPYlY4M3hscVNzaGVPNFdPTThyZUtkSERRcmtyN0FicSI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjI6e3M6MzoidXJsIjtzOjU2OiJodHRwczovL3Bvcy1zcHJpbmdiZWQubG9jYWwvYWRtaW4vcHVyY2hhc2Utb3JkZXJzL2NyZWF0ZSI7czo1OiJyb3V0ZSI7czo0NzoiZmlsYW1lbnQuYWRtaW4ucmVzb3VyY2VzLnB1cmNoYXNlLW9yZGVycy5jcmVhdGUiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfM2RjN2E5MTNlZjVmZDRiODkwZWNhYmUzNDg3MDg1NTczZTE2Y2Y4MiI7aToxO3M6MTc6InBhc3N3b3JkX2hhc2hfd2ViIjtzOjY0OiI4Mjc2M2QwYzliMDNmMmVmNWViOTg1NTliNGY4NDA2YzA0NzUyOTdlNGYxN2FhNWFkNTI0NjAwNDI0OWIxMTdlIjtzOjY6InRhYmxlcyI7YTo0OntzOjQwOiJiYzEwNDZkMjgzNDVmODZkZDAwMGRkNWJmNzVjZWI1OV9jb2x1bW5zIjthOjEwOntpOjA7YTo3OntzOjQ6InR5cGUiO3M6NjoiY29sdW1uIjtzOjQ6Im5hbWUiO3M6NDoibmFtZSI7czo1OiJsYWJlbCI7czo0OiJOYW1lIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6MTthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czo0OiJ0eXBlIjtzOjU6ImxhYmVsIjtzOjQ6IlR5cGUiO3M6ODoiaXNIaWRkZW4iO2I6MDtzOjk6ImlzVG9nZ2xlZCI7YjoxO3M6MTI6ImlzVG9nZ2xlYWJsZSI7YjowO3M6MjQ6ImlzVG9nZ2xlZEhpZGRlbkJ5RGVmYXVsdCI7Tjt9aToyO2E6Nzp7czo0OiJ0eXBlIjtzOjY6ImNvbHVtbiI7czo0OiJuYW1lIjtzOjEzOiJkaXNjb3VudF90eXBlIjtzOjU6ImxhYmVsIjtzOjEzOiJEaXNjb3VudCB0eXBlIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6MzthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czoxNDoiZGlzY291bnRfdmFsdWUiO3M6NToibGFiZWwiO3M6MTQ6IkRpc2NvdW50IHZhbHVlIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6NDthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czoxMjoibWluX3B1cmNoYXNlIjtzOjU6ImxhYmVsIjtzOjEyOiJNaW4gcHVyY2hhc2UiO3M6ODoiaXNIaWRkZW4iO2I6MDtzOjk6ImlzVG9nZ2xlZCI7YjoxO3M6MTI6ImlzVG9nZ2xlYWJsZSI7YjowO3M6MjQ6ImlzVG9nZ2xlZEhpZGRlbkJ5RGVmYXVsdCI7Tjt9aTo1O2E6Nzp7czo0OiJ0eXBlIjtzOjY6ImNvbHVtbiI7czo0OiJuYW1lIjtzOjExOiJ1c2FnZV9saW1pdCI7czo1OiJsYWJlbCI7czoxMToiVXNhZ2UgbGltaXQiO3M6ODoiaXNIaWRkZW4iO2I6MDtzOjk6ImlzVG9nZ2xlZCI7YjoxO3M6MTI6ImlzVG9nZ2xlYWJsZSI7YjowO3M6MjQ6ImlzVG9nZ2xlZEhpZGRlbkJ5RGVmYXVsdCI7Tjt9aTo2O2E6Nzp7czo0OiJ0eXBlIjtzOjY6ImNvbHVtbiI7czo0OiJuYW1lIjtzOjExOiJ1c2FnZV9jb3VudCI7czo1OiJsYWJlbCI7czoxMToiVXNhZ2UgY291bnQiO3M6ODoiaXNIaWRkZW4iO2I6MDtzOjk6ImlzVG9nZ2xlZCI7YjoxO3M6MTI6ImlzVG9nZ2xlYWJsZSI7YjowO3M6MjQ6ImlzVG9nZ2xlZEhpZGRlbkJ5RGVmYXVsdCI7Tjt9aTo3O2E6Nzp7czo0OiJ0eXBlIjtzOjY6ImNvbHVtbiI7czo0OiJuYW1lIjtzOjEwOiJzdGFydF9kYXRlIjtzOjU6ImxhYmVsIjtzOjEwOiJTdGFydCBkYXRlIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6ODthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czo4OiJlbmRfZGF0ZSI7czo1OiJsYWJlbCI7czo4OiJFbmQgZGF0ZSI7czo4OiJpc0hpZGRlbiI7YjowO3M6OToiaXNUb2dnbGVkIjtiOjE7czoxMjoiaXNUb2dnbGVhYmxlIjtiOjA7czoyNDoiaXNUb2dnbGVkSGlkZGVuQnlEZWZhdWx0IjtOO31pOjk7YTo3OntzOjQ6InR5cGUiO3M6NjoiY29sdW1uIjtzOjQ6Im5hbWUiO3M6OToiaXNfYWN0aXZlIjtzOjU6ImxhYmVsIjtzOjk6IklzIGFjdGl2ZSI7czo4OiJpc0hpZGRlbiI7YjowO3M6OToiaXNUb2dnbGVkIjtiOjE7czoxMjoiaXNUb2dnbGVhYmxlIjtiOjA7czoyNDoiaXNUb2dnbGVkSGlkZGVuQnlEZWZhdWx0IjtOO319czo0MDoiOGZhYzZlYjFjZWMyNjgwM2IzZjdmYjQ0MGEyNzExMWJfY29sdW1ucyI7YTo4OntpOjA7YTo3OntzOjQ6InR5cGUiO3M6NjoiY29sdW1uIjtzOjQ6Im5hbWUiO3M6NDoibmFtZSI7czo1OiJsYWJlbCI7czo3OiJQcm9kdWN0IjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6MTthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czoyMzoic3RvcmVTZXR0aW5nLnN0b3JlX25hbWUiO3M6NToibGFiZWwiO3M6NToiU3RvcmUiO3M6ODoiaXNIaWRkZW4iO2I6MDtzOjk6ImlzVG9nZ2xlZCI7YjoxO3M6MTI6ImlzVG9nZ2xlYWJsZSI7YjowO3M6MjQ6ImlzVG9nZ2xlZEhpZGRlbkJ5RGVmYXVsdCI7Tjt9aToyO2E6Nzp7czo0OiJ0eXBlIjtzOjY6ImNvbHVtbiI7czo0OiJuYW1lIjtzOjM6InNrdSI7czo1OiJsYWJlbCI7czozOiJTS1UiO3M6ODoiaXNIaWRkZW4iO2I6MDtzOjk6ImlzVG9nZ2xlZCI7YjoxO3M6MTI6ImlzVG9nZ2xlYWJsZSI7YjowO3M6MjQ6ImlzVG9nZ2xlZEhpZGRlbkJ5RGVmYXVsdCI7Tjt9aTozO2E6Nzp7czo0OiJ0eXBlIjtzOjY6ImNvbHVtbiI7czo0OiJuYW1lIjtzOjEzOiJjYXRlZ29yeS5uYW1lIjtzOjU6ImxhYmVsIjtzOjg6IkNhdGVnb3J5IjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6NDthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czo0OiJzaXplIjtzOjU6ImxhYmVsIjtzOjQ6IlNpemUiO3M6ODoiaXNIaWRkZW4iO2I6MDtzOjk6ImlzVG9nZ2xlZCI7YjoxO3M6MTI6ImlzVG9nZ2xlYWJsZSI7YjowO3M6MjQ6ImlzVG9nZ2xlZEhpZGRlbkJ5RGVmYXVsdCI7Tjt9aTo1O2E6Nzp7czo0OiJ0eXBlIjtzOjY6ImNvbHVtbiI7czo0OiJuYW1lIjtzOjEzOiJzZWxsaW5nX3ByaWNlIjtzOjU6ImxhYmVsIjtzOjEzOiJTZWxsaW5nIFByaWNlIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6NjthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czoyNDoiaW52ZW50b3J5U3RvY2tzLnF1YW50aXR5IjtzOjU6ImxhYmVsIjtzOjU6IlN0b2NrIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6NzthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czo5OiJpc19hY3RpdmUiO3M6NToibGFiZWwiO3M6NjoiQWN0aXZlIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fX1zOjQwOiJkYzQyZThlMmIwNzVjZTJlYTg0ZGNmMWI1YTczOWU0Yl9jb2x1bW5zIjthOjc6e2k6MDthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czoxMToicHJvZHVjdC5za3UiO3M6NToibGFiZWwiO3M6MzoiU0tVIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6MTthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czoxMjoicHJvZHVjdC5uYW1lIjtzOjU6ImxhYmVsIjtzOjc6IlByb2R1Y3QiO3M6ODoiaXNIaWRkZW4iO2I6MDtzOjk6ImlzVG9nZ2xlZCI7YjoxO3M6MTI6ImlzVG9nZ2xlYWJsZSI7YjowO3M6MjQ6ImlzVG9nZ2xlZEhpZGRlbkJ5RGVmYXVsdCI7Tjt9aToyO2E6Nzp7czo0OiJ0eXBlIjtzOjY6ImNvbHVtbiI7czo0OiJuYW1lIjtzOjIxOiJwcm9kdWN0LmNhdGVnb3J5Lm5hbWUiO3M6NToibGFiZWwiO3M6ODoiQ2F0ZWdvcnkiO3M6ODoiaXNIaWRkZW4iO2I6MDtzOjk6ImlzVG9nZ2xlZCI7YjoxO3M6MTI6ImlzVG9nZ2xlYWJsZSI7YjowO3M6MjQ6ImlzVG9nZ2xlZEhpZGRlbkJ5RGVmYXVsdCI7Tjt9aTozO2E6Nzp7czo0OiJ0eXBlIjtzOjY6ImNvbHVtbiI7czo0OiJuYW1lIjtzOjg6InF1YW50aXR5IjtzOjU6ImxhYmVsIjtzOjU6IlN0b2NrIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6NDthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czoyMToicHJvZHVjdC5zZWxsaW5nX3ByaWNlIjtzOjU6ImxhYmVsIjtzOjEwOiJVbml0IFByaWNlIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6NTthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czoxMToidG90YWxfdmFsdWUiO3M6NToibGFiZWwiO3M6MTE6IlRvdGFsIFZhbHVlIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fWk6NjthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czo2OiJzdGF0dXMiO3M6NToibGFiZWwiO3M6NjoiU3RhdHVzIjtzOjg6ImlzSGlkZGVuIjtiOjA7czo5OiJpc1RvZ2dsZWQiO2I6MTtzOjEyOiJpc1RvZ2dsZWFibGUiO2I6MDtzOjI0OiJpc1RvZ2dsZWRIaWRkZW5CeURlZmF1bHQiO047fX1zOjQwOiI4MDk1Zjg5M2ZhMzcwMGYwMWQ2MDBlZDNlMGQxZTAxZF9jb2x1bW5zIjthOjQ6e2k6MDthOjc6e3M6NDoidHlwZSI7czo2OiJjb2x1bW4iO3M6NDoibmFtZSI7czoxMzoic3VwcGxpZXJfbmFtZSI7czo1OiJsYWJlbCI7czoxMzoiU3VwcGxpZXIgbmFtZSI7czo4OiJpc0hpZGRlbiI7YjowO3M6OToiaXNUb2dnbGVkIjtiOjE7czoxMjoiaXNUb2dnbGVhYmxlIjtiOjA7czoyNDoiaXNUb2dnbGVkSGlkZGVuQnlEZWZhdWx0IjtOO31pOjE7YTo3OntzOjQ6InR5cGUiO3M6NjoiY29sdW1uIjtzOjQ6Im5hbWUiO3M6MTQ6Imludm9pY2VfbnVtYmVyIjtzOjU6ImxhYmVsIjtzOjE0OiJJbnZvaWNlIG51bWJlciI7czo4OiJpc0hpZGRlbiI7YjowO3M6OToiaXNUb2dnbGVkIjtiOjE7czoxMjoiaXNUb2dnbGVhYmxlIjtiOjA7czoyNDoiaXNUb2dnbGVkSGlkZGVuQnlEZWZhdWx0IjtOO31pOjI7YTo3OntzOjQ6InR5cGUiO3M6NjoiY29sdW1uIjtzOjQ6Im5hbWUiO3M6MTM6InB1cmNoYXNlX2RhdGUiO3M6NToibGFiZWwiO3M6MTM6IlB1cmNoYXNlIGRhdGUiO3M6ODoiaXNIaWRkZW4iO2I6MDtzOjk6ImlzVG9nZ2xlZCI7YjoxO3M6MTI6ImlzVG9nZ2xlYWJsZSI7YjowO3M6MjQ6ImlzVG9nZ2xlZEhpZGRlbkJ5RGVmYXVsdCI7Tjt9aTozO2E6Nzp7czo0OiJ0eXBlIjtzOjY6ImNvbHVtbiI7czo0OiJuYW1lIjtzOjEyOiJ0b3RhbF9hbW91bnQiO3M6NToibGFiZWwiO3M6MTI6IlRvdGFsIGFtb3VudCI7czo4OiJpc0hpZGRlbiI7YjowO3M6OToiaXNUb2dnbGVkIjtiOjE7czoxMjoiaXNUb2dnbGVhYmxlIjtiOjA7czoyNDoiaXNUb2dnbGVkSGlkZGVuQnlEZWZhdWx0IjtOO319fXM6ODoiZmlsYW1lbnQiO2E6MDp7fX0=',1773644494);
 
 /*Table structure for table `stock_adjustments` */
@@ -1430,7 +1432,7 @@ CREATE TABLE `stock_adjustments` (
 
 /*Data for the table `stock_adjustments` */
 
-insert  into `stock_adjustments`(`id`,`store_setting_id`,`product_id`,`qty_before`,`qty_after`,`qty_difference`,`reason`,`created_at`,`updated_at`) values 
+insert  into `stock_adjustments`(`id`,`store_setting_id`,`product_id`,`qty_before`,`qty_after`,`qty_difference`,`reason`,`created_at`,`updated_at`) values
 (1,1,5,0,10,10,'Super admin add Adjustment 10','2026-03-16 19:54:14','2026-03-16 19:54:14'),
 (2,2,5,0,5,5,'Super admin add Adjustment 5','2026-03-16 19:54:14','2026-03-16 19:54:14'),
 (3,3,5,0,2,2,'Super admin add Adjustment 2','2026-03-16 19:54:14','2026-03-16 19:54:14'),
@@ -1461,7 +1463,7 @@ CREATE TABLE `stock_movements` (
 
 /*Data for the table `stock_movements` */
 
-insert  into `stock_movements`(`id`,`product_id`,`store_setting_id`,`type`,`reference_type`,`reference_id`,`qty`,`cost_price_snapshot`,`created_at`,`updated_at`) values 
+insert  into `stock_movements`(`id`,`product_id`,`store_setting_id`,`type`,`reference_type`,`reference_id`,`qty`,`cost_price_snapshot`,`created_at`,`updated_at`) values
 (1,1,1,'in','App\\Models\\PurchaseOrder',1,50,1000000.00,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
 (2,2,1,'in','App\\Models\\PurchaseOrder',1,50,900000.00,'2026-03-16 19:08:49','2026-03-16 19:08:49'),
 (3,1,2,'in','App\\Models\\PurchaseOrder',2,25,1100000.00,'2026-03-16 19:13:39','2026-03-16 19:13:39'),
@@ -1494,7 +1496,7 @@ CREATE TABLE `store_settings` (
 
 /*Data for the table `store_settings` */
 
-insert  into `store_settings`(`id`,`store_name`,`phone`,`email`,`address`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `store_settings`(`id`,`store_name`,`phone`,`email`,`address`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'Toko 1','1234567890','toko1@yahoo.com','123 Main St','2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
 (2,'Toko 2','123153242','toko2@yahoo.com','123 Main St','2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL),
 (3,'Toko 3','64646546','toko3@yahoo.com','123 Main St','2026-03-16 09:02:06','2026-03-16 09:02:06',NULL,NULL,NULL,NULL);
@@ -1649,7 +1651,7 @@ CREATE TABLE `users` (
 
 /*Data for the table `users` */
 
-insert  into `users`(`id`,`name`,`email`,`email_verified_at`,`password`,`is_active`,`store_setting_id`,`remember_token`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`,`ui_preferences`) values 
+insert  into `users`(`id`,`name`,`email`,`email_verified_at`,`password`,`is_active`,`store_setting_id`,`remember_token`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`,`ui_preferences`) values
 (1,'Super Admin','superadmin@springbed.id',NULL,'$2y$12$Z76zA490/7lL3SdvtcEsIO4k5IFQn.e4L6JXPRICnxfBEOxVdOTGC',1,NULL,NULL,'2026-03-16 09:02:05','2026-03-16 09:02:05',NULL,NULL,NULL,NULL,NULL),
 (2,'Admin','admin@springbed.id',NULL,'$2y$12$XQ8RrYRpi1NODZ.mrKNHHeQy4OmrzvrcZX8J9D0NgFJpz8mdtUYLi',1,1,NULL,'2026-03-16 09:02:05','2026-03-16 19:26:32',NULL,1,NULL,NULL,NULL),
 (3,'Owner','owner@springbed.id',NULL,'$2y$12$tx7nLgi7Oy6gBYeLOckpbu4rSm9.lJxoonMdoDmODDuIAUuOJT7rO',1,NULL,NULL,'2026-03-16 09:02:05','2026-03-16 09:02:05',NULL,NULL,NULL,NULL,NULL),

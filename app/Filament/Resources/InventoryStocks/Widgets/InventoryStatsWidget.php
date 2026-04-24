@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Resources\InventoryStocks\Widgets;
 
 use App\Helpers\RupiahHelper;
 use App\Models\InventoryStock;
