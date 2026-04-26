@@ -21,7 +21,6 @@ class SalesOverviewChartWidget extends ChartWidget
 
     protected static ?int $sort            = 2;
     protected ?string $heading             = 'Sales Overview';
-    protected ?string $maxHeight           = '365px';
     protected string $color                = 'primary';
     protected int|string|array $columnSpan = 2;
     protected ?string $pollingInterval     = '30s';
@@ -87,27 +86,37 @@ class SalesOverviewChartWidget extends ChartWidget
             ? Carbon::parse($this->filters['endDate'])->endOfDay()
             : Carbon::now()->endOfDay();
 
-        $labels = [];
-        $data   = [];
-
         if ($period === 'daily') {
+            $rows = $this->baseQuery()
+                ->selectRaw('DATE(transaction_date) AS period_key, SUM(grand_total) AS total')
+                ->whereBetween('transaction_date', [$startDate, $endDate])
+                ->groupByRaw('DATE(transaction_date)')
+                ->pluck('total', 'period_key');
+
+            $labels = [];
+            $data   = [];
             $current = $startDate->copy();
             while ($current->lte($endDate)) {
+                $key      = $current->toDateString();
                 $labels[] = $current->format('d M');
-                $data[]   = (float) (clone $this->baseQuery())
-                    ->whereDate('transaction_date', $current)
-                    ->sum('grand_total');
+                $data[]   = (float) ($rows[$key] ?? 0);
                 $current->addDay();
             }
         } else {
+            $rows = $this->baseQuery()
+                ->selectRaw("DATE_FORMAT(transaction_date, '%Y-%m') AS period_key, SUM(grand_total) AS total")
+                ->whereBetween('transaction_date', [$startDate, $endDate])
+                ->groupByRaw("DATE_FORMAT(transaction_date, '%Y-%m')")
+                ->pluck('total', 'period_key');
+
+            $labels  = [];
+            $data    = [];
             $current = $startDate->copy()->startOfMonth();
             $end     = $endDate->copy()->startOfMonth();
             while ($current->lte($end)) {
+                $key      = $current->format('Y-m');
                 $labels[] = $current->format('M Y');
-                $data[]   = (float) (clone $this->baseQuery())
-                    ->whereYear('transaction_date', $current->year)
-                    ->whereMonth('transaction_date', $current->month)
-                    ->sum('grand_total');
+                $data[]   = (float) ($rows[$key] ?? 0);
                 $current->addMonth();
             }
         }
