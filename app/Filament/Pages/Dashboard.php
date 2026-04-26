@@ -2,8 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\ActivePromotionsWidget;
-use App\Filament\Widgets\LowStockAlertWidget;
 use App\Filament\Widgets\RightPanelWidget;
 use App\Filament\Widgets\SalesOverviewChartWidget;
 use App\Filament\Widgets\StatsOverviewWidget;
