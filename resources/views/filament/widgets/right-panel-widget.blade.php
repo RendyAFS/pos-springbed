@@ -13,7 +13,7 @@
                 No low stock items
             </div>
         @else
-            <div class="divide-y divide-gray-100 dark:divide-white/5">
+            <div class="divide-y divide-gray-100 dark:divide-white/5 max-h-60 overflow-y-scroll">
                 @foreach ($lowStockItems as $stock)
                     <div class="flex items-center justify-between py-3">
                         <div>
@@ -54,7 +54,7 @@
                 No active promotions
             </div>
         @else
-            <div class="divide-y divide-gray-100 dark:divide-white/5">
+            <div class="divide-y divide-gray-100 dark:divide-white/5 max-h-60 overflow-y-scroll">
                 @foreach ($promotions as $promo)
                     <div class="flex items-center justify-between py-3">
                         <div class="flex items-center gap-2">

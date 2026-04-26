@@ -18,36 +18,44 @@ class RightPanelWidget extends Widget
     protected int|string|array $columnSpan = 1;
     protected string $view = 'filament.widgets.right-panel-widget';
 
+    private ?Collection $lowStockCache    = null;
+    private ?Collection $promotionsCache  = null;
+
     public function getLowStockItems(): Collection
     {
-        return $this->applyStoreFilter(
-            InventoryStock::query()->with('product')->where('quantity', '<=', 5),
+        if ($this->lowStockCache !== null) {
+            return $this->lowStockCache;
+        }
+
+        return $this->lowStockCache = $this->applyStoreFilter(
+            InventoryStock::query()
+                ->select(['id', 'store_setting_id', 'product_id', 'quantity'])
+                ->with([
+                    'product:id,name,sku',
+                ])
+                ->where('quantity', '<=', 5),
             'store_setting_id'
         )
             ->orderBy('quantity', 'asc')
+            ->limit(20)
             ->get();
     }
 
-    // public function getActivePromotions(): Collection
-    // {
-    //     return $this->applyStoreFilter(
-    //         Promo::query()
-    //             ->where('is_active', true)
-    //             ->where('start_date', '<=', Carbon::now())
-    //             ->where('end_date', '>=', Carbon::now()),
-    //         'store_setting_id'
-    //     )
-    //         ->orderBy('end_date', 'asc')
-    //         ->get();
-    // }
-
     public function getActivePromotions(): Collection
     {
-        return Promo::query()
+        if ($this->promotionsCache !== null) {
+            return $this->promotionsCache;
+        }
+
+        $now = Carbon::now();
+
+        return $this->promotionsCache = Promo::query()
+            ->select(['id', 'name', 'type', 'discount_type', 'discount_value', 'usage_count', 'usage_limit', 'end_date'])
             ->where('is_active', true)
-            ->where('start_date', '<=', Carbon::now())
-            ->where('end_date', '>=', Carbon::now())
+            ->where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now)
             ->orderBy('end_date', 'asc')
+            ->limit(10)
             ->get();
     }
 
