@@ -3,6 +3,8 @@
 namespace App\Providers\Filament;
 
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
+use App\Filament\Pages\SelectStore;
+use App\Http\Middleware\EnsureStoreSelected;
 use Awcodes\LightSwitch\Enums\Alignment;
 use Awcodes\LightSwitch\LightSwitchPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -22,6 +24,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
+use Filament\Actions\Action;
 use Hydrat\TableLayoutToggle\TableLayoutTogglePlugin;
 use Hydrat\TableLayoutToggle\Persisters\LocalStoragePersister;
 use Filament\Enums\ThemeMode;
@@ -75,6 +78,13 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnsureStoreSelected::class,
+            ])
+            ->userMenuItems([
+                Action::make('select_store')
+                    ->label('Ganti Store')
+                    ->icon('heroicon-o-building-storefront')
+                    ->url(fn(): string => SelectStore::getUrl()),
             ])
             ->navigationGroups([
                 NavigationGroup::make('Master Data')
