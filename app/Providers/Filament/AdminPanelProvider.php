@@ -14,8 +14,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -25,12 +23,12 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use Filament\Actions\Action;
-use Hydrat\TableLayoutToggle\TableLayoutTogglePlugin;
-use Hydrat\TableLayoutToggle\Persisters\LocalStoragePersister;
 use Filament\Enums\ThemeMode;
 use Filament\Navigation\NavigationGroup;
 use Filament\Support\Enums\Platform;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use Jacobtims\FilamentLogger\FilamentLoggerPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 
@@ -82,9 +80,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 Action::make('select_store')
-                    ->label('Ganti Store')
+                    ->label('Change Store')
                     ->icon('heroicon-o-building-storefront')
-                    ->url(fn(): string => SelectStore::getUrl()),
+                    ->url(fn(): string => SelectStore::getUrl())
+                    ->visible(function () {
+                        /** @var User|null $user */
+                        $user = Auth::user();
+                        return !$user?->hasRole('Super Admin');
+                    }),
             ])
             ->navigationGroups([
                 NavigationGroup::make('Master Data')
@@ -117,18 +120,6 @@ class AdminPanelProvider extends PanelProvider
                         hasAvatars: false, // Enables the avatar upload form component (default = false)
                         slug: 'my-profile' // Sets the slug for the profile page (default = 'my-profile')
                     ),
-                // TableLayoutTogglePlugin::make()
-                //     ->setDefaultLayout('list') // default layout for user seeing the table for the first time
-                //     ->persistLayoutUsing(
-                //         persister: LocalStoragePersister::class, // chose a persister to save the layout preference of the user
-                //         cacheStore: 'redis', // optional, change the cache store for the Cache persister
-                //         cacheTtl: 60 * 24, // optional, change the cache time for the Cache persister
-                //     )
-                //     ->shareLayoutBetweenPages(false) // allow all tables to share the layout option for this user
-                //     ->displayToggleAction() // used to display the toggle action button automatically
-                //     ->toggleActionHook('tables::toolbar.search.after') // chose the Filament view hook to render the button on
-                //     ->listLayoutButtonIcon('heroicon-o-list-bullet')
-                //     ->gridLayoutButtonIcon('heroicon-o-squares-2x2'),
             ]);
     }
 }

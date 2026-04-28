@@ -70,7 +70,7 @@
         {{-- Submit --}}
         <div class="max-w-sm mx-auto">
             <x-filament::button type="submit" class="w-full" size="lg">
-                Masuk ke Dashboard
+                Change Store
             </x-filament::button>
         </div>
 
