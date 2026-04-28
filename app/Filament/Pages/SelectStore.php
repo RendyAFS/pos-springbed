@@ -37,6 +37,6 @@ class SelectStore extends Page
 
     public function getStores()
     {
-        return StoreSetting::pluck('store_name', 'id');
+        return StoreSetting::select('id', 'store_name', 'address')->get();
     }
 }
