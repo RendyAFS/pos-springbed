@@ -80,7 +80,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 Action::make('select_store')
-                    ->label('Ganti Store')
+                    ->label('Change Store')
                     ->icon('heroicon-o-building-storefront')
                     ->url(fn(): string => SelectStore::getUrl())
                     ->visible(function () {
