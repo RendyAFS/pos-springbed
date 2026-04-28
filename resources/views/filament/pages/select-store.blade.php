@@ -1,16 +1,5 @@
 <x-filament-panels::page>
-    <form wire:submit="submit" class="max-w-4xl mx-auto space-y-8">
-
-        {{-- Title --}}
-        <div class="text-center space-y-2">
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-                Pilih Store
-            </h2>
-            <p class="text-base text-gray-500 dark:text-gray-400">
-                Pilih store yang ingin kamu gunakan
-            </p>
-        </div>
-
+    <form wire:submit="submit" class="w-ful mx-auto space-y-4">
         {{-- Store Cards --}}
         <div class="flex justify-center">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 justify-items-center content-center min-h-95 max-h-95 overflow-y-auto w-full px-10">
@@ -20,7 +9,7 @@
                         <input type="radio" wire:model="store_setting_id" value="{{ $store->id }}" class="hidden">
 
                         <div @class([
-                            'relative rounded-2xl border p-6 flex flex-col items-center text-center gap-4',
+                            'relative w-full rounded-2xl border p-6 flex flex-col items-center text-center gap-4',
                             'transition-all duration-200 ease-in-out',
                             'bg-white dark:bg-gray-900',
                             'hover:shadow-xl hover:-translate-y-1 hover:border-primary-400',
@@ -43,10 +32,9 @@
 
                             {{-- Icon --}}
                             <div
-                                class="w-14 h-14 rounded-xl flex items-center justify-center
-                        bg-primary-50 dark:bg-primary-950/40">
+                                class="w-14 h-14 rounded-xl flex items-center justify-center bg-primary-50 dark:bg-primary-950/40">
                                 <x-heroicon-o-building-storefront
-                                    class="w-7 h-7 text-primary-500 dark:text-primary-400" />
+                                    class="w-12 h-12 text-primary-500 dark:text-primary-400" />
                             </div>
 
                             {{-- Store Name --}}
@@ -56,7 +44,7 @@
                                 </p>
 
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    {{ $store->address }}
+                                    {{ Str::limit($store->address, 40) }}
                                 </p>
                             </div>
 
