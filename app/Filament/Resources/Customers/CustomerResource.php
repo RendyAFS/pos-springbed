@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Customers;
 
 use App\Filament\Resources\Customers\Pages\ManageCustomers;
+use App\Helpers\RupiahHelper;
 use App\Models\Customer;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -14,8 +15,10 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -56,6 +59,7 @@ class CustomerResource extends Resource
     {
         return $schema
             ->components([
+
                 Grid::make(1)
                     ->schema([
                         TextInput::make('name')
@@ -69,16 +73,27 @@ class CustomerResource extends Resource
                             ->label('Email address')
                             ->email()
                             ->default(null),
-                    ]),
-
-                Grid::make(1)
-                    ->schema([
                         Textarea::make('address')
                             ->label('Address')
                             ->rows(3)
                             ->default(null),
+                    ])->columnSpan(fn ($record) => $record === null ? 'full' : 1),
+                Section::make('Referal')
+                    ->visible(fn($record) => $record !== null)
+                    ->relationship('referal')
+                    ->description('Informasi referal customer')
+                    ->collapsible()
+                    ->schema([
+                        TextEntry::make('referal_code')
+                            ->label('Kode Referal')
+                            ->default('-'),
+
+                        TextEntry::make('discount_amount')
+                            ->label('Saldo Diskon')
+                            ->numeric()
+                            ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                     ]),
-            ]);
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table
