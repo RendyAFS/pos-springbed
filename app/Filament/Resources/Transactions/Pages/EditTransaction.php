@@ -6,6 +6,7 @@ use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\TransactionPayment;
 use App\Models\TransactionShipment;
 use App\Enums\StatusTransactionShipmentEnum;
+use App\Services\ReferalService;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Model;
 class EditTransaction extends EditRecord
 {
     protected static string $resource = TransactionResource::class;
+
+    protected array $extraData = [];
 
     protected function resolveRecord(int | string $key): Model
     {
@@ -39,41 +42,34 @@ class EditTransaction extends EditRecord
                 : $payment->status;
         }
 
+        $data['is_referal']          = $this->record->is_referal ?? false;
+        $data['referal_customer_id'] = $this->record->referal_customer_id ?? null;
+        $data['nominal_referal']     = $this->record->nominal_referal ?? 0;
+
         return $data;
-    }
-
-    protected function afterSave(): void
-    {
-        $data = $this->data;
-
-        if (filled($data['payment_method'] ?? null) && filled($data['payment_amount'] ?? null)) {
-            TransactionPayment::updateOrCreate(
-                ['transaction_id' => $this->record->id],
-                [
-                    'method'  => $data['payment_method'],
-                    'amount'  => $data['payment_amount'],
-                    'status'  => $data['payment_status'] ?? null,
-                    'paid_at' => now(),
-                ]
-            );
-        }
-
-        if (filled($data['courier_id'] ?? null)) {
-            TransactionShipment::updateOrCreate(
-                ['transaction_id' => $this->record->id],
-                [
-                    'courier_id' => $data['courier_id'],
-                    'status'     => $this->record->transactionShipment?->status
-                        ?? StatusTransactionShipmentEnum::PENDING,
-                ]
-            );
-        } elseif ($this->record->transactionShipment) {
-            $this->record->transactionShipment->delete();
-        }
     }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        $this->extraData = [
+            'courier_id'          => $data['courier_id'] ?? null,
+            'payment_method'      => $data['payment_method'] ?? null,
+            'payment_amount'      => $data['payment_amount'] ?? null,
+            'payment_status'      => $data['payment_status'] ?? null,
+            'is_referal'          => filter_var($data['is_referal'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            'referal_customer_id' => $data['referal_customer_id'] ?? null,
+            'nominal_referal'     => $data['nominal_referal'] ?? 0,
+            'discount_referal'    => $data['discount_referal'] ?? 0,
+        ];
+
+        unset(
+            $data['courier_id'],
+            $data['payment_method'],
+            $data['payment_amount'],
+            $data['payment_status'],
+            $data['discount_referal'],
+        );
+
         if (isset($data['transactionItems'])) {
             foreach ($data['transactionItems'] as &$item) {
                 unset($item['item_type']);
@@ -82,6 +78,40 @@ class EditTransaction extends EditRecord
         }
 
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        $extra = $this->extraData;
+
+        if (filled($extra['payment_method'] ?? null) && filled($extra['payment_amount'] ?? null)) {
+            TransactionPayment::updateOrCreate(
+                ['transaction_id' => $this->record->id],
+                [
+                    'method'  => $extra['payment_method'],
+                    'amount'  => $extra['payment_amount'],
+                    'status'  => $extra['payment_status'] ?? null,
+                    'paid_at' => now(),
+                ]
+            );
+        }
+
+        if (filled($extra['courier_id'] ?? null)) {
+            TransactionShipment::updateOrCreate(
+                ['transaction_id' => $this->record->id],
+                [
+                    'courier_id' => $extra['courier_id'],
+                    'status'     => $this->record->transactionShipment?->status
+                        ?? StatusTransactionShipmentEnum::PENDING,
+                ]
+            );
+        } elseif ($this->record->transactionShipment) {
+            $this->record->transactionShipment->delete();
+        }
+
+        /** @var ReferalService $referalService */
+        $referalService = app(ReferalService::class);
+        $referalService->processReferalOnEdit($this->record, $extra);
     }
 
     protected function getHeaderActions(): array

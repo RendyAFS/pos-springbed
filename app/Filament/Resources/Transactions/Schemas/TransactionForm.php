@@ -6,12 +6,14 @@ use App\Enums\PromoDiscountEnum;
 use App\Enums\TransactionPaymentMethodEnum;
 use App\Enums\TransactionPaymentStatusEnum;
 use App\Enums\TransactionStatusEnum;
+use App\Helpers\RupiahHelper;
 use App\Models\Bundle;
 use App\Models\Courier;
 use App\Models\Customer;
 use App\Models\InventoryStock;
 use App\Models\Product;
 use App\Models\Promo;
+use App\Models\Referal;
 use App\Models\StoreSetting;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
@@ -19,6 +21,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -39,7 +42,6 @@ class TransactionForm
             ->components([
                 Wizard::make([
 
-                    // ─── STEP 1: Customer ──────────────────────────────────────────────
                     Step::make('Customer')
                         ->label('Customer')
                         ->description('Pick a customer & set the transaction date')
@@ -70,6 +72,7 @@ class TransactionForm
                                         ->relationship('customer', 'name')
                                         ->searchable(['name', 'phone', 'email'])
                                         ->preload()
+                                        ->live()
                                         ->createOptionForm([
                                             TextInput::make('name')
                                                 ->label('Full Name')
@@ -132,7 +135,6 @@ class TransactionForm
                                 ]),
                         ]),
 
-                    // ─── STEP 2: Products ──────────────────────────────────────────────
                     Step::make('Products')
                         ->label('Products')
                         ->description('Add the items being purchased')
@@ -149,7 +151,6 @@ class TransactionForm
                                         ->schema([
                                             Section::make()
                                                 ->schema([
-                                                    // ── Item Type Toggle ───────────────────────────────────────
                                                     Radio::make('item_type')
                                                         ->label('Item Type')
                                                         ->options([
@@ -175,7 +176,6 @@ class TransactionForm
                                                         })
                                                         ->columnSpanFull(),
 
-                                                    // ── Single Product ─────────────────────────────────────────
                                                     Select::make('product_id')
                                                         ->label('Product')
                                                         ->options(function (): array {
@@ -202,7 +202,6 @@ class TransactionForm
                                                             $set('qty', 1);
                                                         }),
 
-                                                    // ── Bundle ─────────────────────────────────────────────────
                                                     Select::make('bundle_id')
                                                         ->label('Bundle')
                                                         ->options(
@@ -244,7 +243,6 @@ class TransactionForm
                                                             return "Bundle contents: {$items}";
                                                         }),
 
-                                                    // ── Qty ────────────────────────────────────────────────────
                                                     TextInput::make('qty')
                                                         ->label('Qty')
                                                         ->numeric()
@@ -305,10 +303,12 @@ class TransactionForm
                                                                     return "{$icon} {$bi->product->name}: {$stock} pcs (max {$maxSet} sets)";
                                                                 })->implode(' | ');
 
-                                                                $minQty = $bundle->bundleItems->min(function ($bi) use ($storeId) {
-                                                                    $stock = self::getAvailableStock($bi->product_id, $storeId);
-                                                                    return $bi->qty > 0 ? floor($stock / $bi->qty) : 0;
-                                                                });
+                                                                $minQty = $bundle->bundleItems
+                                                                    ->map(function ($bi) use ($storeId): int {
+                                                                        $stock = self::getAvailableStock($bi->product_id, $storeId);
+                                                                        return $bi->qty > 0 ? (int) floor($stock / $bi->qty) : 0;
+                                                                    })
+                                                                    ->min();
 
                                                                 return "{$stockLines} — Max bundle sets: {$minQty}";
                                                             }
@@ -355,7 +355,6 @@ class TransactionForm
                                 ]),
                         ]),
 
-                    // ─── STEP 3: Promo & Shipping ──────────────────────────────────────
                     Step::make('Promo & Shipping')
                         ->label('Promo & Ship')
                         ->description('Apply a promo and pick a courier')
@@ -476,7 +475,6 @@ class TransactionForm
                                 ]),
                         ]),
 
-                    // ─── STEP 4: Summary & Payment ────────────────────────────────────
                     Step::make('Summary')
                         ->label('Summary')
                         ->description('Review & confirm the transaction')
@@ -485,50 +483,174 @@ class TransactionForm
                         ->schema([
                             Grid::make(2)
                                 ->schema([
-                                    Section::make('Price Breakdown')
-                                        ->icon(Heroicon::ReceiptRefund)
+                                    Grid::make(1)
                                         ->schema([
-                                            TextInput::make('subtotal')->label('Subtotal + Discount')->numeric()->readOnly()->prefix('Rp'),
-                                            TextInput::make('promo_total')->label('Promo Discount')->numeric()->readOnly()->prefix('Rp'),
-                                            TextInput::make('shiping_cost')->label('Shipping Cost')->numeric()->readOnly()->prefix('Rp'),
-                                            TextInput::make('grand_total')->label('Grand Total')->numeric()->readOnly()->prefix('Rp'),
-                                        ]),
+                                            Section::make('Price Breakdown')
+                                                ->icon(Heroicon::ReceiptRefund)
+                                                ->schema([
+                                                    TextInput::make('subtotal')->label('Subtotal + Discount')->numeric()->readOnly()->prefix('Rp'),
+                                                    TextInput::make('promo_total')->label('Promo Discount')->numeric()->readOnly()->prefix('Rp'),
+                                                    TextInput::make('shiping_cost')->label('Shipping Cost')->numeric()->readOnly()->prefix('Rp'),
+                                                    TextInput::make('grand_total')->label('Grand Total')->numeric()->readOnly()->prefix('Rp'),
+                                                ]),
+                                            Section::make('Product Items')
+                                                ->icon(Heroicon::ShoppingBag)
+                                                ->schema([
+                                                    TextEntry::make('items_summary')
+                                                        ->label('Selected Products')
+                                                        ->listWithLineBreaks()
+                                                        ->state(function (Get $get): array {
+                                                            $items = $get('transactionItems') ?? [];
+                                                            if (empty($items)) return ['No products added yet.'];
+                                                            $lines = [];
+                                                            foreach ($items as $item) {
+                                                                $qty          = (int) ($item['qty'] ?? 0);
+                                                                $sellingPrice = (float) ($item['selling_price'] ?? 0);
+                                                                $discount     = (float) ($item['discount'] ?? 0);
+                                                                $subtotal     = (float) ($item['subtotal'] ?? 0);
 
-                                    Section::make('Product Items')
-                                        ->icon(Heroicon::ShoppingBag)
+                                                                if (($item['item_type'] ?? 'product') === 'bundle' && ! empty($item['bundle_id'])) {
+                                                                    $bundle = Bundle::find($item['bundle_id']);
+                                                                    $name   = $bundle ? "[Bundle] {$bundle->name}" : 'Bundle not found';
+                                                                } else {
+                                                                    $productId = $item['product_id'] ?? null;
+                                                                    $name      = $productId
+                                                                        ? (Product::find($productId)?->name ?? 'Product not found')
+                                                                        : '—';
+                                                                }
+
+                                                                $discountPart = $discount > 0
+                                                                    ? ' − Rp ' . number_format($discount, 0, ',', '.') . ' (disc)'
+                                                                    : '';
+
+                                                                $lines[] = "• {$name} × {$qty} @ Rp " . number_format($sellingPrice, 0, ',', '.') . "{$discountPart} = Rp " . number_format($subtotal, 0, ',', '.');
+                                                            }
+                                                            return $lines;
+                                                        }),
+                                                ]),
+                                        ]),
+                                    Grid::make(1)
                                         ->schema([
-                                            TextEntry::make('items_summary')
-                                                ->label('Selected Products')
-                                                ->listWithLineBreaks()
-                                                ->state(function (Get $get): array {
-                                                    $items = $get('transactionItems') ?? [];
-                                                    if (empty($items)) return ['No products added yet.'];
-                                                    $lines = [];
-                                                    foreach ($items as $item) {
-                                                        $qty          = (int) ($item['qty'] ?? 0);
-                                                        $sellingPrice = (float) ($item['selling_price'] ?? 0);
-                                                        $discount     = (float) ($item['discount'] ?? 0);
-                                                        $subtotal     = (float) ($item['subtotal'] ?? 0);
+                                            Section::make('Referal')
+                                                ->description('Tambahkan referral customer jika transaksi ini berasal dari referral.')
+                                                ->icon(Heroicon::UserGroup)
+                                                ->schema([
+                                                    Toggle::make('is_referal')
+                                                        ->label('Gunakan Referal?')
+                                                        ->default(false)
+                                                        ->live()
+                                                        ->afterStateUpdated(function (Set $set, $state): void {
+                                                            if (! $state) {
+                                                                $set('referal_customer_id', null);
+                                                                $set('nominal_referal', null);
+                                                            }
+                                                        }),
 
-                                                        if (($item['item_type'] ?? 'product') === 'bundle' && ! empty($item['bundle_id'])) {
-                                                            $bundle = Bundle::find($item['bundle_id']);
-                                                            $name   = $bundle ? "[Bundle] {$bundle->name}" : 'Bundle not found';
-                                                        } else {
-                                                            $productId = $item['product_id'] ?? null;
-                                                            $name      = $productId
-                                                                ? (Product::find($productId)?->name ?? 'Product not found')
-                                                                : '—';
-                                                        }
+                                                    Select::make('referal_customer_id')
+                                                        ->label('Customer Referal')
+                                                        ->placeholder('Cari customer yang mereferralkan...')
+                                                        ->options(function (Get $get): array {
+                                                            $currentCustomerId = $get('customer_id');
 
-                                                        $discountPart = $discount > 0
-                                                            ? ' − Rp ' . number_format($discount, 0, ',', '.') . ' (disc)'
-                                                            : '';
+                                                            return Customer::query()
+                                                                ->when($currentCustomerId, fn($q) => $q->where('id', '!=', $currentCustomerId))
+                                                                ->get()
+                                                                ->mapWithKeys(function (Customer $customer): array {
+                                                                    $referal = Referal::where('customer_id', $customer->id)->first();
+                                                                    $label   = $customer->name;
 
-                                                        $lines[] = "• {$name} × {$qty} @ Rp " . number_format($sellingPrice, 0, ',', '.') . "{$discountPart} = Rp " . number_format($subtotal, 0, ',', '.');
-                                                    }
-                                                    return $lines;
-                                                }),
-                                        ]),
+                                                                    if ($referal && $referal->discount_amount > 0) {
+                                                                        $label .= ' — Saldo: ' . RupiahHelper::format($referal->discount_amount);
+                                                                    }
+
+                                                                    return [$customer->id => $label];
+                                                                })
+                                                                ->toArray();
+                                                        })
+                                                        ->searchable()
+                                                        ->nullable()
+                                                        ->live()
+                                                        ->visible(fn(Get $get): bool => (bool) $get('is_referal'))
+                                                        ->required(fn(Get $get): bool => (bool) $get('is_referal'))
+                                                        ->helperText('Pilih customer yang mereferralkan transaksi ini. Nominal referal akan ditambahkan ke saldo mereka.'),
+
+                                                    TextInput::make('nominal_referal')
+                                                        ->label('Nominal Referal')
+                                                        ->numeric()
+                                                        ->default(0)
+                                                        ->minValue(0)
+                                                        ->prefix('Rp')
+                                                        ->live(onBlur: true)
+                                                        ->visible(fn(Get $get): bool => (bool) $get('is_referal'))
+                                                        ->required(fn(Get $get): bool => (bool) $get('is_referal'))
+                                                        ->helperText('Jumlah discount (Rupiah) yang akan ditambahkan ke saldo referal customer referral.'),
+                                                ]),
+
+                                            Section::make('Discount Referal')
+                                                ->description('Gunakan saldo referal milik customer ini untuk potongan harga.')
+                                                ->icon(Heroicon::GiftTop)
+                                                ->visible(function (Get $get): bool {
+                                                    $customerId = $get('customer_id');
+                                                    if (! $customerId) return false;
+
+                                                    $referal = Referal::where('customer_id', $customerId)->first();
+                                                    return $referal && $referal->discount_amount > 0;
+                                                })
+                                                ->schema([
+                                                    TextEntry::make('referal_balance_info')
+                                                        ->label('Saldo Referal Anda')
+                                                        ->state(function (Get $get): string {
+                                                            $customerId = $get('customer_id');
+                                                            if (! $customerId) return '—';
+
+                                                            $referal = Referal::where('customer_id', $customerId)->first();
+                                                            if (! $referal || $referal->discount_amount <= 0) {
+                                                                return 'Tidak ada saldo referal.';
+                                                            }
+
+                                                            return '✅ Saldo tersedia: ' . RupiahHelper::format($referal->discount_amount)
+                                                                . ' (Maks. penggunaan: ' . RupiahHelper::format(200000) . ' per transaksi)';
+                                                        }),
+
+                                                    TextInput::make('discount_referal')
+                                                        ->label('Discount Referal')
+                                                        ->numeric()
+                                                        ->default(0)
+                                                        ->minValue(0)
+                                                        ->prefix('Rp')
+                                                        ->dehydrated(true)
+                                                        ->live(onBlur: true)
+                                                        ->afterStateUpdated(function (Get $get, Set $set, $state): void {
+                                                            $customerId = $get('customer_id');
+                                                            $maxUsage   = 200000;
+
+                                                            if ((float) $state > $maxUsage) {
+                                                                $set('discount_referal', $maxUsage);
+                                                                $state = $maxUsage;
+                                                            }
+
+                                                            if ($customerId) {
+                                                                $referal = Referal::where('customer_id', $customerId)->first();
+                                                                if ($referal && (float) $state > $referal->discount_amount) {
+                                                                    $set('discount_referal', $referal->discount_amount);
+                                                                }
+                                                            }
+
+                                                            self::recalculateTotals($get, $set);
+                                                        })
+                                                        ->helperText(function (Get $get): string {
+                                                            $customerId = $get('customer_id');
+                                                            if (! $customerId) return '';
+
+                                                            $referal = Referal::where('customer_id', $customerId)->first();
+                                                            $balance = $referal ? (float) $referal->discount_amount : 0;
+                                                            $maxUse  = min(200000, $balance);
+
+                                                            return 'Maksimal penggunaan: ' . RupiahHelper::format($maxUse)
+                                                                . '. Saldo saat ini: ' . RupiahHelper::format($balance);
+                                                        }),
+                                                ]),
+                                        ])
                                 ]),
 
                             Section::make('Payment')
@@ -628,9 +750,12 @@ class TransactionForm
             }
         }
 
+        $discountReferal = (float) ($get('discount_referal') ?? 0);
+
         $shippingCost = (float) ($get('shiping_cost') ?? 0);
+
         $set('subtotal',    round($subtotal, 2));
         $set('promo_total', round($promoTotal, 2));
-        $set('grand_total', round(max(0, $subtotal - $promoTotal + $shippingCost), 2));
+        $set('grand_total', round(max(0, $subtotal - $promoTotal - $discountReferal + $shippingCost), 2));
     }
 }

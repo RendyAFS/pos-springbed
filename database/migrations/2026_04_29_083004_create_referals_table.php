@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->nullable()->constrained('customers')->cascadeOnDelete();
             $table->string('name_customer')->nullable();
             $table->string('referal_code')->nullable()->unique();
-            $table->integer('referal_amount')->nullable();
+            $table->integer('discount_amount')->nullable();
             $table->timestamps();
         });
 
