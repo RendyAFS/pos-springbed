@@ -16,4 +16,10 @@ class Customer extends Model
         'email',
         'address',
     ];
+
+    public function referal()
+    {
+        return $this->hasOne(Referal::class);
+    }
 }
+
