@@ -22,6 +22,9 @@ class Transaction extends Model
         'status',
         'promo_id',
         'transaction_date',
+        'is_referal',
+        'referal_customer_id',
+        'nominal_referal',
     ];
 
     protected $casts = [
@@ -31,6 +34,7 @@ class Transaction extends Model
         'shiping_cost'     => 'decimal:2',
         'grand_total'      => 'decimal:2',
         'transaction_date' => 'date',
+        'is_referal'       => 'boolean',
     ];
 
     public function customer()
@@ -66,5 +70,10 @@ class Transaction extends Model
     public function transactionShipment()
     {
         return $this->hasOne(TransactionShipment::class, 'transaction_id');
+    }
+
+    public function referalCustomer()
+    {
+        return $this->belongsTo(Customer::class, 'referal_customer_id');
     }
 }

@@ -202,6 +202,7 @@ class InventoryService
             ->get();
 
         // ── Konsumsi FIFO dari PurchaseOrderItem ──────────────────────────
+        /** @var \App\Models\PurchaseOrderItem $purchaseItem */
         foreach ($purchaseItems as $purchaseItem) {
             if ($remaining <= 0) {
                 break;

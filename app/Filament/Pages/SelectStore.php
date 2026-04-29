@@ -14,7 +14,7 @@ class SelectStore extends Page
 
     protected string $view = 'filament.pages.select-store';
 
-    public int $store_setting_id;
+    public ?int $store_setting_id = null;
 
     public function mount()
     {
