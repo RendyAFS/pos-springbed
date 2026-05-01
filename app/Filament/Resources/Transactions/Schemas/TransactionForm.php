@@ -502,6 +502,7 @@ class TransactionForm
                                                         ->state(function (Get $get): array {
                                                             $items = $get('transactionItems') ?? [];
                                                             if (empty($items)) return ['No products added yet.'];
+
                                                             $lines = [];
                                                             foreach ($items as $item) {
                                                                 $qty          = (int) ($item['qty'] ?? 0);
@@ -520,11 +521,18 @@ class TransactionForm
                                                                 }
 
                                                                 $discountPart = $discount > 0
-                                                                    ? ' − Rp ' . number_format($discount, 0, ',', '.') . ' (disc)'
+                                                                    ? ' - Rp ' . number_format($discount, 0, ',', '.') . ' (disc)'
                                                                     : '';
 
-                                                                $lines[] = "• {$name} × {$qty} @ Rp " . number_format($sellingPrice, 0, ',', '.') . "{$discountPart} = Rp " . number_format($subtotal, 0, ',', '.');
+                                                                $lines[] = "• {$name} * {$qty} @ Rp " . number_format($sellingPrice, 0, ',', '.') . "{$discountPart} = Rp " . number_format($subtotal, 0, ',', '.');
                                                             }
+
+                                                            $discountReferal = (float) ($get('discount_referal') ?? 0);
+                                                            if ($discountReferal > 0) {
+                                                                $lines[] = '──────────────────────────';
+                                                                $lines[] = '🎁 Discount Referal: − Rp ' . number_format($discountReferal, 0, ',', '.');
+                                                            }
+
                                                             return $lines;
                                                         }),
                                                 ]),
@@ -608,8 +616,10 @@ class TransactionForm
                                                                 return 'Tidak ada saldo referal.';
                                                             }
 
+                                                            $maxReward = self::getMaxReward($get);
+
                                                             return '✅ Saldo tersedia: ' . RupiahHelper::format($referal->discount_amount)
-                                                                . ' (Maks. penggunaan: ' . RupiahHelper::format(200000) . ' per transaksi)';
+                                                                . ' (Maks. penggunaan: ' . RupiahHelper::format($maxReward) . ' per transaksi)';
                                                         }),
 
                                                     TextInput::make('discount_referal')
@@ -622,7 +632,7 @@ class TransactionForm
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(function (Get $get, Set $set, $state): void {
                                                             $customerId = $get('customer_id');
-                                                            $maxUsage   = 200000;
+                                                            $maxUsage   = self::getMaxReward($get);
 
                                                             if ((float) $state > $maxUsage) {
                                                                 $set('discount_referal', $maxUsage);
@@ -642,9 +652,10 @@ class TransactionForm
                                                             $customerId = $get('customer_id');
                                                             if (! $customerId) return '';
 
-                                                            $referal = Referal::where('customer_id', $customerId)->first();
-                                                            $balance = $referal ? (float) $referal->discount_amount : 0;
-                                                            $maxUse  = min(200000, $balance);
+                                                            $referal  = Referal::where('customer_id', $customerId)->first();
+                                                            $balance  = $referal ? (float) $referal->discount_amount : 0;
+                                                            $maxReward = self::getMaxReward($get);
+                                                            $maxUse   = min($maxReward, $balance);
 
                                                             return 'Maksimal penggunaan: ' . RupiahHelper::format($maxUse)
                                                                 . '. Saldo saat ini: ' . RupiahHelper::format($balance);
@@ -757,5 +768,14 @@ class TransactionForm
         $set('subtotal',    round($subtotal, 2));
         $set('promo_total', round($promoTotal, 2));
         $set('grand_total', round(max(0, $subtotal - $promoTotal - $discountReferal + $shippingCost), 2));
+    }
+
+    protected static function getMaxReward(Get $get): float
+    {
+        $storeId = self::getStoreId($get);
+        if (!$storeId) return 200000;
+
+        $store = StoreSetting::find($storeId);
+        return (float) ($store?->set_max_reward ?? 200000);
     }
 }

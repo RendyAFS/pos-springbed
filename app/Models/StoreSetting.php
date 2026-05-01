@@ -17,6 +17,7 @@ class StoreSetting extends Model implements HasMedia
         'phone',
         'email',
         'address',
+        'set_max_reward'
     ];
 
     public function users()
