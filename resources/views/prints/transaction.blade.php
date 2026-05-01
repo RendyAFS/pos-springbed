@@ -6,50 +6,23 @@
     <style>
         @page {
             size: A5 portrait;
-            margin: 10mm 10mm 10mm 10mm;
+            margin: 5mm;
         }
 
         * {
             box-sizing: border-box;
         }
 
-        html,
-        body {
-            width: 148mm;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            font-size: 11px;
-            color: #000;
-        }
-
         .paper {
-            width: 148mm;
+            width: 100%;
         }
 
-        /* ===== HEADER ===== */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 6px;
+        /* HEADER */
+        .header-table {
+            width: 100%;
             border-bottom: 2px solid #000;
             padding-bottom: 6px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-        }
-
-        .header-logo {
-            width: 55px;
-            height: 55px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            margin-bottom: 6px;
         }
 
         .header-store-name {
@@ -72,32 +45,21 @@
             line-height: 1.4;
         }
 
-        .header-right {
-            text-align: left;
-            font-size: 11px;
-            min-width: 90px;
-        }
-
-        .header-right table {
+        .header-right-table {
             border-collapse: collapse;
         }
 
-        .header-right td {
+        .header-right-table td {
             padding: 1px 3px;
             vertical-align: top;
         }
 
-        .header-right .label {
+        .label {
             font-weight: bold;
             white-space: nowrap;
         }
 
-        .header-right .value {
-            border-bottom: 1px solid #000;
-            min-width: 70px;
-        }
-
-        /* ===== NOTA NO ===== */
+        /* NOTA NO */
         .nota-no {
             font-size: 11px;
             font-weight: bold;
@@ -106,7 +68,7 @@
             padding-bottom: 2px;
         }
 
-        /* ===== TABLE ITEMS ===== */
+        /* ITEMS TABLE */
         .items-table {
             width: 100%;
             border-collapse: collapse;
@@ -117,98 +79,79 @@
             border: 1px solid #000;
             padding: 3px 4px;
             text-align: center;
-            font-size: 10px;
-            background: #fff;
+            font-size: 12px;
         }
 
         .items-table td {
             border: 1px solid #000;
             padding: 3px 4px;
-            font-size: 10px;
+            font-size: 12px;
             vertical-align: top;
         }
 
-        .items-table .col-qty {
+        .col-qty {
             width: 14mm;
             text-align: center;
         }
 
-        .items-table .col-name {
+        .col-name {
             width: auto;
         }
 
-        .items-table .col-price {
+        .col-price {
             width: 22mm;
             text-align: right;
         }
 
-        .items-table .col-total {
+        .col-total {
             width: 22mm;
             text-align: right;
         }
 
-        /* Empty rows to fill space */
-        .items-table tr.empty-row td {
+        .empty-row td {
             height: 8mm;
         }
 
-        /* ===== FOOTER ===== */
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-top: 4px;
-            gap: 8px;
-        }
-
-        .footer-left {
-            flex: 1;
-        }
-
+        /* FOOTER */
         .footer-perhatian {
             border: 1px solid #000;
             padding: 4px 6px;
-            font-size: 9px;
+            font-size: 12px;
             line-height: 1.4;
             margin-bottom: 8px;
         }
 
-        .footer-perhatian .perhatian-title {
+        .perhatian-title {
             font-weight: bold;
-            font-size: 9px;
+            font-size: 12px;
             text-decoration: underline;
             margin-bottom: 2px;
         }
 
-        .footer-tanda-terima {
-            font-size: 10px;
-            font-weight: bold;
-            margin-top: 4px;
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .footer-tanda-terima .sign-line {
-            margin-top: 18mm;
-            border-top: 1px solid #000;
-            width: 40mm;
+        .summary-table td {
+            padding: 1px 0;
+            font-size: 12px;
         }
 
-        .footer-right {
-            min-width: 55mm;
+        .summary-table .val {
             text-align: right;
+            border-bottom: 1px solid #000;
+            min-width: 30mm;
         }
 
-        .footer-right .jumlah-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .jumlah-row td {
             font-weight: bold;
             font-size: 11px;
             border-bottom: 2px solid #000;
             padding-bottom: 2px;
-            margin-bottom: 4px;
         }
 
-        .footer-right .jumlah-box {
+        .jumlah-box {
             border: 1px solid #000;
             min-width: 30mm;
             height: 7mm;
@@ -217,44 +160,27 @@
             font-weight: bold;
         }
 
-        .footer-right .summary-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            padding: 1px 0;
+        .sign-table {
+            width: 100%;
         }
 
-        .footer-right .summary-row .val {
-            min-width: 30mm;
-            text-align: right;
-            border-bottom: 1px solid #000;
-        }
-
-        .footer-right .hormat-kami {
-            font-size: 10px;
+        .sign-cell {
+            font-size: 12px;
             font-weight: bold;
-            margin-top: 4px;
             text-align: center;
+            vertical-align: top;
+            width: 50%;
         }
 
-        .footer-right .hormat-sign {
-            margin-top: 14mm;
+        .sign-line {
+            margin: 18mm auto 0 auto;
             border-top: 1px solid #000;
-            text-align: center;
-            font-size: 9px;
-        }
-
-        @media print {
-
-            html,
-            body {
-                width: 148mm;
-            }
+            width: 40mm;
         }
     </style>
 </head>
 
-<body onload="window.print()">
+<body>
 
     @php
         $storeName = $transaction->storeSetting->store_name ?? '-';
@@ -267,62 +193,54 @@
 
         $customerName = $transaction->customer->name ?? '-';
 
-        // Count items for empty row padding
         $itemCount = $transaction->transactionItems->count();
-        $minRows = 10; // minimum visible rows in table
+        $minRows = 10;
         $emptyRows = max(0, $minRows - $itemCount);
     @endphp
 
     <div class="paper">
 
         {{-- HEADER --}}
-        <div class="header">
-            <div class="header-left">
-                <div class="header-logo">
-                    <img src="{{ asset('assets/images/logo.png') }}" alt="Logo"
-                        style="width: 80px; height: 80px; object-fit: contain;">
-                </div>
-                <div>
-                    <div class="header-store-name">{{ strtoupper($storeName) }}</div>
-                    @if ($storeAddress)
-                        <div class="header-store-address">{{ $storeAddress }}</div>
-                    @endif
-                    @if ($storePhone)
-                        <div class="header-store-address">Telp. {{ $storePhone }}</div>
-                    @endif
-                </div>
-            </div>
-            <div class="header-right">
-                <table>
-                    <tr>
-                        <td class="label">Tgl.</td>
-                        <td class="value">{{ $tglFormatted }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label" style="vertical-align: middle; padding: 2px 3px;">
-                            <div
-                                style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.5;">
-                                <span style="border-bottom: 1px solid #000; min-width: 10x;">Tuan</span>
+        <table class="header-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td style="vertical-align: top; width: 65%;">
+                    <table cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style="vertical-align: top; padding-right: 8px;">
+                                <img src="{{ public_path('assets/images/logo.png') }}" alt="Logo"
+                                    style="width: 55px; height: 55px; object-fit: contain;">
+                            </td>
+                            <td style="vertical-align: top;">
+                                <div class="header-store-name">{{ strtoupper($storeName) }}</div>
+                                @if ($storeAddress)
+                                    <div class="header-store-address">{{ $storeAddress }}</div>
+                                @endif
+                                @if ($storePhone)
+                                    <div class="header-store-address">Telp. {{ $storePhone }}</div>
+                                @endif
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="vertical-align: top; text-align: right;  width: 35%;">
+                    <table class="header-right-table" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td class="label">Tgl.</td>
+                            <td style="text-decoration: underline;">{{ $tglFormatted }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label" style="vertical-align: middle; padding: 2px 3px; ">
+                                <span style="border-bottom: 1px solid #000; display: block;">Tuan</span>
                                 <span>Toko</span>
-                            </div>
-                        </td>
-                        <td class="value" style="vertical-align: middle;">
-                            <div
-                                style="
-                                min-width: 70px;
-                                height: 100%;
-                                display: flex;
-                                align-items: center;
-                                padding: 2px 3px;
-                                min-height: 28px;
-                            ">
+                            </td>
+                            <td style="min-height: 28px; padding: 2px 3px; text-decoration: underline;">
                                 {{ $customerName }}
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
 
         {{-- NOTA NO --}}
         <div class="nota-no">
@@ -333,10 +251,10 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th class="col-qty">Banyak-<br>nya</th>
-                    <th class="col-name">NAMA BARANG</th>
-                    <th class="col-price">Harga Sat.</th>
-                    <th class="col-total">Jumlah</th>
+                    <th class="col-qty" style="font-size:14px;">Banyak-<br>nya</th>
+                    <th class="col-name" style="font-size:14px;">NAMA BARANG</th>
+                    <th class="col-price" style="font-size:14px;">Harga Sat.</th>
+                    <th class="col-total" style="font-size:14px;">Jumlah</th>
                 </tr>
             </thead>
             <tbody>
@@ -346,15 +264,15 @@
                         $name = $item->product->name ?? ($item->bundle->name ?? '-');
                     @endphp
 
-                    {{-- Main item row --}}
                     <tr>
-                        <td class="col-qty">{{ $item->qty }}</td>
-                        <td class="col-name">{{ $name }}</td>
-                        <td class="col-price">{{ number_format($item->selling_price, 0, ',', '.') }}</td>
-                        <td class="col-total">{{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                        <td class="col-qty" style="font-size:14px;">{{ $item->qty }}</td>
+                        <td class="col-name" style="font-weight: bold;font-size:14px;">{{ $name }}</td>
+                        <td class="col-price" style="font-size:14px;">
+                            {{ number_format($item->selling_price, 0, ',', '.') }}</td>
+                        <td class="col-total" style="font-size:14px;">{{ number_format($item->subtotal, 0, ',', '.') }}
+                        </td>
                     </tr>
 
-                    {{-- Bundle children --}}
                     @if ($isBundle)
                         @foreach ($item->bundle->bundleItems as $bundleItem)
                             @php
@@ -364,19 +282,18 @@
                                 $subtotal = $price * $qty;
                             @endphp
                             <tr>
-                                <td class="col-qty" style="text-align:center;font-size:9px;">{{ $qty }}</td>
-                                <td class="col-name" style="font-size:9px;padding-left:8px;">↳ {{ $bundleProduct }}
+                                <td class="col-qty" style="text-align:center;font-size:14px;">{{ $qty }}</td>
+                                <td class="col-name" style="font-size:14px;padding-left:8px;"> - {{ $bundleProduct }}
                                 </td>
-                                <td class="col-price" style="font-size:9px;">{{ number_format($price, 0, ',', '.') }}
+                                <td class="col-price" style="font-size:14px;">{{ number_format($price, 0, ',', '.') }}
                                 </td>
-                                <td class="col-total" style="font-size:9px;">
+                                <td class="col-total" style="font-size:14px;">
                                     {{ number_format($subtotal, 0, ',', '.') }}</td>
                             </tr>
                         @endforeach
                     @endif
                 @endforeach
 
-                {{-- Empty padding rows --}}
                 @for ($i = 0; $i < $emptyRows; $i++)
                     <tr class="empty-row">
                         <td class="col-qty"></td>
@@ -389,66 +306,65 @@
         </table>
 
         {{-- FOOTER --}}
-        <div style="margin-top: 4px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
-                <div style="flex: 1;">
+        <table style="width: 100%; margin-top: 4px;" cellpadding="0" cellspacing="4">
+            <tr>
+                <td style="vertical-align: top; width: 55%;">
                     <div class="footer-perhatian">
                         <div class="perhatian-title">PERHATIAN</div>
                         Barang-barang yang sudah dibeli<br>
                         tidak dapat dikembalikan / ditukar
                     </div>
-                </div>
-                <div class="footer-right">
-                    <div class="summary-row">
-                        <span>Subtotal</span>
-                        <span class="val">{{ number_format($transaction->subtotal, 0, ',', '.') }}</span>
-                    </div>
-                    @if ($transaction->discount_total > 0)
-                        <div class="summary-row">
-                            <span>Diskon</span>
-                            <span class="val">{{ number_format($transaction->discount_total, 0, ',', '.') }}</span>
-                        </div>
-                    @endif
-                    @if ($transaction->shiping_cost > 0)
-                        <div class="summary-row">
-                            <span>Ongkir</span>
-                            <span class="val">{{ number_format($transaction->shiping_cost, 0, ',', '.') }}</span>
-                        </div>
-                    @endif
+                </td>
+                <td style="vertical-align: top; width: 45%;">
+                    <table class="summary-table" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td>Subtotal</td>
+                            <td class="val">{{ number_format($transaction->subtotal, 0, ',', '.') }}</td>
+                        </tr>
+                        @if ($transaction->discount_total > 0)
+                            <tr>
+                                <td>Diskon</td>
+                                <td class="val">{{ number_format($transaction->discount_total, 0, ',', '.') }}</td>
+                            </tr>
+                        @endif
+                        @if ($transaction->shiping_cost > 0)
+                            <tr>
+                                <td>Ongkir</td>
+                                <td class="val">{{ number_format($transaction->shiping_cost, 0, ',', '.') }}</td>
+                            </tr>
+                        @endif
+                        <tr class="jumlah-row" style="margin-top: 4px;">
+                            <td>Jumlah Rp.</td>
+                            <td class="jumlah-box">{{ number_format($transaction->grand_total, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-size:11px; color:#555;">
+                                {{ $transaction->transactionPayment?->method?->getLabel() }}
+                            </td>
+                            <td style="font-size:11px; color:#555; text-align:right;">
+                                {{ $transaction->transactionPayment?->status?->getLabel() }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
 
-                    <div class="jumlah-row" style="margin-top:4px;">
-                        <span>Jumlah Rp.</span>
-                        <div class="jumlah-box">
-                            {{ number_format($transaction->grand_total, 0, ',', '.') }}
-                        </div>
-                    </div>
-                    <div class="summary-row" style="font-size:9px; color:#555;">
-                        <span>{{ $transaction->transactionPayment?->method?->getLabel() }}</span>
-                        <span>{{ $transaction->transactionPayment?->status?->getLabel() }}</span>
-                    </div>
-                </div>
-
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 4px;">
-
-                <div style="font-size: 10px; font-weight: bold; text-align: center;">
+        {{-- TANDA TANGAN --}}
+        <table class="sign-table" style="margin-top: 4px;" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="sign-cell">
                     Tanda Terima,
-                    <div style="margin-top: 18mm; border-top: 1px solid #000; width: 40mm;"></div>
-                </div>
-
-                <div style="font-size: 10px; font-weight: bold; text-align: center;">
+                    <div class="sign-line"></div>
+                </td>
+                <td class="sign-cell">
                     Hormat kami,
-                    <div style="margin-top: 18mm; border-top: 1px solid #000; width: 40mm;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <div class="sign-line"></div>
+                </td>
+            </tr>
+        </table>
 
-    <script>
-        window.onafterprint = function() {
-            window.close();
-        };
-    </script>
+    </div>
 
 </body>
 
