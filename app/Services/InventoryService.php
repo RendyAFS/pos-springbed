@@ -190,7 +190,6 @@ class InventoryService
         $storeId   = $this->getStoreId($storeReference);
         $remaining = $qty;
 
-        // ── Ambil PurchaseOrderItem yang masih ada sisa, urut FIFO ────────
         $purchaseItems = PurchaseOrderItem::where('product_id', $productId)
             ->where('qty_remaining', '>', 0)
             ->whereHas('purchaseOrder', function ($q) use ($storeId) {
@@ -201,7 +200,6 @@ class InventoryService
             ->lockForUpdate()
             ->get();
 
-        // ── Konsumsi FIFO dari PurchaseOrderItem ──────────────────────────
         /** @var \App\Models\PurchaseOrderItem $purchaseItem */
         foreach ($purchaseItems as $purchaseItem) {
             if ($remaining <= 0) {

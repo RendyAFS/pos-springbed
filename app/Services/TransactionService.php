@@ -27,16 +27,13 @@ class TransactionService
 
                     if ($bundle) {
                         foreach ($bundle->bundleItems as $bundleItem) {
-                            // qty bundle × qty per item dalam bundle
                             $totalQty = $item->qty * $bundleItem->qty;
 
-                            // ✅ Kurangi stok menggunakan $item yang sudah ada
-                            // JANGAN buat TransactionItem baru & JANGAN delete $item
                             $inventoryService->decreaseStock(
                                 productId: $bundleItem->product_id,
                                 qty: $totalQty,
                                 storeReference: $transaction,
-                                transactionItem: $item // pakai item yang ada sebagai referensi
+                                transactionItem: $item
                             );
                         }
                     }
@@ -50,7 +47,6 @@ class TransactionService
                 }
             }
 
-            // ── Promo usage (tidak berubah) ──────────────────────────────────
             if ($transaction->promo_id) {
                 $promo = Promo::lockForUpdate()->find($transaction->promo_id);
 
