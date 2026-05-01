@@ -278,7 +278,7 @@ class ProductForm
                             ->onColor('success')
                             ->inline(false)
                             ->default(false)
-                            ->reactive()
+                            ->live(onBlur: true)
                             ->afterStateUpdated(function ($state, $livewire, Get $get, Set $set) {
                                 if ($state === true) {
                                     $items = $get('../../productImages');

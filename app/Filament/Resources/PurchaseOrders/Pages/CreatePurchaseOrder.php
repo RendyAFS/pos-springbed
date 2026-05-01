@@ -14,4 +14,9 @@ class CreatePurchaseOrder extends CreateRecord
     {
         app(PurchaseOrderService::class)->receiveStock($this->record);
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
