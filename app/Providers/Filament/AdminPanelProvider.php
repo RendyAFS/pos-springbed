@@ -44,6 +44,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->registration()
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->favicon(asset('assets/images/favicon.png'))
             ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Amber,
