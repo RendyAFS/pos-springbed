@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\StoreSettings;
 
 use App\Filament\Resources\StoreSettings\Pages\ManageStoreSettings;
+use App\Helpers\RupiahHelper;
 use App\Models\StoreSetting;
 use BackedEnum;
 use Filament\Actions\ActionGroup;
@@ -19,6 +20,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
@@ -61,24 +63,34 @@ class StoreSettingResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('store_name')
-                    ->label('Store Name')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('phone')
-                    ->label('Phone')
-                    ->numeric()
-                    ->nullable()
-                    ->maxLength(255),
-                TextInput::make('email')
-                    ->label('Email Address')
-                    ->email()
-                    ->nullable()
-                    ->maxLength(255),
-                Textarea::make('address')
-                    ->label('Address')
-                    ->nullable()
-                    ->required(),
+                Grid::make(1)
+                    ->schema([
+                        TextInput::make('store_name')
+                            ->label('Store Name')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('phone')
+                            ->label('Phone')
+                            ->numeric()
+                            ->nullable()
+                            ->maxLength(255),
+                        TextInput::make('email')
+                            ->label('Email Address')
+                            ->email()
+                            ->nullable()
+                            ->maxLength(255),
+                    ]),
+                Grid::make(1)
+                    ->schema([
+                        TextInput::make('set_max_reward')
+                            ->label('Set Max Reward')
+                            ->numeric()
+                            ->required(),
+                        Textarea::make('address')
+                            ->label('Address')
+                            ->nullable()
+                            ->required(),
+                    ]),
                 SpatieMediaLibraryFileUpload::make('homepage_banner')
                     ->label('Homepage Banner')
                     ->nullable()
@@ -90,7 +102,7 @@ class StoreSettingResource extends Resource
                     ->collection('homepage_banner')
                     ->maxSize(2048)
                     ->columnSpanFull(),
-            ]);
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table
@@ -125,6 +137,11 @@ class StoreSettingResource extends Resource
                         return $state;
                     })
                     ->searchable(),
+                TextColumn::make('set_max_reward')
+                    ->label('Maximal Reward')
+                    ->alignCenter()
+                    ->weight('medium')
+                    ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                 SpatieMediaLibraryImageColumn::make('homepage_banner')
                     ->defaultImageUrl(asset('assets/images/logo-no-image.png'))
                     ->extraImgAttributes([

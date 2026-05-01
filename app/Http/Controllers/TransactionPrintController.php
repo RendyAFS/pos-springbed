@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionPrintController extends Controller
 {
@@ -17,6 +18,9 @@ class TransactionPrintController extends Controller
             'storeSetting',
         ]);
 
-        return view('prints.transaction', compact('transaction'));
+        $pdf = Pdf::loadView('prints.transaction', compact('transaction'))
+            ->setPaper('a5', 'portrait');
+
+        return $pdf->stream('nota-' . $transaction->transaction_code . '.pdf');
     }
 }
