@@ -12,9 +12,6 @@ MySQL - 8.0.30 : Database - pos_springbed
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`pos_springbed` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-
-USE `pos_springbed`;
 
 /*Table structure for table `activity_log` */
 
@@ -41,7 +38,7 @@ CREATE TABLE `activity_log` (
 
 /*Data for the table `activity_log` */
 
-insert  into `activity_log`(`id`,`log_name`,`description`,`subject_type`,`event`,`subject_id`,`causer_type`,`causer_id`,`properties`,`batch_uuid`,`created_at`,`updated_at`) values 
+insert  into `activity_log`(`id`,`log_name`,`description`,`subject_type`,`event`,`subject_id`,`causer_type`,`causer_id`,`properties`,`batch_uuid`,`created_at`,`updated_at`) values
 (1,'Access','Super Admin logged in','App\\Models\\User','Login',1,'App\\Models\\User',1,'{\"ip\": \"127.0.0.1\", \"user_agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36\"}',NULL,'2026-05-01 13:15:20','2026-05-01 13:15:20'),
 (2,'Resource','Category Created','App\\Models\\Category','Created',1,NULL,NULL,'{\"id\": 1, \"name\": \"Pocket\", \"slug\": \"pocket-1777616251\", \"is_active\": true, \"created_at\": \"2026-05-01 13:17:31\", \"created_by\": null, \"updated_at\": \"2026-05-01 13:17:31\", \"updated_by\": null}',NULL,'2026-05-01 13:17:31','2026-05-01 13:17:31'),
 (3,'Resource','Category Created','App\\Models\\Category','Created',2,NULL,NULL,'{\"id\": 2, \"name\": \"Bonnel\", \"slug\": \"bonnel-1777616251\", \"is_active\": true, \"created_at\": \"2026-05-01 13:17:31\", \"created_by\": null, \"updated_at\": \"2026-05-01 13:17:31\", \"updated_by\": null}',NULL,'2026-05-01 13:17:31','2026-05-01 13:17:31'),
@@ -81,7 +78,7 @@ CREATE TABLE `brands` (
 
 /*Data for the table `brands` */
 
-insert  into `brands`(`id`,`name`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `brands`(`id`,`name`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'King Koil',1,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
 (2,'Serta',1,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
 (3,'Comforta',1,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
@@ -177,7 +174,7 @@ CREATE TABLE `categories` (
 
 /*Data for the table `categories` */
 
-insert  into `categories`(`id`,`name`,`slug`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `categories`(`id`,`name`,`slug`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'Pocket','pocket-1777616251',1,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
 (2,'Bonnel','bonnel-1777616251',1,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
 (3,'Hybird','hybird-1777616251',1,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
@@ -204,7 +201,7 @@ CREATE TABLE `couriers` (
 
 /*Data for the table `couriers` */
 
-insert  into `couriers`(`id`,`name`,`type`,`shipping_cost`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `couriers`(`id`,`name`,`type`,`shipping_cost`,`is_active`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'JNE','external',100000.00,1,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
 (2,'SiCepat','external',120000.00,1,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
 (3,'J&T','internal',130000.00,1,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
@@ -231,7 +228,7 @@ CREATE TABLE `customers` (
 
 /*Data for the table `customers` */
 
-insert  into `customers`(`id`,`name`,`phone`,`email`,`address`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `customers`(`id`,`name`,`phone`,`email`,`address`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'John Doe','1234567890','johndoe@yahoo.com','123 Main St','2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
 (2,'Jane Doe','123153242','janedoe@yahoo.com','123 Main St','2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
 (3,'David Smith','64646546','david@yahoo.com','123 Main St','2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL);
@@ -356,7 +353,7 @@ CREATE TABLE `migrations` (
 
 /*Data for the table `migrations` */
 
-insert  into `migrations`(`id`,`migration`,`batch`) values 
+insert  into `migrations`(`id`,`migration`,`batch`) values
 (1,'0001_01_01_000000_create_users_table',1),
 (2,'0001_01_01_000001_create_cache_table',1),
 (3,'0001_01_01_000002_create_jobs_table',1),
@@ -426,7 +423,7 @@ CREATE TABLE `model_has_roles` (
 
 /*Data for the table `model_has_roles` */
 
-insert  into `model_has_roles`(`role_id`,`model_type`,`model_id`) values 
+insert  into `model_has_roles`(`role_id`,`model_type`,`model_id`) values
 (1,'App\\Models\\User',1),
 (2,'App\\Models\\User',2),
 (3,'App\\Models\\User',3),
@@ -461,7 +458,7 @@ CREATE TABLE `permissions` (
 
 /*Data for the table `permissions` */
 
-insert  into `permissions`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) values 
+insert  into `permissions`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) values
 (1,'ViewAny:Brand','web','2026-05-01 13:14:56','2026-05-01 13:14:56'),
 (2,'View:Brand','web','2026-05-01 13:14:56','2026-05-01 13:14:56'),
 (3,'Create:Brand','web','2026-05-01 13:14:56','2026-05-01 13:14:56'),
@@ -819,7 +816,7 @@ CREATE TABLE `role_has_permissions` (
 
 /*Data for the table `role_has_permissions` */
 
-insert  into `role_has_permissions`(`permission_id`,`role_id`) values 
+insert  into `role_has_permissions`(`permission_id`,`role_id`) values
 (1,1),
 (2,1),
 (3,1),
@@ -996,7 +993,7 @@ CREATE TABLE `roles` (
 
 /*Data for the table `roles` */
 
-insert  into `roles`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) values 
+insert  into `roles`(`id`,`name`,`guard_name`,`created_at`,`updated_at`) values
 (1,'Super Admin','web','2026-05-01 13:14:43','2026-05-01 13:14:43'),
 (2,'Admin','web','2026-05-01 13:14:43','2026-05-01 13:14:43'),
 (3,'Owner','web','2026-05-01 13:14:43','2026-05-01 13:14:43'),
@@ -1090,7 +1087,7 @@ CREATE TABLE `store_settings` (
 
 /*Data for the table `store_settings` */
 
-insert  into `store_settings`(`id`,`store_name`,`phone`,`email`,`address`,`set_max_reward`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values 
+insert  into `store_settings`(`id`,`store_name`,`phone`,`email`,`address`,`set_max_reward`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`) values
 (1,'Toko 1','1234567890','toko1@yahoo.com','123 Main St',0,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
 (2,'Toko 2','123153242','toko2@yahoo.com','123 Main St',0,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL),
 (3,'Toko 3','64646546','toko3@yahoo.com','123 Main St',0,'2026-05-01 13:17:31','2026-05-01 13:17:31',NULL,NULL,NULL,NULL);
@@ -1250,7 +1247,7 @@ CREATE TABLE `users` (
 
 /*Data for the table `users` */
 
-insert  into `users`(`id`,`name`,`email`,`email_verified_at`,`password`,`is_active`,`store_setting_id`,`remember_token`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`,`ui_preferences`) values 
+insert  into `users`(`id`,`name`,`email`,`email_verified_at`,`password`,`is_active`,`store_setting_id`,`remember_token`,`created_at`,`updated_at`,`created_by`,`updated_by`,`deleted_at`,`deleted_by`,`ui_preferences`) values
 (1,'Super Admin','superadmin@springbed.id',NULL,'$2y$12$cCakAHDeV5xHFubmucO44uZbEMsFw3UpgAZUTT0J8MPzsvQT/CG3.',1,NULL,NULL,'2026-05-01 13:14:43','2026-05-01 13:14:43',NULL,NULL,NULL,NULL,NULL),
 (2,'Admin','admin@springbed.id',NULL,'$2y$12$bGE8at9MKThOSxJdxkfcbu4to9vuMgGX008h3JfEShf2qgHn9h9JW',1,NULL,NULL,'2026-05-01 13:14:43','2026-05-01 13:14:43',NULL,NULL,NULL,NULL,NULL),
 (3,'Owner','owner@springbed.id',NULL,'$2y$12$8S5gPYtBevsQz/M0.UobuOX/U3MZ1hhgrcT1UTjvzsTnUVj5njUma',1,NULL,NULL,'2026-05-01 13:14:43','2026-05-01 13:14:43',NULL,NULL,NULL,NULL,NULL),
