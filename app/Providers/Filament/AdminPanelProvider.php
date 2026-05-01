@@ -44,6 +44,8 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->registration()
             ->viteTheme('resources/css/filament/admin/theme.css')
+            ->favicon(asset('assets/images/favicon.png'))
+            ->brandName('Serba Indah')
             ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Amber,
