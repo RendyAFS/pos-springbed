@@ -6,25 +6,15 @@
     <style>
         @page {
             size: A5 portrait;
-            margin: 10mm;
+            margin: 5mm;
         }
 
         * {
             box-sizing: border-box;
         }
 
-        html,
-        body {
-            width: 148mm;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            font-size: 11px;
-            color: #000;
-        }
-
         .paper {
-            width: 148mm;
+            width: 100%;
         }
 
         /* HEADER */
@@ -69,11 +59,6 @@
             white-space: nowrap;
         }
 
-        .value {
-            border-bottom: 1px solid #000;
-            min-width: 70px;
-        }
-
         /* NOTA NO */
         .nota-no {
             font-size: 11px;
@@ -94,13 +79,13 @@
             border: 1px solid #000;
             padding: 3px 4px;
             text-align: center;
-            font-size: 10px;
+            font-size: 12px;
         }
 
         .items-table td {
             border: 1px solid #000;
             padding: 3px 4px;
-            font-size: 10px;
+            font-size: 12px;
             vertical-align: top;
         }
 
@@ -131,14 +116,14 @@
         .footer-perhatian {
             border: 1px solid #000;
             padding: 4px 6px;
-            font-size: 9px;
+            font-size: 12px;
             line-height: 1.4;
             margin-bottom: 8px;
         }
 
         .perhatian-title {
             font-weight: bold;
-            font-size: 9px;
+            font-size: 12px;
             text-decoration: underline;
             margin-bottom: 2px;
         }
@@ -150,7 +135,7 @@
 
         .summary-table td {
             padding: 1px 0;
-            font-size: 10px;
+            font-size: 12px;
         }
 
         .summary-table .val {
@@ -180,7 +165,7 @@
         }
 
         .sign-cell {
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
             text-align: center;
             vertical-align: top;
@@ -188,7 +173,7 @@
         }
 
         .sign-line {
-            margin-top: 18mm;
+            margin: 18mm auto 0 auto;
             border-top: 1px solid #000;
             width: 40mm;
         }
@@ -218,7 +203,7 @@
         {{-- HEADER --}}
         <table class="header-table" cellpadding="0" cellspacing="0">
             <tr>
-                <td style="vertical-align: top;">
+                <td style="vertical-align: top; width: 65%;">
                     <table cellpadding="0" cellspacing="0">
                         <tr>
                             <td style="vertical-align: top; padding-right: 8px;">
@@ -237,18 +222,18 @@
                         </tr>
                     </table>
                 </td>
-                <td style="vertical-align: top; text-align: right;">
+                <td style="vertical-align: top; text-align: right;  width: 35%;">
                     <table class="header-right-table" cellpadding="0" cellspacing="0">
                         <tr>
                             <td class="label">Tgl.</td>
-                            <td class="value">{{ $tglFormatted }}</td>
+                            <td style="text-decoration: underline;">{{ $tglFormatted }}</td>
                         </tr>
                         <tr>
-                            <td class="label" style="vertical-align: middle; padding: 2px 3px;">
+                            <td class="label" style="vertical-align: middle; padding: 2px 3px; ">
                                 <span style="border-bottom: 1px solid #000; display: block;">Tuan</span>
                                 <span>Toko</span>
                             </td>
-                            <td class="value" style="min-height: 28px; padding: 2px 3px;">
+                            <td style="min-height: 28px; padding: 2px 3px; text-decoration: underline;">
                                 {{ $customerName }}
                             </td>
                         </tr>
@@ -266,10 +251,10 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th class="col-qty">Banyak-<br>nya</th>
-                    <th class="col-name">NAMA BARANG</th>
-                    <th class="col-price">Harga Sat.</th>
-                    <th class="col-total">Jumlah</th>
+                    <th class="col-qty" style="font-size:14px;">Banyak-<br>nya</th>
+                    <th class="col-name" style="font-size:14px;">NAMA BARANG</th>
+                    <th class="col-price" style="font-size:14px;">Harga Sat.</th>
+                    <th class="col-total" style="font-size:14px;">Jumlah</th>
                 </tr>
             </thead>
             <tbody>
@@ -280,10 +265,12 @@
                     @endphp
 
                     <tr>
-                        <td class="col-qty">{{ $item->qty }}</td>
-                        <td class="col-name">{{ $name }}</td>
-                        <td class="col-price">{{ number_format($item->selling_price, 0, ',', '.') }}</td>
-                        <td class="col-total">{{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                        <td class="col-qty" style="font-size:14px;">{{ $item->qty }}</td>
+                        <td class="col-name" style="font-weight: bold;font-size:14px;">{{ $name }}</td>
+                        <td class="col-price" style="font-size:14px;">
+                            {{ number_format($item->selling_price, 0, ',', '.') }}</td>
+                        <td class="col-total" style="font-size:14px;">{{ number_format($item->subtotal, 0, ',', '.') }}
+                        </td>
                     </tr>
 
                     @if ($isBundle)
@@ -295,12 +282,12 @@
                                 $subtotal = $price * $qty;
                             @endphp
                             <tr>
-                                <td class="col-qty" style="text-align:center;font-size:9px;">{{ $qty }}</td>
-                                <td class="col-name" style="font-size:9px;padding-left:8px;">↳ {{ $bundleProduct }}
+                                <td class="col-qty" style="text-align:center;font-size:14px;">{{ $qty }}</td>
+                                <td class="col-name" style="font-size:14px;padding-left:8px;"> - {{ $bundleProduct }}
                                 </td>
-                                <td class="col-price" style="font-size:9px;">{{ number_format($price, 0, ',', '.') }}
+                                <td class="col-price" style="font-size:14px;">{{ number_format($price, 0, ',', '.') }}
                                 </td>
-                                <td class="col-total" style="font-size:9px;">
+                                <td class="col-total" style="font-size:14px;">
                                     {{ number_format($subtotal, 0, ',', '.') }}</td>
                             </tr>
                         @endforeach
@@ -351,10 +338,10 @@
                             <td class="jumlah-box">{{ number_format($transaction->grand_total, 0, ',', '.') }}</td>
                         </tr>
                         <tr>
-                            <td style="font-size:9px; color:#555;">
+                            <td style="font-size:11px; color:#555;">
                                 {{ $transaction->transactionPayment?->method?->getLabel() }}
                             </td>
-                            <td style="font-size:9px; color:#555; text-align:right;">
+                            <td style="font-size:11px; color:#555; text-align:right;">
                                 {{ $transaction->transactionPayment?->status?->getLabel() }}
                             </td>
                         </tr>

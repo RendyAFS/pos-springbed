@@ -527,7 +527,7 @@ class TransactionForm
                                                                 $lines[] = "• {$name} * {$qty} @ Rp " . number_format($sellingPrice, 0, ',', '.') . "{$discountPart} = Rp " . number_format($subtotal, 0, ',', '.');
                                                             }
 
-                                                            $discountReferal = (float) ($get('discount_referal') ?? 0);
+                                                            $discountReferal = (float) ($get('use_discount_referal') ?? 0);
                                                             if ($discountReferal > 0) {
                                                                 $lines[] = '──────────────────────────';
                                                                 $lines[] = '🎁 Discount Referal: − Rp ' . number_format($discountReferal, 0, ',', '.');
@@ -622,7 +622,7 @@ class TransactionForm
                                                                 . ' (Maks. penggunaan: ' . RupiahHelper::format($maxReward) . ' per transaksi)';
                                                         }),
 
-                                                    TextInput::make('discount_referal')
+                                                    TextInput::make('use_discount_referal')
                                                         ->label('Discount Referal')
                                                         ->numeric()
                                                         ->default(0)
@@ -635,14 +635,14 @@ class TransactionForm
                                                             $maxUsage   = self::getMaxReward($get);
 
                                                             if ((float) $state > $maxUsage) {
-                                                                $set('discount_referal', $maxUsage);
+                                                                $set('use_discount_referal', $maxUsage);
                                                                 $state = $maxUsage;
                                                             }
 
                                                             if ($customerId) {
                                                                 $referal = Referal::where('customer_id', $customerId)->first();
                                                                 if ($referal && (float) $state > $referal->discount_amount) {
-                                                                    $set('discount_referal', $referal->discount_amount);
+                                                                    $set('use_discount_referal', $referal->discount_amount);
                                                                 }
                                                             }
 
@@ -761,7 +761,7 @@ class TransactionForm
             }
         }
 
-        $discountReferal = (float) ($get('discount_referal') ?? 0);
+        $discountReferal = (float) ($get('use_discount_referal') ?? 0);
 
         $shippingCost = (float) ($get('shiping_cost') ?? 0);
 

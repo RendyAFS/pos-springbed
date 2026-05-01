@@ -22,14 +22,14 @@ class CreateTransaction extends CreateRecord
         $data['store_setting_id'] = Auth::user()?->store_setting_id;
 
         $this->extraData = [
-            'courier_id'          => $data['courier_id'] ?? null,
-            'payment_method'      => $data['payment_method'] ?? null,
-            'payment_amount'      => $data['payment_amount'] ?? null,
-            'payment_status'      => $data['payment_status'] ?? null,
-            'is_referal'          => filter_var($data['is_referal'] ?? false, FILTER_VALIDATE_BOOLEAN),
-            'referal_customer_id' => $data['referal_customer_id'] ?? null,
-            'nominal_referal'     => $data['nominal_referal'] ?? 0,
-            'discount_referal'    => $data['discount_referal'] ?? 0,
+            'courier_id'           => $data['courier_id'] ?? null,
+            'payment_method'       => $data['payment_method'] ?? null,
+            'payment_amount'       => $data['payment_amount'] ?? null,
+            'payment_status'       => $data['payment_status'] ?? null,
+            'is_referal'           => filter_var($data['is_referal'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            'referal_customer_id'  => $data['referal_customer_id'] ?? null,
+            'nominal_referal'      => $data['nominal_referal'] ?? 0,
+            'use_discount_referal' => $data['use_discount_referal'] ?? 0,
         ];
 
         unset(
@@ -37,7 +37,6 @@ class CreateTransaction extends CreateRecord
             $data['payment_method'],
             $data['payment_amount'],
             $data['payment_status'],
-            $data['discount_referal'],
         );
 
         if (isset($data['transactionItems'])) {

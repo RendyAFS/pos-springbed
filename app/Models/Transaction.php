@@ -25,6 +25,7 @@ class Transaction extends Model
         'is_referal',
         'referal_customer_id',
         'nominal_referal',
+        'use_discount_referal'
     ];
 
     protected $casts = [
