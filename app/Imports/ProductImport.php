@@ -53,6 +53,7 @@ class ProductImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                 $rowNum   = $index + 3;
                 $rowArray = $row->toArray();
 
+                $storeName    = strtolower(trim($rowArray['store_name']    ?? ''));
                 $brandName    = strtolower(trim($rowArray['brand_name']    ?? ''));
                 $categoryName = strtolower(trim($rowArray['category_name'] ?? ''));
                 $name         = trim($rowArray['name']          ?? '');
@@ -63,6 +64,23 @@ class ProductImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                 $weight       = $rowArray['weight']    ?? null;
                 $color        = $rowArray['color']     ?? null;
                 $isActive     = $rowArray['is_active'] ?? 1;
+
+                $resolvedStore  = $storeMap[$storeName] ?? null;
+                $storeSettingId = null;
+
+                if ($resolvedStore) {
+                    if ($loggedInUserStoreId && $resolvedStore->id !== $loggedInUserStoreId) {
+                        $this->errors[] = [
+                            'row'    => $rowNum,
+                            'name'   => $name ?: '(empty)',
+                            'errors' => ["Store '{$rowArray['store_name']}' tidak sesuai dengan toko Anda."],
+                        ];
+                        continue;
+                    }
+                    $storeSettingId = $resolvedStore->id;
+                } else {
+                    $storeSettingId = $loggedInUserStoreId;
+                }
 
                 $stockEntries = [];
 
@@ -81,9 +99,9 @@ class ProductImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                         continue;
                     }
 
-                    // if ($loggedInUserStoreId && $store->id !== $loggedInUserStoreId) {
-                    //     continue;
-                    // }
+                    if ($loggedInUserStoreId && $store->id !== $loggedInUserStoreId) {
+                        continue;
+                    }
 
                     $qty = is_numeric($value) ? max(0, (int) $value) : 0;
                     $stockEntries[$store->id] = $qty;
@@ -144,16 +162,17 @@ class ProductImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                 }
 
                 $product = Product::create([
-                    'brands_id'     => $brand->id,
-                    'categories_id' => $category->id,
-                    'name'          => $name,
-                    'type'          => $type,
-                    'size'          => $size,
-                    'selling_price' => (float) $sellingPrice,
-                    'sku'           => $sku ?: null,
-                    'weight'        => is_numeric($weight) ? (float) $weight : null,
-                    'color'         => $color ?: null,
-                    'is_active'     => (bool) (int) $isActive,
+                    'store_setting_id' => $storeSettingId,
+                    'brand_id'         => $brand->id,
+                    'category_id'      => $category->id,
+                    'name'             => $name,
+                    'type'             => $type,
+                    'size'             => $size,
+                    'selling_price'    => (float) $sellingPrice,
+                    'sku'              => $sku ?: null,
+                    'weight'           => is_numeric($weight) ? (float) $weight : null,
+                    'color'            => $color ?: null,
+                    'is_active'        => (bool) (int) $isActive,
                 ]);
 
                 foreach ($stockEntries as $storeId => $qty) {
