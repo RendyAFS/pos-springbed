@@ -24,7 +24,7 @@ class CreateUser extends CreateRecord
 
     private function resolveStoreSettingId(array $data): array
     {
-        $selected = $data['store_selected'] ?? [];
+        $selected = $data['selected_store'] ?? [];
 
         if (count($selected) === 1) {
             $store = StoreSetting::where('store_name', reset($selected))->first();
