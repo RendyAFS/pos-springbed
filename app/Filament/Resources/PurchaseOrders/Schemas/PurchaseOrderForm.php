@@ -33,8 +33,7 @@ class PurchaseOrderForm
                             ->default(fn() => Auth::user()?->store_setting_id)
                             ->disabled(fn() => Auth::user()?->store_setting_id !== null)
                             ->dehydrated(fn() => true)
-                            ->reactive()
-                            ->debounce(500)
+                            ->live(onBlur: true)
                             ->afterStateUpdated(function (Get $get, Set $set) {
                                 $storeId = $get('store_setting_id');
                                 $items = $get('purchaseOrderItems') ?? [];
@@ -113,8 +112,7 @@ class PurchaseOrderForm
                                     ->searchable()
                                     ->preload()
                                     ->required()
-                                    ->reactive()
-                                    ->debounce(500)
+                                    ->live(onBlur: true)
                                     ->afterStateUpdated(function ($state, Get $get, Set $set) {
 
                                         $storeId = $get('../../store_setting_id');
@@ -142,8 +140,7 @@ class PurchaseOrderForm
                                     ->label('Quantity')
                                     ->numeric()
                                     ->required()
-                                    ->reactive()
-                                    ->debounce(500)
+                                    ->live(onBlur: true)
                                     ->minValue(0)
                                     ->default(0)
                                     ->afterStateUpdated(function (Get $get, Set $set) {
@@ -166,8 +163,7 @@ class PurchaseOrderForm
                                     ->default(0)
                                     ->prefix('Rp')
                                     ->required()
-                                    ->reactive()
-                                    ->debounce(500)
+                                    ->live(onBlur: true)
                                     ->afterStateUpdated(function (Get $get, Set $set) {
 
                                         $items = $get('../../purchaseOrderItems') ?? [];

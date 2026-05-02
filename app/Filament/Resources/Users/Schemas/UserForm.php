@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Models\StoreSetting;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Icons\Heroicon;
@@ -67,16 +70,35 @@ class UserForm
                             ->searchable()
                             ->required(),
 
-                        Select::make('storeSetting')
-                            ->label('Store / Warehouse')
-                            ->relationship(
-                                name: 'storeSetting',
-                                titleAttribute: 'store_name'
-                            )
+                        Select::make('store_selected')
+                            ->label('Available Store')
+                            ->multiple()
+                            ->options(StoreSetting::all()->pluck('store_name', 'store_name'))
                             ->preload()
                             ->searchable()
-                            ->required(),
+                            ->nullable()
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set, ?array $state) {
+                                if (empty($state)) {
+                                    $set('store_setting_id', null);
+                                    return;
+                                }
 
+                                if (count($state) === 1) {
+                                    $storeName = reset($state);
+                                    $store = StoreSetting::where('store_name', $storeName)->first();
+
+                                    $set('store_setting_id', $store?->id ?? null);
+                                }
+                            }),
+
+                        Select::make('store_setting_id')
+                            ->label('Active Store')
+                            ->relationship('storeSetting', 'store_name')
+                            ->dehydrated()
+                            ->preload()
+                            ->searchable()
+                            ->hidden(),
 
                         Toggle::make('is_active')
                             ->label('Is Active')

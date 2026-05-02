@@ -36,6 +36,7 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'is_active',
         'store_setting_id',
+        'store_selected',
     ];
 
     /**
@@ -60,6 +61,7 @@ class User extends Authenticatable implements FilamentUser
             'password'          => 'hashed',
             'is_active'         => 'boolean',
             'ui_preferences'    => 'array',
+            'store_selected'    => 'array',
         ];
     }
 

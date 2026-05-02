@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateBundle extends CreateRecord
 {
     protected static string $resource = BundleResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
