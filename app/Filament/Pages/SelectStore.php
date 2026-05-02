@@ -9,9 +9,7 @@ use App\Models\User;
 
 class SelectStore extends Page
 {
-
     protected static bool $shouldRegisterNavigation = false;
-
     protected string $view = 'filament.pages.select-store';
 
     public ?int $store_setting_id = null;
@@ -26,17 +24,30 @@ class SelectStore extends Page
         /** @var User $user */
         $user = Auth::user();
 
+        $store = StoreSetting::find($this->store_setting_id);
+
         $user->update([
             'store_setting_id' => $this->store_setting_id,
         ]);
 
-        session()->put('store_selected', true);
+        session()->put('selected_store', $store?->store_name);
 
         return redirect()->intended('/admin');
     }
 
     public function getStores()
     {
-        return StoreSetting::select('id', 'store_name', 'address')->get();
+        /** @var User $user */
+        $user = Auth::user();
+
+        $allowedStores = $user->selected_store ?? [];
+
+        if (empty($allowedStores)) {
+            return StoreSetting::select('id', 'store_name', 'address')->get();
+        }
+
+        return StoreSetting::select('id', 'store_name', 'address')
+            ->whereIn('store_name', $allowedStores)
+            ->get();
     }
 }

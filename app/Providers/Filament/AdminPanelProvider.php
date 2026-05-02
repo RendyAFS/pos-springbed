@@ -88,7 +88,12 @@ class AdminPanelProvider extends PanelProvider
                     ->visible(function () {
                         /** @var User|null $user */
                         $user = Auth::user();
-                        return !$user?->hasRole('Super Admin');
+
+                        if (!$user || $user->hasRole('Super Admin')) {
+                            return false;
+                        }
+
+                        return count($user->selected_store ?? []) > 1;
                     }),
             ])
             ->navigationGroups([

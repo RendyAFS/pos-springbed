@@ -35,7 +35,7 @@ class UsersTable
                     ->label('Name')
                     ->searchable(),
 
-                TextColumn::make('store_selected')
+                TextColumn::make('selected_store')
                     ->label('Available Store')
                     ->badge()
                     ->separator(', ')

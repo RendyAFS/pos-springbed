@@ -70,7 +70,7 @@ class UserForm
                             ->searchable()
                             ->required(),
 
-                        Select::make('store_selected')
+                        Select::make('selected_store')
                             ->label('Available Store')
                             ->multiple()
                             ->options(StoreSetting::all()->pluck('store_name', 'store_name'))
