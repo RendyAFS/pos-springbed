@@ -49,4 +49,9 @@ class CreateProduct extends CreateRecord
             app(StockAdjustmentService::class)->adjust($adjustment);
         }
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

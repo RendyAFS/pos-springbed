@@ -60,4 +60,9 @@ class EditProduct extends EditRecord
             app(StockAdjustmentService::class)->adjust($adjustment);
         }
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
