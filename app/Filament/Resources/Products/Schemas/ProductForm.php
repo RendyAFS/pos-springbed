@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
-use App\Enums\SizeProductEnum;
-use App\Enums\TypeProductEnum;
 use App\Models\InventoryStock;
 use App\Models\StoreSetting;
 use Filament\Actions\Action;
@@ -46,27 +44,17 @@ class ProductForm
                             ->searchable()
                             ->preload()
                             ->required(),
-                        Select::make('size')
+                        Select::make('size_id')
                             ->label('Size')
-                            ->options(
-                                collect(SizeProductEnum::cases())
-                                    ->mapWithKeys(fn($case) => [
-                                        $case->value => $case->getLabel()
-                                    ])
-                                    ->toArray()
-                            )
+                            ->relationship('size', 'name')
                             ->searchable()
+                            ->preload()
                             ->required(),
-                        Select::make('type')
+                        Select::make('type_id')
                             ->label('Type')
-                            ->options(
-                                collect(TypeProductEnum::cases())
-                                    ->mapWithKeys(fn($case) => [
-                                        $case->value => $case->getLabel()
-                                    ])
-                                    ->toArray()
-                            )
+                            ->relationship('type', 'name')
                             ->searchable()
+                            ->preload()
                             ->required(),
                         TextInput::make('name')
                             ->label('Name')
@@ -89,19 +77,33 @@ class ProductForm
                             ->label('Weight')
                             ->numeric()
                             ->default(null),
-                        TextInput::make('color')
-                            ->label('Color')
-                            ->default(null),
                         Toggle::make('is_active')
                             ->label('Is Active')
                             ->offIcon(Heroicon::XMark)
                             ->onIcon(Heroicon::Check)
                             ->offColor('danger')
                             ->onColor('success')
-                            ->inline(false)
-                            ->default(true),
-                        Hidden::make('stock_adjustment_temp')
-                            ->dehydrated(true)
+                            ->inline(false),
+                        Select::make('color')
+                            ->label('Color')
+                            ->options([
+                                'merah' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #ef4444"></span>Merah</span>',
+                                'pink' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #ec4899"></span>Pink</span>',
+                                'kuning' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #eab308"></span>Kuning</span>',
+                                'orange' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #f97316"></span>Orange</span>',
+                                'biru' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #3b82f6"></span>Biru</span>',
+                                'hijau' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #22c55e"></span>Hijau</span>',
+                                'ungu' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #8b5cf6"></span>Ungu</span>',
+                                'coklat' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #92400e"></span>Coklat</span>',
+                                'hitam' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #111827"></span>Hitam</span>',
+                                'putih' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #ffffff"></span>Putih</span>',
+                                'abu_abu' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #9ca3af"></span>Abu-abu</span>',
+                            ])
+                            ->allowHtml()
+                            ->native(false)
+                            ->searchable()
+                            ->preload()
+                            ->dehydrated(true),
                     ])->columns(2),
                 Section::make('Inventory')
                     ->icon(Heroicon::ArchiveBox)

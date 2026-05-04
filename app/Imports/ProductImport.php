@@ -2,12 +2,12 @@
 
 namespace App\Imports;
 
-use App\Enums\SizeProductEnum;
-use App\Enums\TypeProductEnum;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\InventoryStock;
 use App\Models\Product;
+use App\Models\ProductSize;
+use App\Models\ProductType;
 use App\Models\StoreSetting;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -28,8 +28,17 @@ class ProductImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
 
     public function collection(Collection $rows): void
     {
-        $validTypes = collect(TypeProductEnum::cases())->pluck('value')->toArray();
-        $validSizes = collect(SizeProductEnum::cases())->pluck('value')->toArray();
+        $validTypes = ProductType::all()
+            ->pluck('name')
+            ->map(fn(string $name): string => strtolower(trim($name)))
+            ->toArray();
+        $validSizes = ProductSize::all()
+            ->pluck('name')
+            ->map(fn(string $name): string => strtolower(trim($name)))
+            ->toArray();
+
+        $typeMap = ProductType::all()->keyBy(fn(ProductType $type): string => strtolower(trim($type->name)));
+        $sizeMap = ProductSize::all()->keyBy(fn(ProductSize $size): string => strtolower(trim($size->name)));
 
         $storeMap = StoreSetting::all()->keyBy(
             fn(StoreSetting $s) => strtolower(trim($s->store_name))
@@ -44,6 +53,8 @@ class ProductImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
             $rows,
             $validTypes,
             $validSizes,
+            $typeMap,
+            $sizeMap,
             $storeMap,
             $brandMap,
             $categoryMap,
@@ -166,6 +177,8 @@ class ProductImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                     'brand_id'         => $brand->id,
                     'category_id'      => $category->id,
                     'name'             => $name,
+                    'type_id'          => $typeMap[$type]?->id,
+                    'size_id'          => $sizeMap[$size]?->id,
                     'type'             => $type,
                     'size'             => $size,
                     'selling_price'    => (float) $sellingPrice,

@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\SizeProductEnum;
-use App\Enums\TypeProductEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Mattiverse\Userstamps\Traits\Userstamps;
@@ -17,10 +15,10 @@ class Product extends Model
         'brand_id',
         'category_id',
         'name',
-        'type',
+        'type_id',
         'selling_price',
         'sku',
-        'size',
+        'size_id',
         'weight',
         'color',
         'is_active',
@@ -30,8 +28,6 @@ class Product extends Model
         'is_active'     => 'boolean',
         'selling_price' => 'decimal:2',
         'weight'        => 'decimal:2',
-        'type'          => TypeProductEnum::class,
-        'size'          => SizeProductEnum::class,
     ];
 
     public function brand()
@@ -42,6 +38,16 @@ class Product extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function size()
+    {
+        return $this->belongsTo(ProductSize::class, 'size_id');
+    }
+
+    public function type()
+    {
+        return $this->belongsTo(ProductType::class, 'type_id');
     }
 
     public function productImages()
