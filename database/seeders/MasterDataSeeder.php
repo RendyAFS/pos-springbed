@@ -127,18 +127,21 @@ class MasterDataSeeder extends Seeder
 
         $store_settings = [
             [
+                'company_name' => 'Serba Indah',
                 'store_name' => 'Toko 1',
                 'phone' => '1234567890',
                 'email' => 'toko1@yahoo.com',
                 'address' => '123 Main St',
             ],
             [
+                'company_name' => 'Serba Indah',
                 'store_name' => 'Toko 2',
                 'phone' => '123153242',
                 'email' => 'toko2@yahoo.com',
                 'address' => '123 Main St',
             ],
             [
+                'company_name' => 'Serba Indah',
                 'store_name' => 'Toko 3',
                 'phone' => '64646546',
                 'email' => 'toko3@yahoo.com',

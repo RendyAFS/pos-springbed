@@ -13,6 +13,7 @@ class StoreSetting extends Model implements HasMedia
     use SoftDeletes, Userstamps, InteractsWithMedia;
 
     protected $fillable = [
+        'company_name',
         'store_name',
         'phone',
         'email',

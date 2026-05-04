@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Filament\Pages\SelectStore;
 use App\Http\Middleware\EnsureStoreSelected;
+use App\Models\StoreSetting;
 use Awcodes\LightSwitch\Enums\Alignment;
 use Awcodes\LightSwitch\LightSwitchPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -27,8 +28,10 @@ use Filament\Enums\ThemeMode;
 use Filament\Navigation\NavigationGroup;
 use Filament\Support\Enums\Platform;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\HtmlString;
 use Jacobtims\FilamentLogger\FilamentLoggerPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 
@@ -45,7 +48,9 @@ class AdminPanelProvider extends PanelProvider
             ->registration()
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->favicon(asset('assets/images/favicon.png'))
-            ->brandName('Serba Indah')
+            ->brandName(fn(): string => $this->getStoreBrandName())
+            ->brandLogo(fn(): Htmlable => $this->getStoreBrandLogo())
+            ->brandLogoHeight('2.5rem')
             ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Amber,
@@ -128,5 +133,34 @@ class AdminPanelProvider extends PanelProvider
                         slug: 'my-profile' // Sets the slug for the profile page (default = 'my-profile')
                     ),
             ]);
+    }
+
+    protected function getActiveStoreSetting(): ?StoreSetting
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        return $user?->storeSetting ?? StoreSetting::query()->first();
+    }
+
+    protected function getStoreBrandName(): string
+    {
+        return $this->getActiveStoreSetting()?->company_name ?: 'Serba Indah';
+    }
+
+    protected function getActiveStoreName(): string
+    {
+        return $this->getActiveStoreSetting()?->store_name ?: 'Toko 1';
+    }
+
+    protected function getStoreBrandLogo(): Htmlable
+    {
+        $store = $this->getActiveStoreSetting();
+
+        return new HtmlString(view('filament.components.store-brand-logo', [
+            'brandName' => $this->getStoreBrandName(),
+            'storeName' => $this->getActiveStoreName(),
+            'logoUrl' => $store?->getFirstMediaUrl('store_logo') ?: asset('assets/images/favicon.png'),
+        ])->render());
     }
 }
