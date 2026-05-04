@@ -12,10 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
+            $table->dropcolumn(['size', 'type']);
+
             // Add new columns for foreign keys
             $table->unsignedBigInteger('size_id')->nullable()->after('sku');
             $table->unsignedBigInteger('type_id')->nullable()->after('size_id');
-            
+
             // Add foreign key constraints
             $table->foreign('size_id')->references('id')->on('product_sizes')->nullOnDelete();
             $table->foreign('type_id')->references('id')->on('product_types')->nullOnDelete();

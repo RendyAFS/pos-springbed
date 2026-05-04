@@ -11,36 +11,17 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Model;
+
 use UnitEnum;
 
 class ProductSizeResource extends Resource
 {
     protected static ?string $model = ProductSize::class;
-
-    protected static ?string $navigationLabel = 'Size';
-
+    protected static ?string $navigationLabel = 'Sizes';
     protected static ?string $pluralLabel = 'Sizes';
-
     protected static string | UnitEnum | null $navigationGroup = 'Master Data';
-
-    protected static ?int $navigationSort = 40;
-
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedArrowsPointingOut;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name'];
-    }
-
-    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
-    {
-        return $record->name;
-    }
 
     public static function form(Schema $schema): Schema
     {

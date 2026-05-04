@@ -33,7 +33,7 @@ class ProductsTable
                     ->searchable()
                     ->formatStateUsing(function ($state, $record) {
 
-                        $type = $record->type?->getLabel() ?? '-';
+                        $type = $record->type?->name ?? '-';
                         $brand = $record->brand?->name ?? '-';
 
                         return new HtmlString("
@@ -60,7 +60,7 @@ class ProductsTable
                     ->sortable(),
                 TextColumn::make('size')
                     ->label('Size')
-                    ->formatStateUsing(fn($state) => $state?->getLabel())
+                    ->formatStateUsing(fn($state) => $state?->name)
                     ->searchable(),
                 TextColumn::make('selling_price')
                     ->label('Selling Price')

@@ -45,8 +45,9 @@ class InventoryStockResource extends Resource
         $product = $record->product;
 
         return [
+            'Store'         => $product?->storeSetting?->store_name,
             'SKU'           => $product?->sku,
-            'Type'          => $product?->type?->getLabel(),
+            'Type'          => $product?->type?->name,
             'Category'      => $product?->category?->name,
             'Brand'         => $product?->brand?->name,
             'Stock'         => ($record->quantity ?? 0) . ' pcs',
