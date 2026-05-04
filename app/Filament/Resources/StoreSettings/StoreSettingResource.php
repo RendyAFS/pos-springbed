@@ -19,8 +19,9 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
@@ -63,12 +64,35 @@ class StoreSettingResource extends Resource
     {
         return $schema
             ->components([
+                Section::make('Store Identity')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('store_logo')
+                            ->label('Store Logo')
+                            ->nullable()
+                            ->image()
+                            ->imageEditor()
+                            ->openable()
+                            ->downloadable()
+                            ->disk('public')
+                            ->collection('store_logo')
+                            ->maxSize(2048)
+                            ->columnSpan(1),
+                        TextInput::make('company_name')
+                            ->label('Company Name')
+                            ->default('Serba Indah')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpan(1),
+                        TextInput::make('store_name')
+                            ->label('Active Store Name')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
                 Grid::make(1)
                     ->schema([
-                        TextInput::make('store_name')
-                            ->label('Store Name')
-                            ->required()
-                            ->maxLength(255),
                         TextInput::make('phone')
                             ->label('Phone')
                             ->numeric()
@@ -109,8 +133,22 @@ class StoreSettingResource extends Resource
     {
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make('store_logo')
+                    ->label('Logo')
+                    ->defaultImageUrl(asset('assets/images/favicon.png'))
+                    ->extraImgAttributes([
+                        'class' => 'rounded-md'
+                    ])
+                    ->limit(1)
+                    ->disk('public')
+                    ->collection('store_logo')
+                    ->imageWidth(44)
+                    ->imageHeight(44),
+                TextColumn::make('company_name')
+                    ->label('Company Name')
+                    ->searchable(),
                 TextColumn::make('store_name')
-                    ->label('Store Name')
+                    ->label('Active Store')
                     ->searchable(),
                 TextColumn::make('phone')
                     ->label('Phone')

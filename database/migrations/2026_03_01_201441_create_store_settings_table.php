@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('store_settings', function (Blueprint $table) {
             $table->id();
+            $table->string('company_name')->default('Serba Indah');
             $table->string('store_name')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
