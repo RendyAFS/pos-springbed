@@ -21,26 +21,9 @@ use UnitEnum;
 class ProductTypeResource extends Resource
 {
     protected static ?string $model = ProductType::class;
-
-    protected static ?string $navigationLabel = 'Type';
-
+    protected static ?string $navigationLabel = 'Types';
     protected static ?string $pluralLabel = 'Types';
-
     protected static string | UnitEnum | null $navigationGroup = 'Master Data';
-
-    protected static ?int $navigationSort = 41;
-
-    protected static string | \BackedEnum | null $navigationIcon = Heroicon::OutlinedSquares2x2;
-
-    public static function getGloballySearchableAttributes(): array
-    {
-        return ['name'];
-    }
-
-    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
-    {
-        return $record->name;
-    }
 
     public static function form(Schema $schema): Schema
     {

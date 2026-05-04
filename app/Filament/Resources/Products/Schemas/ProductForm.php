@@ -32,13 +32,13 @@ class ProductForm
                 Section::make('Product Information')
                     ->icon(Heroicon::ArchiveBox)
                     ->schema([
-                        Select::make('brands_id')
+                        Select::make('brand_id')
                             ->label('Brand')
                             ->relationship('brand', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
-                        Select::make('categories_id')
+                        Select::make('categoriy_id')
                             ->label('Category')
                             ->relationship('category', 'name')
                             ->searchable()
@@ -77,13 +77,6 @@ class ProductForm
                             ->label('Weight')
                             ->numeric()
                             ->default(null),
-                        Toggle::make('is_active')
-                            ->label('Is Active')
-                            ->offIcon(Heroicon::XMark)
-                            ->onIcon(Heroicon::Check)
-                            ->offColor('danger')
-                            ->onColor('success')
-                            ->inline(false),
                         Select::make('color')
                             ->label('Color')
                             ->options([
@@ -104,6 +97,13 @@ class ProductForm
                             ->searchable()
                             ->preload()
                             ->dehydrated(true),
+                        Toggle::make('is_active')
+                            ->label('Is Active')
+                            ->offIcon(Heroicon::XMark)
+                            ->onIcon(Heroicon::Check)
+                            ->offColor('danger')
+                            ->onColor('success')
+                            ->inline(false),
                     ])->columns(2),
                 Section::make('Inventory')
                     ->icon(Heroicon::ArchiveBox)
