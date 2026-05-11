@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Activity::class, ActivityPolicy::class);
-        Gate::define('viewLogViewer', function ($user) {
+        Gate::define('viewLogViewer', function (User $user) {
             return $user->hasRole('Super Admin');
         });
         Gate::define('viewPulse', function (User $user) {
