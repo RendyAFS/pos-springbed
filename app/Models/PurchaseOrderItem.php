@@ -12,10 +12,12 @@ class PurchaseOrderItem extends Model
         'qty_purchased',
         'qty_remaining',
         'cost_price',
+        'date_product_order'
     ];
 
     protected $casts = [
-        'cost_price' => 'decimal:2'
+        'cost_price'         => 'decimal:2',
+        'date_product_order' => 'datetime'
     ];
 
     public function purchaseOrder()
