@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Policies\ActivityPolicy;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -24,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Activity::class, ActivityPolicy::class);
         Gate::define('viewLogViewer', function ($user) {
+            return $user->hasRole('Super Admin');
+        });
+        Gate::define('viewPulse', function (User $user) {
             return $user->hasRole('Super Admin');
         });
     }
