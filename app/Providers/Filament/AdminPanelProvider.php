@@ -150,7 +150,7 @@ class AdminPanelProvider extends PanelProvider
 
     protected function getActiveStoreName(): string
     {
-        return $this->getActiveStoreSetting()?->store_name ?: 'Toko 1';
+        return $this->getActiveStoreSetting()?->store_name ?: '';
     }
 
     protected function getStoreBrandLogo(): Htmlable

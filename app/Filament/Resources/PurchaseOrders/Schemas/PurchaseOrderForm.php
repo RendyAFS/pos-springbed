@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PurchaseOrders\Schemas;
 use App\Models\InventoryStock;
 use App\Models\Product;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -204,7 +205,15 @@ class PurchaseOrderForm
                                             ->value('selling_price');
                                         $set('selling_price', $price ?? 0);
                                     })
-                                    ->columnSpan(1)
+                                    ->columnSpan(1),
+                                DateTimePicker::make('date_product_order')
+                                    ->label('Date Product Order')
+                                    ->native(false)
+                                    ->suffixIcon(Heroicon::Calendar)
+                                    ->closeOnDateSelection()
+                                    ->required()
+                                    ->default(now())
+                                    ->columnSpanFull(),
                             ])->columns(2),
                     ])
                     ->addActionLabel('Add Item')
