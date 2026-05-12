@@ -42,7 +42,7 @@ class InventoryStocksTable
                     ->searchable()
                     ->formatStateUsing(function ($state, $record) {
 
-                        $type  = $record->product?->type?->getLabel() ?? '';
+                        $type  = $record->product?->type?->name ?? '';
                         $brand = $record->product?->brand?->name ?? '';
 
                         return new HtmlString("

@@ -140,7 +140,7 @@ class AdminPanelProvider extends PanelProvider
         /** @var User|null $user */
         $user = Auth::user();
 
-        return $user?->storeSetting ?? StoreSetting::query()->first();
+        return $user?->storeSetting;
     }
 
     protected function getStoreBrandName(): string

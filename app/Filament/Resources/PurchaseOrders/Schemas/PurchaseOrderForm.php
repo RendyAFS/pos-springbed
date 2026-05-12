@@ -100,15 +100,6 @@ class PurchaseOrderForm
                                     ->relationship(
                                         name: 'product',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: function ($query) {
-                                            $storeId = Auth::user()?->store_setting_id;
-
-                                            if ($storeId) {
-                                                $query->whereHas('inventoryStocks', function ($q) use ($storeId) {
-                                                    $q->where('store_setting_id', $storeId);
-                                                });
-                                            }
-                                        }
                                     )
                                     ->searchable()
                                     ->preload()
