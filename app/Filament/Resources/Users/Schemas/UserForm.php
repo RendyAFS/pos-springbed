@@ -73,7 +73,7 @@ class UserForm
                         Select::make('selected_store')
                             ->label('Available Store')
                             ->multiple()
-                            ->options(StoreSetting::all()->pluck('store_name', 'store_name'))
+                            ->options(StoreSetting::query()->pluck('store_name', 'store_name'))
                             ->preload()
                             ->searchable()
                             ->nullable()
@@ -84,21 +84,41 @@ class UserForm
                                     return;
                                 }
 
+                                $activeStoreId = $get('store_setting_id');
+
+                                if ($activeStoreId) {
+                                    $activeStore = StoreSetting::find($activeStoreId);
+
+                                    if (! $activeStore || ! in_array($activeStore->store_name, $state)) {
+                                        $set('store_setting_id', null);
+                                    }
+                                }
+
                                 if (count($state) === 1) {
                                     $storeName = reset($state);
+
                                     $store = StoreSetting::where('store_name', $storeName)->first();
 
-                                    $set('store_setting_id', $store?->id ?? null);
+                                    $set('store_setting_id', $store?->id);
                                 }
                             }),
 
                         Select::make('store_setting_id')
                             ->label('Active Store')
-                            ->relationship('storeSetting', 'store_name')
-                            ->dehydrated()
-                            ->preload()
+                            ->options(function (Get $get) {
+                                $selectedStores = $get('selected_store');
+
+                                if (empty($selectedStores)) {
+                                    return [];
+                                }
+
+                                return StoreSetting::query()
+                                    ->whereIn('store_name', $selectedStores)
+                                    ->pluck('store_name', 'id');
+                            })
                             ->searchable()
-                            ->hidden(),
+                            ->preload()
+                            ->nullable(),
 
                         Toggle::make('is_active')
                             ->label('Is Active')
