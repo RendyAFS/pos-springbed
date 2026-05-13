@@ -14,6 +14,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Support\RawJs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -84,7 +85,9 @@ class PurchaseOrderForm
                     ->schema([
                         TextInput::make('total_amount')
                             ->label('Total Amount')
-                            ->numeric()
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                             ->prefix('Rp')
                             ->readOnly()
                             ->default(0),
@@ -150,7 +153,9 @@ class PurchaseOrderForm
                                     }),
                                 TextInput::make('cost_price')
                                     ->label('Cost Price')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                     ->minValue(0)
                                     ->default(0)
                                     ->prefix('Rp')
@@ -171,7 +176,9 @@ class PurchaseOrderForm
                                     }),
                                 TextInput::make('qty_remaining')
                                     ->label('Current Stock')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                     ->disabled()
                                     ->dehydrated(true)
                                     ->default(0)
@@ -180,7 +187,9 @@ class PurchaseOrderForm
                                 TextInput::make('selling_price')
                                     ->label('Current Selling Price')
                                     ->prefix('Rp')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->default(0)
