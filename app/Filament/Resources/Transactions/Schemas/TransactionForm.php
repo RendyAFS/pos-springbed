@@ -178,12 +178,20 @@ class TransactionForm
 
                                                     Select::make('product_id')
                                                         ->label('Product')
-                                                        ->options(function (): array {
-                                                            $storeId = Auth::user()?->store_setting_id;
-                                                            $query   = Product::query()->where('is_active', true);
+                                                        ->options(function (Get $get): array {
+
+                                                            $storeId = self::getStoreId($get);
+
+                                                            $query = Product::query()
+                                                                ->where('is_active', true);
+
                                                             if (! is_null($storeId)) {
-                                                                $query->where('store_setting_id', $storeId);
+                                                                $query->whereHas('inventoryStocks', function ($q) use ($storeId) {
+                                                                    $q->where('store_setting_id', $storeId)
+                                                                        ->where('quantity', '>', 0);
+                                                                });
                                                             }
+
                                                             return $query->pluck('name', 'id')->toArray();
                                                         })
                                                         ->searchable()
