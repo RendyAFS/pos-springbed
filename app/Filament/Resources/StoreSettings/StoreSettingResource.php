@@ -95,7 +95,7 @@ class StoreSettingResource extends Resource
                     ->schema([
                         TextInput::make('phone')
                             ->label('Phone')
-                            ->numeric()
+                            ->tel()
                             ->nullable()
                             ->maxLength(255),
                         TextInput::make('email')
