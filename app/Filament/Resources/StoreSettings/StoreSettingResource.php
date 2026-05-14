@@ -196,7 +196,7 @@ class StoreSettingResource extends Resource
                     ->imageHeight(100),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->recordActions([
                 ActionGroup::make([

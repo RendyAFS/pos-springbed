@@ -51,7 +51,7 @@ class PurchaseOrdersTable
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -86,7 +86,7 @@ class CategoryResource extends Resource
 
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->recordActions([
                 EditAction::make(),

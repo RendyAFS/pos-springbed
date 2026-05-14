@@ -66,7 +66,7 @@ class UsersTable
                     ->onColor('success'),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->recordActions([
                 ActionGroup::make([

@@ -115,7 +115,7 @@ class CourierResource extends Resource
                     ->onColor('success'),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->recordActions([
                 EditAction::make(),
