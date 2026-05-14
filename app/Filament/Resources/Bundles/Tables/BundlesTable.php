@@ -27,7 +27,7 @@ class BundlesTable
                     ->boolean(),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->recordActions([
                 EditAction::make(),

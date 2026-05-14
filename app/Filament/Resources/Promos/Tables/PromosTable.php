@@ -49,7 +49,7 @@ class PromosTable
                     ->boolean(),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->recordActions([
                 EditAction::make(),

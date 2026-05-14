@@ -117,14 +117,49 @@ class TransactionsTable
             ])
             ->defaultSort('transaction_date', 'desc')
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
                 SelectFilter::make('status')
                     ->label('Status')
+                    ->searchable()
                     ->options(
                         collect(TransactionStatusEnum::cases())
                             ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                             ->toArray()
                     ),
+                SelectFilter::make('payment_status')
+                    ->label('Payment Status')
+                    ->searchable()
+                    ->options(
+                        collect(TransactionPaymentStatusEnum::cases())
+                            ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                            ->toArray()
+                    )
+                    ->query(function ($query, array $data) {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn($query, $value) =>
+                            $query->whereHas('transactionPayment', function ($q) use ($value) {
+                                $q->where('status', $value);
+                            })
+                        );
+                    }),
+                SelectFilter::make('shiping_status')
+                    ->label('Delivery Status')
+                    ->searchable()
+                    ->options(
+                        collect(StatusTransactionShipmentEnum::cases())
+                            ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                            ->toArray()
+                    )
+                    ->query(function ($query, array $data) {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn($query, $value) =>
+                            $query->whereHas('transactionShipment', function ($q) use ($value) {
+                                $q->where('status', $value);
+                            })
+                        );
+                    }),
             ])
             ->recordActions([
                 ActionGroup::make([
