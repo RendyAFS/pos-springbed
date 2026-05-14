@@ -58,9 +58,8 @@ class ProductsTable
                     ->badge()
                     ->color('primary')
                     ->sortable(),
-                TextColumn::make('size')
+                TextColumn::make('size.name')
                     ->label('Size')
-                    ->formatStateUsing(fn($state) => $state?->name)
                     ->searchable(),
                 TextColumn::make('selling_price')
                     ->label('Selling Price')
