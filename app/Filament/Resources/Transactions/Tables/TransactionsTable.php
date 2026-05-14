@@ -54,7 +54,7 @@ class TransactionsTable
                     ->sortable()
                     ->weight('semibold')
                     ->description(fn($record): string => $record->customer?->phone ?? '—'),
-                TextColumn::make('grand_total')
+                TextColumn::make('transactionPayment.amount')
                     ->label('Total')
                     ->sortable()
                     ->alignRight()
