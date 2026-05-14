@@ -595,6 +595,7 @@ class TransactionForm
                                                         ->label('Gunakan Referal?')
                                                         ->default(false)
                                                         ->live()
+                                                        ->dehydrated(true)
                                                         ->afterStateUpdated(function (Set $set, $state): void {
                                                             if (! $state) {
                                                                 $set('referal_customer_id', null);
@@ -626,6 +627,7 @@ class TransactionForm
                                                         ->searchable()
                                                         ->nullable()
                                                         ->live()
+                                                        ->dehydrated(true)
                                                         ->visible(fn(Get $get): bool => (bool) $get('is_referal'))
                                                         ->required(fn(Get $get): bool => (bool) $get('is_referal'))
                                                         ->helperText('Pilih customer yang mereferralkan transaksi ini. Nominal referal akan ditambahkan ke saldo mereka.'),
@@ -639,6 +641,7 @@ class TransactionForm
                                                         ->minValue(0)
                                                         ->prefix('Rp')
                                                         ->live(onBlur: true)
+                                                        ->dehydrated(true)
                                                         ->visible(fn(Get $get): bool => (bool) $get('is_referal'))
                                                         ->required(fn(Get $get): bool => (bool) $get('is_referal'))
                                                         ->helperText('Jumlah discount (Rupiah) yang akan ditambahkan ke saldo referal customer referral.'),

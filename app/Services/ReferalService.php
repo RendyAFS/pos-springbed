@@ -20,10 +20,10 @@ class ReferalService
     public function processReferal(Transaction $transaction, array $data): void
     {
         DB::transaction(function () use ($transaction, $data) {
-            $isReferal         = filter_var($data['is_referal'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $isReferal        = filter_var($data['is_referal'] ?? false, FILTER_VALIDATE_BOOLEAN);
             $referalCustomerId = $data['referal_customer_id'] ?? null;
-            $nominalReferal    = (float) ($data['nominal_referal'] ?? 0);
-            $discountReferal   = (float) ($data['use_discount_referal'] ?? 0);
+            $nominalReferal   = (float) ($data['nominal_referal'] ?? 0);
+            $discountReferal  = (float) ($data['use_discount_referal'] ?? 0);
 
             if ($isReferal && $referalCustomerId && $nominalReferal > 0) {
                 $this->addReferalBalance($referalCustomerId, $nominalReferal);
@@ -35,51 +35,54 @@ class ReferalService
         });
     }
 
-    public function processReferalOnEdit(Transaction $transaction, array $data): void
+    public function processReferalOnEdit(Transaction $transaction, array $data, array $oldData = []): void
     {
-        DB::transaction(function () use ($transaction, $data) {
-            $isReferalBaru         = filter_var($data['is_referal'] ?? false, FILTER_VALIDATE_BOOLEAN);
-            $referalCustomerIdBaru = $data['referal_customer_id'] ?? null;
-            $nominalBaru           = (float) ($data['nominal_referal'] ?? 0);
+        DB::transaction(function () use ($transaction, $data, $oldData) {
+            $newIsReferal    = filter_var($data['is_referal'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $newCustomerId   = $data['referal_customer_id'] ?? null;
+            $newNominal      = (float) ($data['nominal_referal'] ?? 0);
 
-            $transaction->refresh();
-            $isReferalLama         = (bool) $transaction->is_referal;
-            $referalCustomerIdLama = $transaction->referal_customer_id;
-            $nominalLama           = (float) ($transaction->nominal_referal ?? 0);
+            $oldIsReferal    = (bool) ($oldData['is_referal'] ?? false);
+            $oldCustomerId   = $oldData['referal_customer_id'] ?? null;
+            $oldNominal      = (float) ($oldData['nominal_referal'] ?? 0);
 
-            $tidakAda = ! $isReferalBaru && ! $isReferalLama;
-            if ($tidakAda) {
+            if (! $newIsReferal && ! $oldIsReferal) {
                 return;
             }
 
-            if ($isReferalLama && ! $isReferalBaru && $referalCustomerIdLama) {
-                $this->deductReferalBalance($referalCustomerIdLama, $nominalLama);
+            if ($oldIsReferal && ! $newIsReferal && $oldCustomerId) {
+                $this->deductReferalBalance($oldCustomerId, $oldNominal);
                 return;
             }
 
-            if (! $isReferalLama && $isReferalBaru && $referalCustomerIdBaru && $nominalBaru > 0) {
-                $this->addReferalBalance($referalCustomerIdBaru, $nominalBaru);
-                return;
-            }
+            if ($newIsReferal && $newCustomerId && $newNominal > 0) {
 
-            if ($isReferalLama && $isReferalBaru) {
+                $existingReferal = Referal::where('customer_id', $newCustomerId)->first();
 
-                if ($referalCustomerIdLama !== $referalCustomerIdBaru) {
-                    if ($referalCustomerIdLama) {
-                        $this->deductReferalBalance($referalCustomerIdLama, $nominalLama);
-                    }
-                    if ($referalCustomerIdBaru && $nominalBaru > 0) {
-                        $this->addReferalBalance($referalCustomerIdBaru, $nominalBaru);
-                    }
+                if (! $oldIsReferal) {
+                    $this->addReferalBalance($newCustomerId, $newNominal);
                     return;
                 }
 
-                if ($referalCustomerIdLama && $nominalBaru !== $nominalLama) {
-                    $selisih = $nominalBaru - $nominalLama;
-                    if ($selisih > 0) {
-                        $this->addReferalBalance($referalCustomerIdLama, $selisih);
-                    } elseif ($selisih < 0) {
-                        $this->deductReferalBalance($referalCustomerIdLama, abs($selisih));
+                if ($oldCustomerId !== $newCustomerId) {
+                    if ($oldCustomerId) {
+                        $this->deductReferalBalance($oldCustomerId, $oldNominal);
+                    }
+                    $this->addReferalBalance($newCustomerId, $newNominal);
+                    return;
+                }
+
+                if (! $existingReferal) {
+                    $this->addReferalBalance($newCustomerId, $newNominal);
+                    return;
+                }
+
+                if ($newNominal !== $oldNominal) {
+                    $difference = $newNominal - $oldNominal;
+                    if ($difference > 0) {
+                        $this->addReferalBalance($newCustomerId, $difference);
+                    } elseif ($difference < 0) {
+                        $this->deductReferalBalance($newCustomerId, abs($difference));
                     }
                 }
             }
