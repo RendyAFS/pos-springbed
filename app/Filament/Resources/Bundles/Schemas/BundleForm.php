@@ -69,7 +69,8 @@ class BundleForm
                                         $price = Product::find($state)?->selling_price ?? 0;
                                         $set('price', $price);
                                         self::updateBundlePrice($get, $set);
-                                    }),
+                                    })
+                                    ->columnSpanFull(),
                                 TextInput::make('price')
                                     ->label('Price')
                                     ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
@@ -80,7 +81,8 @@ class BundleForm
                                     ->debounce(500)
                                     ->afterStateUpdated(function (Get $get, Set $set) {
                                         self::updateBundlePrice($get, $set);
-                                    }),
+                                    })
+                                    ->columns(1),
                                 TextInput::make('qty')
                                     ->label('Quantity')
                                     ->numeric()
@@ -91,9 +93,10 @@ class BundleForm
                                     ->debounce(500)
                                     ->afterStateUpdated(function (Get $get, Set $set) {
                                         self::updateBundlePrice($get, $set);
-                                    }),
+                                    })
+                                    ->columns(1),
                             ])
-                            ->columns(3)
+                            ->columns(2)
                             ->required()
                             ->defaultItems(1)
                             ->addActionLabel('Add Product')
@@ -102,8 +105,7 @@ class BundleForm
                             ->live()
                             ->afterStateUpdated(function (Get $get, Set $set) {
                                 self::updateBundlePrice($get, $set);
-                            })
-                            ->columnSpanFull(),
+                            }),
                     ])
                     ->columnSpan(2)
             ])
