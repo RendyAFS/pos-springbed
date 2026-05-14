@@ -24,6 +24,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
+use Filament\Support\RawJs;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -95,7 +96,7 @@ class StoreSettingResource extends Resource
                     ->schema([
                         TextInput::make('phone')
                             ->label('Phone')
-                            ->numeric()
+                            ->tel()
                             ->nullable()
                             ->maxLength(255),
                         TextInput::make('email')
@@ -108,7 +109,10 @@ class StoreSettingResource extends Resource
                     ->schema([
                         TextInput::make('set_max_reward')
                             ->label('Set Max Reward')
-                            ->numeric()
+                            ->prefix('Rp')
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                             ->required(),
                         Textarea::make('address')
                             ->label('Address')

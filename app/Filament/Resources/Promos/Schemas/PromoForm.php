@@ -13,6 +13,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Support\RawJs;
 use Illuminate\Support\Facades\Auth;
 
 class PromoForm
@@ -79,44 +80,63 @@ class PromoForm
                             ->columnSpanFull(),
                         TextInput::make('discount_value')
                             ->label('Discount Value')
-                            ->numeric()
                             ->required()
                             ->default(0)
                             ->live()
+                            ->mask(
+                                fn(Get $get) =>
+                                $get('discount_type') === PromoDiscountEnum::NOMINAL->value
+                                    ? RawJs::make('$money($input, \',\', \'.\', 0)')
+                                    : null
+                            )
+                            ->dehydrateStateUsing(
+                                fn($state, Get $get) =>
+                                $get('discount_type') === PromoDiscountEnum::NOMINAL->value
+                                    ? ($state ? (float) str_replace('.', '', $state) : null)
+                                    : $state
+                            )
+                            ->formatStateUsing(
+                                fn($state, Get $get) =>
+                                $get('discount_type') === PromoDiscountEnum::NOMINAL->value
+                                    ? ($state ? number_format((float) $state, 0, ',', '.') : null)
+                                    : $state
+                            )
                             ->suffix(
-                                fn($get) =>
+                                fn(Get $get) =>
                                 $get('discount_type') === PromoDiscountEnum::PERCENTAGE->value
                                     ? '%'
                                     : null
                             )
                             ->prefix(
-                                fn($get) =>
+                                fn(Get $get) =>
                                 $get('discount_type') === PromoDiscountEnum::NOMINAL->value
-                                    ? 'Rp'
+                                    ? 'Rp.'
                                     : null
                             )
                             ->minValue(
-                                fn($get) =>
+                                fn(Get $get) =>
                                 $get('discount_type') === PromoDiscountEnum::PERCENTAGE->value
                                     ? 0.1
                                     : 1
                             )
                             ->maxValue(
-                                fn($get) =>
+                                fn(Get $get) =>
                                 $get('discount_type') === PromoDiscountEnum::PERCENTAGE->value
                                     ? 100
                                     : null
                             )
                             ->step(
-                                fn($get) =>
+                                fn(Get $get) =>
                                 $get('discount_type') === PromoDiscountEnum::PERCENTAGE->value
                                     ? 0.1
                                     : 1
                             ),
                         TextInput::make('min_purchase')
                             ->label('Minimum Purchase')
-                            ->numeric()
-                            ->prefix('Rp')
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                            ->prefix('Rp.')
                             ->default(0)
                             ->helperText('Minimum cart total required to activate this promo'),
                     ])

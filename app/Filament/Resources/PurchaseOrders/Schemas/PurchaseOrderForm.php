@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PurchaseOrders\Schemas;
 use App\Models\InventoryStock;
 use App\Models\Product;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -13,6 +14,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Support\RawJs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -83,7 +85,9 @@ class PurchaseOrderForm
                     ->schema([
                         TextInput::make('total_amount')
                             ->label('Total Amount')
-                            ->numeric()
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                             ->prefix('Rp')
                             ->readOnly()
                             ->default(0),
@@ -99,15 +103,6 @@ class PurchaseOrderForm
                                     ->relationship(
                                         name: 'product',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: function ($query) {
-                                            $storeId = Auth::user()?->store_setting_id;
-
-                                            if ($storeId) {
-                                                $query->whereHas('inventoryStocks', function ($q) use ($storeId) {
-                                                    $q->where('store_setting_id', $storeId);
-                                                });
-                                            }
-                                        }
                                     )
                                     ->searchable()
                                     ->preload()
@@ -158,7 +153,9 @@ class PurchaseOrderForm
                                     }),
                                 TextInput::make('cost_price')
                                     ->label('Cost Price')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                     ->minValue(0)
                                     ->default(0)
                                     ->prefix('Rp')
@@ -179,7 +176,9 @@ class PurchaseOrderForm
                                     }),
                                 TextInput::make('qty_remaining')
                                     ->label('Current Stock')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                     ->disabled()
                                     ->dehydrated(true)
                                     ->default(0)
@@ -188,7 +187,9 @@ class PurchaseOrderForm
                                 TextInput::make('selling_price')
                                     ->label('Current Selling Price')
                                     ->prefix('Rp')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->default(0)
@@ -204,7 +205,15 @@ class PurchaseOrderForm
                                             ->value('selling_price');
                                         $set('selling_price', $price ?? 0);
                                     })
-                                    ->columnSpan(1)
+                                    ->columnSpan(1),
+                                DateTimePicker::make('date_product_order')
+                                    ->label('Date Product Order')
+                                    ->native(false)
+                                    ->suffixIcon(Heroicon::Calendar)
+                                    ->closeOnDateSelection()
+                                    ->required()
+                                    ->default(now())
+                                    ->columnSpanFull(),
                             ])->columns(2),
                     ])
                     ->addActionLabel('Add Item')

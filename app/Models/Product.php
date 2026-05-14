@@ -11,7 +11,6 @@ class Product extends Model
     use SoftDeletes, Userstamps;
 
     protected $fillable = [
-        'store_setting_id',
         'brand_id',
         'category_id',
         'name',
@@ -78,10 +77,5 @@ class Product extends Model
     public function stockAdjustments()
     {
         return $this->hasMany(StockAdjustment::class);
-    }
-
-    public function storeSetting()
-    {
-        return $this->belongsTo(StoreSetting::class, 'store_setting_id');
     }
 }

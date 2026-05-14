@@ -12,6 +12,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Support\RawJs;
 
 class BundleForm
 {
@@ -27,7 +28,9 @@ class BundleForm
                             ->required(),
                         TextInput::make('bundle_price')
                             ->label('Bundle Price')
-                            ->numeric()
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                             ->prefix('Rp.')
                             ->default(0)
                             ->dehydrated(),
@@ -69,7 +72,9 @@ class BundleForm
                                     }),
                                 TextInput::make('price')
                                     ->label('Price')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                     ->prefix('Rp.')
                                     ->live()
                                     ->debounce(500)

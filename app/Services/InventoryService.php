@@ -25,13 +25,6 @@ class InventoryService
         return $reference->store_setting_id;
     }
 
-    private function ensureProductStore(int $productId, int $storeId): void
-    {
-        Product::where('id', $productId)
-            ->whereNull('store_setting_id')
-            ->update(['store_setting_id' => $storeId]);
-    }
-
     private function validateQty(int $qty): void
     {
         if ($qty <= 0) {
@@ -69,7 +62,6 @@ class InventoryService
 
         DB::transaction(function () use ($productId, $qty, $reference, $costPrice) {
             $storeId = $this->getStoreId($reference);
-            $this->ensureProductStore($productId, $storeId);
 
             $stock           = $this->getStock($productId, $storeId);
             $stock->quantity += $qty;
@@ -105,7 +97,6 @@ class InventoryService
 
         DB::transaction(function () use ($productId, $qty, $storeReference, $transactionItem) {
             $storeId = $this->getStoreId($storeReference);
-            $this->ensureProductStore($productId, $storeId);
 
             $stock = $this->getStock($productId, $storeId);
 
@@ -136,7 +127,6 @@ class InventoryService
     ): void {
         DB::transaction(function () use ($productId, $difference, $reference) {
             $storeId = $this->getStoreId($reference);
-            $this->ensureProductStore($productId, $storeId);
 
             $stock = InventoryStock::where([
                 'product_id'       => $productId,
