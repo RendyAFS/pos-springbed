@@ -241,6 +241,18 @@ class TransactionsTable
                         ->color('success')
                         ->url(fn($record) => route('transactions.print', $record))
                         ->openUrlInNewTab(),
+                    Action::make('invoice_a5')
+                        ->label('Invoice A5')
+                        ->icon(Heroicon::DocumentText)
+                        ->color('info')
+                        ->url(fn($record) => route('transactions.invoice', $record) . '?paper=a5')
+                        ->openUrlInNewTab(),
+                    Action::make('invoice_a4')
+                        ->label('Invoice A4')
+                        ->icon(Heroicon::DocumentText)
+                        ->color('primary')
+                        ->url(fn($record) => route('transactions.invoice', $record) . '?paper=a4')
+                        ->openUrlInNewTab(),
                     EditAction::make(),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),
