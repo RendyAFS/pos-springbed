@@ -472,7 +472,7 @@ class TransactionForm
                                                         $courier = Courier::find($state);
 
                                                         if ($courier) {
-                                                            $set('shiping_cost', $courier->shipping_cost);
+                                                            $set('shiping_cost', (float) $courier->shipping_cost);
                                                         }
                                                     } else {
                                                         $set('shiping_cost', 0);
@@ -512,6 +512,7 @@ class TransactionForm
                                                     TextInput::make('subtotal')
                                                         ->label('Subtotal + Discount')
                                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
                                                         ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
                                                         ->readOnly()
                                                         ->prefix('Rp'),
@@ -519,6 +520,7 @@ class TransactionForm
                                                     TextInput::make('promo_total')
                                                         ->label('Promo Discount')
                                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
                                                         ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
                                                         ->readOnly()
                                                         ->prefix('Rp'),
@@ -526,6 +528,7 @@ class TransactionForm
                                                     TextInput::make('shiping_cost')
                                                         ->label('Shipping Cost')
                                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
                                                         ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
                                                         ->readOnly()
                                                         ->prefix('Rp'),
@@ -533,6 +536,7 @@ class TransactionForm
                                                     TextInput::make('grand_total')
                                                         ->label('Grand Total')
                                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
                                                         ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
                                                         ->readOnly()
                                                         ->prefix('Rp'),
@@ -754,7 +758,8 @@ class TransactionForm
                                         ->dehydrated(true)
                                         ->afterStateHydrated(function (TextInput $component, $record): void {
                                             if ($record && $record->transactionPayment) {
-                                                $component->state($record->transactionPayment->amount);
+                                                $amount = (float) $record->transactionPayment->amount;
+                                                $component->state(number_format($amount, 0, ',', '.'));
                                             }
                                         }),
 
@@ -792,7 +797,13 @@ class TransactionForm
             return (float) $value;
         }
 
-        $value = preg_replace('/[^0-9]/', '', (string) $value);
+        $stringValue = (string) $value;
+
+        if (preg_match('/^\d+\.\d{1,2}$/', $stringValue)) {
+            return (float) $stringValue;
+        }
+
+        $value = preg_replace('/[^0-9]/', '', $stringValue);
 
         return (float) $value;
     }
@@ -825,9 +836,12 @@ class TransactionForm
     {
         $items = $get('transactionItems') ?? [];
 
-        $subtotal = collect($items)->sum(
-            fn($i) => self::parseCurrency($i['subtotal'] ?? 0)
-        );
+        $subtotal = collect($items)->sum(function ($i) {
+            $qty = (float) ($i['qty'] ?? 0);
+            $price = self::parseCurrency($i['selling_price'] ?? 0);
+            $discount = self::parseCurrency($i['discount'] ?? 0);
+            return max(0, ($qty * $price) - $discount);
+        });
 
         $promoTotal = 0;
         $promoId = $get('promo_id');
