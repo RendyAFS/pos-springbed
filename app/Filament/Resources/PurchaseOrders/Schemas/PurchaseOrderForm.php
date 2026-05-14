@@ -205,16 +205,24 @@ class PurchaseOrderForm
                                     ->dehydrated(false)
                                     ->default(0)
                                     ->helperText('Current selling price in selected store')
-                                    ->afterStateHydrated(function (Get $get, Set $set) {
-                                        $productId = $get('product_id');
-                                        if (!$productId) {
-                                            $set('selling_price', 0);
+                                    ->afterStateHydrated(function (Get $get, Set $set, $state) {
+                                        // Jika state sudah ada (dari DB), format langsung dari $state
+                                        if ($state) {
+                                            $set('selling_price', number_format((float) $state, 0, ',', '.'));
                                             return;
                                         }
+
+                                        $productId = $get('product_id');
+                                        if (!$productId) {
+                                            $set('selling_price', '0');
+                                            return;
+                                        }
+
                                         $price = Product::query()
                                             ->where('id', $productId)
                                             ->value('selling_price');
-                                        $set('selling_price', $price ?? 0);
+
+                                        $set('selling_price', number_format((float) ($price ?? 0), 0, ',', '.'));
                                     })
                                     ->columnSpan(1),
                                 DateTimePicker::make('date_product_order')
