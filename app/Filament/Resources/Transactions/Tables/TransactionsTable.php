@@ -73,7 +73,7 @@ class TransactionsTable
                         $isLunas      = $totalDeposit >= $grandTotal;
                         $sisa         = $grandTotal - $totalDeposit;
 
-                        $depositBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-warning-600 ring-1 ring-inset ring-warning-600/20">Deposit</span>';
+                        $depositBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-warning-600 ring-1 ring-inset ring-warning-600/20">Down Payment</span>';
 
                         if ($isLunas) {
                             $statusBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-success-600 ring-1 ring-inset ring-success-600/20">Paid</span>';
@@ -145,11 +145,11 @@ class TransactionsTable
             ->filters([
                 TrashedFilter::make()->native(false),
                 TernaryFilter::make('is_deposit')
-                    ->label('Deposit')
+                    ->label('Down Payment')
                     ->native(false)
                     ->placeholder('All')
-                    ->trueLabel('Deposit')
-                    ->falseLabel('Non-Deposit'),
+                    ->trueLabel('Down Payment')
+                    ->falseLabel('Non-Down Payment'),
                 SelectFilter::make('status'),
                 SelectFilter::make('status')
                     ->label('Status')

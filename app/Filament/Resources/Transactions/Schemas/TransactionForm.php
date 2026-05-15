@@ -781,7 +781,7 @@ class TransactionForm
                                             }
                                         }),
                                     Toggle::make('is_deposit')
-                                        ->label('Is Deposit')
+                                        ->label('Is Down Payment')
                                         ->offIcon(Heroicon::XMark)
                                         ->onIcon(Heroicon::Check)
                                         ->offColor('danger')
@@ -789,7 +789,7 @@ class TransactionForm
                                         ->inline(false)
                                         ->default(true),
                                     DateTimePicker::make('due_date_deposit')
-                                        ->label('Due Date Deposit')
+                                        ->label('Due Date Down Payment')
                                         ->native(false)
                                         ->suffixIcon(Heroicon::Calendar)
                                         ->closeOnDateSelection()

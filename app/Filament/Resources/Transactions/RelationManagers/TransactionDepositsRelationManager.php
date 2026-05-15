@@ -60,6 +60,7 @@ class TransactionDepositsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Down Payments')
             ->recordTitleAttribute('transaction')
             ->columns([
                 TextColumn::make('amount')
