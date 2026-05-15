@@ -54,7 +54,16 @@ class TransactionResource extends Resource
     {
         $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([SoftDeletingScope::class])
-            ->with(['transactionDownPayments', 'transactionPayment', 'transactionShipment', 'customer', 'storeSetting']);
+            ->with([
+                'transactionDownPayments',
+                'transactionPayment',
+                'transactionShipment',
+                'customer',
+                'storeSetting',
+                'transactionItems',
+                'transactionItems.product',
+                'transactionItems.bundle'
+            ]);
 
         $storeId = Auth::user()?->store_setting_id;
 
