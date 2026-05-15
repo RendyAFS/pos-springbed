@@ -74,6 +74,7 @@ class CourierResource extends Resource
                     ->searchable()
                     ->required(),
                 TextInput::make('shipping_cost')
+                ->label('Shipping Cost')
                     ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                     ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                     ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)

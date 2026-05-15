@@ -53,7 +53,8 @@ class TransactionResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()
-            ->withoutGlobalScopes([SoftDeletingScope::class]);
+            ->withoutGlobalScopes([SoftDeletingScope::class])
+            ->with(['transactionDownPayments', 'transactionPayment', 'transactionShipment', 'customer', 'storeSetting']);
 
         $storeId = Auth::user()?->store_setting_id;
 
@@ -77,7 +78,7 @@ class TransactionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\transactionDownPaymentsRelationManager::class,
         ];
     }
 

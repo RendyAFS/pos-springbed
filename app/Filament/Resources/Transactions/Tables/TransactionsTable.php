@@ -26,6 +26,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\TernaryFilter;
 
 class TransactionsTable
 {
@@ -59,7 +61,31 @@ class TransactionsTable
                     ->sortable()
                     ->alignRight()
                     ->weight('medium')
-                    ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                    ->formatStateUsing(fn($state) => RupiahHelper::format($state))
+                    ->description(function ($record) {
+                        if (! $record->is_down_payment) {
+                            return null;
+                        }
+
+                        $totalDownPayment = $record->transactionDownPayments->sum('amount')
+                            + (float) ($record->transactionPayment?->amount ?? 0);
+                        $grandTotal   = (float) $record->grand_total;
+                        $isLunas      = $totalDownPayment >= $grandTotal;
+                        $sisa         = $grandTotal - $totalDownPayment;
+
+                        $downPaymentBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-warning-600 ring-1 ring-inset ring-warning-600/20">Down Payment</span>';
+
+                        if ($isLunas) {
+                            $statusBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-success-600 ring-1 ring-inset ring-success-600/20">Paid</span>';
+                        } else {
+                            $formatted   = RupiahHelper::format($sisa);
+                            $statusBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-danger-600 ring-1 ring-inset ring-danger-600/20">Remaining ' . e($formatted) . '</span>';
+                        }
+
+                        return new \Illuminate\Support\HtmlString(
+                            $downPaymentBadge . ' ' . $statusBadge
+                        );
+                    }),
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -118,6 +144,13 @@ class TransactionsTable
             ->defaultSort('transaction_date', 'desc')
             ->filters([
                 TrashedFilter::make()->native(false),
+                TernaryFilter::make('is_down_payment')
+                    ->label('Down Payment')
+                    ->native(false)
+                    ->placeholder('All')
+                    ->trueLabel('Down Payment')
+                    ->falseLabel('Non-Down Payment'),
+                SelectFilter::make('status'),
                 SelectFilter::make('status')
                     ->label('Status')
                     ->searchable()
@@ -160,7 +193,7 @@ class TransactionsTable
                             })
                         );
                     }),
-            ])
+            ], layout: FiltersLayout::Modal)
             ->recordActions([
                 ActionGroup::make([
                     Action::make('updateAllStatus')
