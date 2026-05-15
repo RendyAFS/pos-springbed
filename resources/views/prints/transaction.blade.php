@@ -346,17 +346,19 @@
                             </td>
                         </tr>
 
-                        @if ($transaction->is_deposit)
+                        @if ($transaction->is_down_payment)
                             @php
-                                $totalDeposit = $transaction->transactionDeposits->sum('amount')
-                                            + (float) ($transaction->transactionPayment?->amount ?? 0);
-                                $grandTotal   = (float) $transaction->grand_total;
-                                $isLunas      = $totalDeposit >= $grandTotal;
-                                $sisa         = $grandTotal - $totalDeposit;
+                                $totalDownPayment =
+                                    $transaction->transactionDownPayments->sum('amount') +
+                                    (float) ($transaction->transactionPayment?->amount ?? 0);
+                                $grandTotal = (float) $transaction->grand_total;
+                                $isLunas = $totalDownPayment >= $grandTotal;
+                                $sisa = $grandTotal - $totalDownPayment;
                             @endphp
                             <tr>
                                 <td colspan="2" style="padding-top: 4px;">
-                                    <span style="
+                                    <span
+                                        style="
                                         display: inline-block;
                                         font-size: 10px;
                                         font-weight: bold;
@@ -364,10 +366,12 @@
                                         border: 1px solid #e67e22;
                                         color: #e67e22;
                                         border-radius: 3px;
-                                    ">DEPOSIT</span>
+                                    ">DOWN
+                                        PAYMENT</span>
 
                                     @if ($isLunas)
-                                        <span style="
+                                        <span
+                                            style="
                                             display: inline-block;
                                             font-size: 10px;
                                             font-weight: bold;
@@ -378,7 +382,8 @@
                                             margin-left: 3px;
                                         ">LUNAS</span>
                                     @else
-                                        <span style="
+                                        <span
+                                            style="
                                             display: inline-block;
                                             font-size: 10px;
                                             font-weight: bold;
@@ -387,7 +392,8 @@
                                             color: #c0392b;
                                             border-radius: 3px;
                                             margin-left: 3px;
-                                        ">BELUM LUNAS</span>
+                                        ">BELUM
+                                            LUNAS</span>
                                         <div style="font-size: 10px; color: #c0392b; margin-top: 2px;">
                                             Sisa: Rp {{ number_format($sisa, 0, ',', '.') }}
                                         </div>

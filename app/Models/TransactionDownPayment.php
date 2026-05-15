@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TransactionDeposit extends Model
+class TransactionDownPayment extends Model
 {
     protected $fillable = [
         'transaction_id',

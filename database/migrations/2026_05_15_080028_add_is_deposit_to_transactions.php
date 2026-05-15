@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->boolean('is_deposit')->default(false)->after('use_discount_referal');
-            $table->date('due_date_deposit')->nullable()->after('is_deposit');
+            $table->boolean('is_down_payment')->default(false)->after('use_discount_referal');
+            $table->date('due_date_down_payment')->nullable()->after('is_down_payment');
         });
     }
 
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->dropColumn(['is_deposit', 'due_date_deposit']);
+            $table->dropColumn(['is_down_payment', 'due_date_down_payment']);
         });
     }
 };

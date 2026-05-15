@@ -22,9 +22,9 @@ use Filament\Support\RawJs;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class TransactionDepositsRelationManager extends RelationManager
+class transactionDownPaymentsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'transactionDeposits';
+    protected static string $relationship = 'transactionDownPayments';
 
     public function form(Schema $schema): Schema
     {
@@ -80,7 +80,7 @@ class TransactionDepositsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Add Deposit')
+                    ->label('Add Down Payment')
                     ->icon(Heroicon::Plus),
             ])
             ->recordActions([

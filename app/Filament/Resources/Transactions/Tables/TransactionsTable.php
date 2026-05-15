@@ -63,17 +63,17 @@ class TransactionsTable
                     ->weight('medium')
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state))
                     ->description(function ($record) {
-                        if (! $record->is_deposit) {
+                        if (! $record->is_down_payment) {
                             return null;
                         }
 
-                        $totalDeposit = $record->transactionDeposits->sum('amount')
+                        $totalDownPayment = $record->transactionDownPayments->sum('amount')
                             + (float) ($record->transactionPayment?->amount ?? 0);
                         $grandTotal   = (float) $record->grand_total;
-                        $isLunas      = $totalDeposit >= $grandTotal;
-                        $sisa         = $grandTotal - $totalDeposit;
+                        $isLunas      = $totalDownPayment >= $grandTotal;
+                        $sisa         = $grandTotal - $totalDownPayment;
 
-                        $depositBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-warning-600 ring-1 ring-inset ring-warning-600/20">Down Payment</span>';
+                        $downPaymentBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-warning-600 ring-1 ring-inset ring-warning-600/20">Down Payment</span>';
 
                         if ($isLunas) {
                             $statusBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-success-600 ring-1 ring-inset ring-success-600/20">Paid</span>';
@@ -83,7 +83,7 @@ class TransactionsTable
                         }
 
                         return new \Illuminate\Support\HtmlString(
-                            $depositBadge . ' ' . $statusBadge
+                            $downPaymentBadge . ' ' . $statusBadge
                         );
                     }),
                 TextColumn::make('status')
@@ -144,7 +144,7 @@ class TransactionsTable
             ->defaultSort('transaction_date', 'desc')
             ->filters([
                 TrashedFilter::make()->native(false),
-                TernaryFilter::make('is_deposit')
+                TernaryFilter::make('is_down_payment')
                     ->label('Down Payment')
                     ->native(false)
                     ->placeholder('All')

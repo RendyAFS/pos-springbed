@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transaction_deposits', function (Blueprint $table) {
+        Schema::create('transaction_down_payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->nullable()->constrained('transactions')->cascadeOnDelete();
             $table->decimal('amount', 12, 2)->default(0);
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transaction_deposits');
+        Schema::dropIfExists('transaction_down_payments');
     }
 };

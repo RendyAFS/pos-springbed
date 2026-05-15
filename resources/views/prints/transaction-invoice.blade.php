@@ -64,7 +64,7 @@
         $footerBandPad = $isA4 ? '6px 28px' : '4px 18px';
         $footerBandSz = $isA4 ? '8px' : '7px';
 
-        $depositBadgeSz = $isA4 ? '8px' : '7px';
+        $downPaymentBadgeSz = $isA4 ? '8px' : '7px';
     @endphp
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -477,10 +477,10 @@
             right: 0;
         }
 
-        /* ── DEPOSIT BADGES ── */
-        .badge-deposit {
+        /* ── DOWN PAYMENT BADGES ── */
+        .badge-down-payment {
             display: inline-block;
-            font-size: {{ $depositBadgeSz }};
+            font-size: {{ $downPaymentBadgeSz }};
             font-weight: 700;
             padding: 2px 7px;
             border: 1px solid #e67e22;
@@ -492,7 +492,7 @@
 
         .badge-lunas {
             display: inline-block;
-            font-size: {{ $depositBadgeSz }};
+            font-size: {{ $downPaymentBadgeSz }};
             font-weight: 700;
             padding: 2px 7px;
             border: 1px solid #27ae60;
@@ -505,7 +505,7 @@
 
         .badge-belum-lunas {
             display: inline-block;
-            font-size: {{ $depositBadgeSz }};
+            font-size: {{ $downPaymentBadgeSz }};
             font-weight: 700;
             padding: 2px 7px;
             border: 1px solid #c0392b;
@@ -517,7 +517,7 @@
         }
 
         .sisa-text {
-            font-size: {{ $depositBadgeSz }};
+            font-size: {{ $downPaymentBadgeSz }};
             color: #c0392b;
             margin-top: 3px;
             font-weight: 600;
@@ -549,11 +549,12 @@
         $emptyRows = max(0, $minRows - $itemCount);
         $rowNum = 0;
 
-        $totalDeposit =
-            $transaction->transactionDeposits->sum('amount') + (float) ($transaction->transactionPayment?->amount ?? 0);
+        $totalDownPayment =
+            $transaction->transactionDownPayments->sum('amount') +
+            (float) ($transaction->transactionPayment?->amount ?? 0);
         $grandTotal = (float) $transaction->grand_total;
-        $isLunas = $totalDeposit >= $grandTotal;
-        $sisa = $grandTotal - $totalDeposit;
+        $isLunas = $totalDownPayment >= $grandTotal;
+        $sisa = $grandTotal - $totalDownPayment;
     @endphp
 
     <div class="page">
@@ -764,10 +765,10 @@
                                 {{ $transaction->transactionPayment?->status?->getLabel() }}
                             </td>
                         </tr>
-                        @if ($transaction->is_deposit)
+                        @if ($transaction->is_down_payment)
                             <tr>
                                 <td colspan="2" style="padding-top:5px;">
-                                    <span class="badge-deposit">Deposit</span>
+                                    <span class="badge-down-payment">Down Payment</span>
                                     @if ($isLunas)
                                         <span class="badge-lunas">Lunas</span>
                                     @else

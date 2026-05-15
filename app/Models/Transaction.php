@@ -26,8 +26,8 @@ class Transaction extends Model
         'referal_customer_id',
         'nominal_referal',
         'use_discount_referal',
-        'is_deposit',
-        'due_date_deposit',
+        'is_down_payment',
+        'due_date_down_payment',
     ];
 
     protected $casts = [
@@ -38,8 +38,8 @@ class Transaction extends Model
         'grand_total'      => 'decimal:2',
         'transaction_date' => 'date',
         'is_referal'       => 'boolean',
-        'is_deposit'       => 'boolean',
-        'due_date_deposit' => 'date',
+        'is_down_payment'       => 'boolean',
+        'due_date_down_payment' => 'date',
     ];
 
     public function customer()
@@ -82,8 +82,8 @@ class Transaction extends Model
         return $this->belongsTo(Customer::class, 'referal_customer_id');
     }
 
-    public function transactionDeposits()
+    public function transactionDownPayments()
     {
-        return $this->hasMany(TransactionDeposit::class, 'transaction_id');
+        return $this->hasMany(TransactionDownPayment::class, 'transaction_id');
     }
 }

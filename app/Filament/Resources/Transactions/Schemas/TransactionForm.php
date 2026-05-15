@@ -780,20 +780,21 @@ class TransactionForm
                                                 $component->state($record->transactionPayment->status?->value ?? $record->transactionPayment->status);
                                             }
                                         }),
-                                    Toggle::make('is_deposit')
+                                    Toggle::make('is_down_payment')
                                         ->label('Is Down Payment')
                                         ->offIcon(Heroicon::XMark)
                                         ->onIcon(Heroicon::Check)
+                                        ->nullable()
                                         ->offColor('danger')
                                         ->onColor('success')
                                         ->inline(false)
                                         ->default(true),
-                                    DateTimePicker::make('due_date_deposit')
+                                    DateTimePicker::make('due_date_down_payment')
                                         ->label('Due Date Down Payment')
                                         ->native(false)
                                         ->suffixIcon(Heroicon::Calendar)
                                         ->closeOnDateSelection()
-                                        ->required()
+                                        ->nullable()
                                         ->default(now()),
                                 ]),
                         ]),
