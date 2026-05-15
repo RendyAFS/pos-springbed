@@ -345,6 +345,56 @@
                                 {{ $transaction->transactionPayment?->status?->getLabel() }}
                             </td>
                         </tr>
+
+                        @if ($transaction->is_deposit)
+                            @php
+                                $totalDeposit = $transaction->transactionDeposits->sum('amount')
+                                            + (float) ($transaction->transactionPayment?->amount ?? 0);
+                                $grandTotal   = (float) $transaction->grand_total;
+                                $isLunas      = $totalDeposit >= $grandTotal;
+                                $sisa         = $grandTotal - $totalDeposit;
+                            @endphp
+                            <tr>
+                                <td colspan="2" style="padding-top: 4px;">
+                                    <span style="
+                                        display: inline-block;
+                                        font-size: 10px;
+                                        font-weight: bold;
+                                        padding: 1px 6px;
+                                        border: 1px solid #e67e22;
+                                        color: #e67e22;
+                                        border-radius: 3px;
+                                    ">DEPOSIT</span>
+
+                                    @if ($isLunas)
+                                        <span style="
+                                            display: inline-block;
+                                            font-size: 10px;
+                                            font-weight: bold;
+                                            padding: 1px 6px;
+                                            border: 1px solid #27ae60;
+                                            color: #27ae60;
+                                            border-radius: 3px;
+                                            margin-left: 3px;
+                                        ">LUNAS</span>
+                                    @else
+                                        <span style="
+                                            display: inline-block;
+                                            font-size: 10px;
+                                            font-weight: bold;
+                                            padding: 1px 6px;
+                                            border: 1px solid #c0392b;
+                                            color: #c0392b;
+                                            border-radius: 3px;
+                                            margin-left: 3px;
+                                        ">BELUM LUNAS</span>
+                                        <div style="font-size: 10px; color: #c0392b; margin-top: 2px;">
+                                            Sisa: Rp {{ number_format($sisa, 0, ',', '.') }}
+                                        </div>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endif
                     </table>
                 </td>
             </tr>

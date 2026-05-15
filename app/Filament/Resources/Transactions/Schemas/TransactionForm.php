@@ -16,6 +16,7 @@ use App\Models\Promo;
 use App\Models\Referal;
 use App\Models\StoreSetting;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -750,7 +751,6 @@ class TransactionForm
                                                 $component->state($record->transactionPayment->method?->value ?? $record->transactionPayment->method);
                                             }
                                         }),
-
                                     TextInput::make('payment_amount')
                                         ->label('Amount Paid')
                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
@@ -765,7 +765,6 @@ class TransactionForm
                                                 $component->state(number_format($amount, 0, ',', '.'));
                                             }
                                         }),
-
                                     Select::make('payment_status')
                                         ->label('Payment Status')
                                         ->options(
@@ -781,6 +780,21 @@ class TransactionForm
                                                 $component->state($record->transactionPayment->status?->value ?? $record->transactionPayment->status);
                                             }
                                         }),
+                                    Toggle::make('is_deposit')
+                                        ->label('Is Deposit')
+                                        ->offIcon(Heroicon::XMark)
+                                        ->onIcon(Heroicon::Check)
+                                        ->offColor('danger')
+                                        ->onColor('success')
+                                        ->inline(false)
+                                        ->default(true),
+                                    DateTimePicker::make('due_date_deposit')
+                                        ->label('Due Date Deposit')
+                                        ->native(false)
+                                        ->suffixIcon(Heroicon::Calendar)
+                                        ->closeOnDateSelection()
+                                        ->required()
+                                        ->default(now()),
                                 ]),
                         ]),
 
