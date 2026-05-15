@@ -91,16 +91,17 @@ class InventoryService
         int $productId,
         int $qty,
         Model $storeReference,
-        TransactionItem $transactionItem
+        TransactionItem $transactionItem,
+        bool $allowNegative = false
     ): void {
         $this->validateQty($qty);
 
-        DB::transaction(function () use ($productId, $qty, $storeReference, $transactionItem) {
+        DB::transaction(function () use ($productId, $qty, $storeReference, $transactionItem, $allowNegative) {
             $storeId = $this->getStoreId($storeReference);
 
             $stock = $this->getStock($productId, $storeId);
 
-            if ($stock->quantity < $qty) {
+            if (!$allowNegative && $stock->quantity < $qty) {
                 throw new Exception('Stock tidak cukup');
             }
 

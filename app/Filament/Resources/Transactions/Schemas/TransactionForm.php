@@ -180,21 +180,11 @@ class TransactionForm
 
                                                     Select::make('product_id')
                                                         ->label('Product')
-                                                        ->options(function (Get $get): array {
-
-                                                            $storeId = self::getStoreId($get);
-
-                                                            $query = Product::query()
-                                                                ->where('is_active', true);
-
-                                                            if (! is_null($storeId)) {
-                                                                $query->whereHas('inventoryStocks', function ($q) use ($storeId) {
-                                                                    $q->where('store_setting_id', $storeId)
-                                                                        ->where('quantity', '>', 0);
-                                                                });
-                                                            }
-
-                                                            return $query->pluck('name', 'id')->toArray();
+                                                        ->options(function (): array {
+                                                            return Product::query()
+                                                                ->where('is_active', true)
+                                                                ->pluck('name', 'id')
+                                                                ->toArray();
                                                         })
                                                         ->searchable()
                                                         ->preload()
@@ -263,40 +253,36 @@ class TransactionForm
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
                                                         ->suffix('pcs')
-                                                        ->rules([
-                                                            fn(Get $get): \Closure => function (string $attribute, $value, \Closure $fail) use ($get): void {
-                                                                $storeId = Auth::user()?->store_setting_id;
-
-                                                                if ($get('item_type') === 'product') {
-                                                                    $productId = $get('product_id');
-                                                                    if (! $productId || ! $value) return;
-                                                                    $stock = self::getAvailableStock($productId, $storeId);
-                                                                    if ((int) $value > $stock) {
-                                                                        $fail("Qty exceeds available stock ({$stock} pcs).");
-                                                                    }
-                                                                } elseif ($get('item_type') === 'bundle') {
-                                                                    $bundleId = $get('bundle_id');
-                                                                    if (! $bundleId || ! $value) return;
-                                                                    $bundle = Bundle::with('bundleItems')->find($bundleId);
-                                                                    if (! $bundle) return;
-                                                                    foreach ($bundle->bundleItems as $bi) {
-                                                                        $needed = $bi->qty * (int) $value;
-                                                                        $stock  = self::getAvailableStock($bi->product_id, $storeId);
-                                                                        if ($needed > $stock) {
-                                                                            $fail("Not enough stock for {$bi->product->name}. Need: {$needed}, available: {$stock}.");
-                                                                        }
-                                                                    }
-                                                                }
-                                                            },
-                                                        ])
-                                                        ->helperText(function (Get $get): string {
+                                                        ->helperText(function (Get $get, $component): string {
                                                             $storeId = Auth::user()?->store_setting_id;
+
+                                                            // Ambil key item saat ini dari statePath
+                                                            // statePath contoh: "transactionItems.0.qty" → key = "0"
+                                                            $statePath = $component->getStatePath();
+                                                            $parts     = explode('.', $statePath);
+                                                            // index ada di posisi kedua dari belakang (sebelum 'qty')
+                                                            $currentKey = $parts[count($parts) - 2] ?? null;
 
                                                             if ($get('item_type') === 'product') {
                                                                 $productId = $get('product_id');
                                                                 if (! $productId) return 'Select a product first.';
-                                                                $stock = self::getAvailableStock($productId, $storeId);
-                                                                return $stock > 0 ? "Available stock: {$stock} pcs" : '⚠️ Out of stock';
+
+                                                                $effectiveStock = self::getEffectiveStock((int) $productId, $storeId, $get, $currentKey);
+                                                                $qty            = (int) ($get('qty') ?? 1);
+
+                                                                if ($effectiveStock <= 0) {
+                                                                    $label = $effectiveStock < 0
+                                                                        ? "⚠️ Already over-committed by " . abs($effectiveStock) . " pcs — will be pre-order."
+                                                                        : '⚠️ No remaining stock — will be pre-order (minus stock).';
+                                                                    return $label;
+                                                                }
+
+                                                                if ($qty > $effectiveStock) {
+                                                                    $deficit = $qty - $effectiveStock;
+                                                                    return "⚠️ Effective stock: {$effectiveStock} pcs — {$deficit} pcs will be pre-order (minus stock).";
+                                                                }
+
+                                                                return "Effective stock: {$effectiveStock} pcs (actual: " . self::getAvailableStock((int) $productId, $storeId) . " pcs)";
                                                             }
 
                                                             if ($get('item_type') === 'bundle') {
@@ -306,17 +292,21 @@ class TransactionForm
                                                                 $bundle = Bundle::with('bundleItems.product')->find($bundleId);
                                                                 if (! $bundle) return '';
 
-                                                                $stockLines = $bundle->bundleItems->map(function ($bi) use ($storeId) {
-                                                                    $stock  = self::getAvailableStock($bi->product_id, $storeId);
-                                                                    $maxSet = $bi->qty > 0 ? floor($stock / $bi->qty) : 0;
-                                                                    $icon   = $stock > 0 ? '✅' : '⚠️';
-                                                                    return "{$icon} {$bi->product->name}: {$stock} pcs (max {$maxSet} sets)";
+                                                                $qty = (int) ($get('qty') ?? 1);
+
+                                                                $stockLines = $bundle->bundleItems->map(function ($bi) use ($storeId, $get, $currentKey, $qty) {
+                                                                    $effectiveStock = self::getEffectiveStock((int) $bi->product_id, $storeId, $get, $currentKey);
+                                                                    $needed         = $bi->qty * $qty;
+                                                                    $maxSet         = $bi->qty > 0 ? floor($effectiveStock / $bi->qty) : 0;
+
+                                                                    $icon = $effectiveStock >= $needed ? '✅' : '⚠️';
+                                                                    return "{$icon} {$bi->product->name}: effective {$effectiveStock} pcs (max {$maxSet} sets)";
                                                                 })->implode(' | ');
 
                                                                 $minQty = $bundle->bundleItems
-                                                                    ->map(function ($bi) use ($storeId): int {
-                                                                        $stock = self::getAvailableStock($bi->product_id, $storeId);
-                                                                        return $bi->qty > 0 ? (int) floor($stock / $bi->qty) : 0;
+                                                                    ->map(function ($bi) use ($storeId, $get, $currentKey): int {
+                                                                        $effectiveStock = self::getEffectiveStock((int) $bi->product_id, $storeId, $get, $currentKey);
+                                                                        return $bi->qty > 0 ? (int) floor($effectiveStock / $bi->qty) : 0;
                                                                     })
                                                                     ->min();
 
@@ -788,14 +778,13 @@ class TransactionForm
                                         ->offColor('danger')
                                         ->onColor('success')
                                         ->inline(false)
-                                        ->default(true),
+                                        ->default(false),
                                     DateTimePicker::make('due_date_down_payment')
                                         ->label('Due Date Down Payment')
                                         ->native(false)
                                         ->suffixIcon(Heroicon::Calendar)
                                         ->closeOnDateSelection()
-                                        ->nullable()
-                                        ->default(now()),
+                                        ->nullable(),
                                 ]),
                         ]),
 
@@ -848,6 +837,41 @@ class TransactionForm
         $discount = self::parseCurrency($get('discount'));
         $subtotal = max(0, ($qty * $price) - $discount);
         $set('subtotal', number_format($subtotal, 0, ',', '.'));
+    }
+
+
+    protected static function getEffectiveStock(int $productId, ?int $storeId, Get $get, ?string $currentItemKey = null): int
+    {
+        $actualStock = self::getAvailableStock($productId, $storeId);
+
+        $allItems = $get('../../transactionItems') ?? [];
+
+        $usedQty = 0;
+        foreach ($allItems as $key => $item) {
+            if ($currentItemKey !== null && $key === $currentItemKey) {
+                continue;
+            }
+
+            $itemType = $item['item_type'] ?? 'product';
+            $itemQty  = (int) ($item['qty'] ?? 0);
+
+            if ($itemType === 'product' && isset($item['product_id']) && (int) $item['product_id'] === $productId) {
+                $usedQty += $itemQty;
+            }
+
+            if ($itemType === 'bundle' && isset($item['bundle_id'])) {
+                $bundle = Bundle::with('bundleItems')->find($item['bundle_id']);
+                if ($bundle) {
+                    foreach ($bundle->bundleItems as $bi) {
+                        if ((int) $bi->product_id === $productId) {
+                            $usedQty += $bi->qty * $itemQty;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $actualStock - $usedQty;
     }
 
     protected static function recalculateTotals(Get $get, Set $set): void

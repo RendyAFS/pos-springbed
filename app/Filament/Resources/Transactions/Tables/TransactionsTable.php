@@ -45,7 +45,46 @@ class TransactionsTable
                     ->iconPosition(IconPosition::After)
                     ->copyable()
                     ->copyMessage('Transaction ID copied')
-                    ->copyMessageDuration(1500),
+                    ->copyMessageDuration(1500)
+                    ->tooltip(function ($record): ?\Illuminate\Support\HtmlString {
+                        $preOrderItems = $record->transactionItems
+                            ->where('is_pre_order', true);
+
+                        if ($preOrderItems->isEmpty()) {
+                            return null;
+                        }
+
+                        $content = $preOrderItems
+                            ->map(function ($item) {
+                                $isBundle = $item->bundle_id && $item->bundle;
+
+                                $type = $isBundle ? 'Bundle' : 'Product';
+
+                                $name = $isBundle
+                                    ? $item->bundle->name
+                                    : ($item->product?->name ?? "Product #{$item->product_id}");
+
+                                return "<strong>{$type}:</strong> {$name} • Qty: {$item->qty}";
+                            })
+                            ->implode('<br>');
+
+                        return new \Illuminate\Support\HtmlString($content);
+                    })
+                    ->description(function ($record): ?\Illuminate\Support\HtmlString {
+                        $preOrderItems = $record->transactionItems
+                            ->where('is_pre_order', true);
+
+                        if ($preOrderItems->isEmpty()) {
+                            return null;
+                        }
+
+                        $badge = '
+                        <span class="inline-flex items-center gap-x-1 px-1.5 py-0.5 text-xs font-medium text-warning-600 ring-1 ring-inset ring-warning-600/20 rounded-md">
+                            Pre-Order
+                        </span>';
+
+                        return new \Illuminate\Support\HtmlString($badge);
+                    }),
                 TextColumn::make('transaction_date')
                     ->label('Date')
                     ->date('Y-m-d')
@@ -69,16 +108,16 @@ class TransactionsTable
 
                         $totalDownPayment = $record->transactionDownPayments->sum('amount')
                             + (float) ($record->transactionPayment?->amount ?? 0);
-                        $grandTotal   = (float) $record->grand_total;
-                        $isLunas      = $totalDownPayment >= $grandTotal;
-                        $sisa         = $grandTotal - $totalDownPayment;
+                        $grandTotal = (float) $record->grand_total;
+                        $isPaid     = $totalDownPayment >= $grandTotal;
+                        $remaining  = $grandTotal - $totalDownPayment;
 
                         $downPaymentBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-warning-600 ring-1 ring-inset ring-warning-600/20">Down Payment</span>';
 
-                        if ($isLunas) {
+                        if ($isPaid) {
                             $statusBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-success-600 ring-1 ring-inset ring-success-600/20">Paid</span>';
                         } else {
-                            $formatted   = RupiahHelper::format($sisa);
+                            $formatted   = RupiahHelper::format($remaining);
                             $statusBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-danger-600 ring-1 ring-inset ring-danger-600/20">Remaining ' . e($formatted) . '</span>';
                         }
 
