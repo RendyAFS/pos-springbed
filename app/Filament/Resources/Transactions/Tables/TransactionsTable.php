@@ -26,6 +26,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\TernaryFilter;
 
 class TransactionsTable
 {
@@ -54,12 +56,36 @@ class TransactionsTable
                     ->sortable()
                     ->weight('semibold')
                     ->description(fn($record): string => $record->customer?->phone ?? '—'),
-                TextColumn::make('grand_total')
+                TextColumn::make('transactionPayment.amount')
                     ->label('Total')
                     ->sortable()
                     ->alignRight()
                     ->weight('medium')
-                    ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                    ->formatStateUsing(fn($state) => RupiahHelper::format($state))
+                    ->description(function ($record) {
+                        if (! $record->is_down_payment) {
+                            return null;
+                        }
+
+                        $totalDownPayment = $record->transactionDownPayments->sum('amount')
+                            + (float) ($record->transactionPayment?->amount ?? 0);
+                        $grandTotal   = (float) $record->grand_total;
+                        $isLunas      = $totalDownPayment >= $grandTotal;
+                        $sisa         = $grandTotal - $totalDownPayment;
+
+                        $downPaymentBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-warning-600 ring-1 ring-inset ring-warning-600/20">Down Payment</span>';
+
+                        if ($isLunas) {
+                            $statusBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-success-600 ring-1 ring-inset ring-success-600/20">Paid</span>';
+                        } else {
+                            $formatted   = RupiahHelper::format($sisa);
+                            $statusBadge = '<span class="inline-flex items-center fi-badge fi-size-sm font-medium text-danger-600 ring-1 ring-inset ring-danger-600/20">Remaining ' . e($formatted) . '</span>';
+                        }
+
+                        return new \Illuminate\Support\HtmlString(
+                            $downPaymentBadge . ' ' . $statusBadge
+                        );
+                    }),
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -117,15 +143,57 @@ class TransactionsTable
             ])
             ->defaultSort('transaction_date', 'desc')
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
+                TernaryFilter::make('is_down_payment')
+                    ->label('Down Payment')
+                    ->native(false)
+                    ->placeholder('All')
+                    ->trueLabel('Down Payment')
+                    ->falseLabel('Non-Down Payment'),
+                SelectFilter::make('status'),
                 SelectFilter::make('status')
                     ->label('Status')
+                    ->searchable()
                     ->options(
                         collect(TransactionStatusEnum::cases())
                             ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                             ->toArray()
                     ),
-            ])
+                SelectFilter::make('payment_status')
+                    ->label('Payment Status')
+                    ->searchable()
+                    ->options(
+                        collect(TransactionPaymentStatusEnum::cases())
+                            ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                            ->toArray()
+                    )
+                    ->query(function ($query, array $data) {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn($query, $value) =>
+                            $query->whereHas('transactionPayment', function ($q) use ($value) {
+                                $q->where('status', $value);
+                            })
+                        );
+                    }),
+                SelectFilter::make('shiping_status')
+                    ->label('Delivery Status')
+                    ->searchable()
+                    ->options(
+                        collect(StatusTransactionShipmentEnum::cases())
+                            ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                            ->toArray()
+                    )
+                    ->query(function ($query, array $data) {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn($query, $value) =>
+                            $query->whereHas('transactionShipment', function ($q) use ($value) {
+                                $q->where('status', $value);
+                            })
+                        );
+                    }),
+            ], layout: FiltersLayout::Modal)
             ->recordActions([
                 ActionGroup::make([
                     Action::make('updateAllStatus')
@@ -205,6 +273,18 @@ class TransactionsTable
                         ->icon(Heroicon::Printer)
                         ->color('success')
                         ->url(fn($record) => route('transactions.print', $record))
+                        ->openUrlInNewTab(),
+                    Action::make('invoice_a5')
+                        ->label('Invoice A5')
+                        ->icon(Heroicon::DocumentText)
+                        ->color('info')
+                        ->url(fn($record) => route('transactions.invoice', $record) . '?paper=a5')
+                        ->openUrlInNewTab(),
+                    Action::make('invoice_a4')
+                        ->label('Invoice A4')
+                        ->icon(Heroicon::DocumentText)
+                        ->color('primary')
+                        ->url(fn($record) => route('transactions.invoice', $record) . '?paper=a4')
                         ->openUrlInNewTab(),
                     EditAction::make(),
                     DeleteAction::make(),

@@ -20,6 +20,8 @@ class EditTransaction extends EditRecord
 
     protected array $extraData = [];
 
+    protected array $oldReferalData = [];
+
     protected function resolveRecord(int | string $key): Model
     {
         return parent::resolveRecord($key)
@@ -51,6 +53,12 @@ class EditTransaction extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        $this->oldReferalData = [
+            'is_referal'          => (bool) $this->record->is_referal,
+            'referal_customer_id' => $this->record->referal_customer_id,
+            'nominal_referal'     => (float) ($this->record->nominal_referal ?? 0),
+        ];
+
         $this->extraData = [
             'courier_id'           => $data['courier_id'] ?? null,
             'payment_method'       => $data['payment_method'] ?? null,
@@ -110,7 +118,7 @@ class EditTransaction extends EditRecord
 
         /** @var ReferalService $referalService */
         $referalService = app(ReferalService::class);
-        $referalService->processReferalOnEdit($this->record, $extra);
+        $referalService->processReferalOnEdit($this->record, $extra, $this->oldReferalData);
     }
 
     protected function getHeaderActions(): array

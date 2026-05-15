@@ -16,6 +16,7 @@ use App\Models\Promo;
 use App\Models\Referal;
 use App\Models\StoreSetting;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -31,6 +32,7 @@ use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Support\RawJs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -178,12 +180,20 @@ class TransactionForm
 
                                                     Select::make('product_id')
                                                         ->label('Product')
-                                                        ->options(function (): array {
-                                                            $storeId = Auth::user()?->store_setting_id;
-                                                            $query   = Product::query()->where('is_active', true);
+                                                        ->options(function (Get $get): array {
+
+                                                            $storeId = self::getStoreId($get);
+
+                                                            $query = Product::query()
+                                                                ->where('is_active', true);
+
                                                             if (! is_null($storeId)) {
-                                                                $query->where('store_setting_id', $storeId);
+                                                                $query->whereHas('inventoryStocks', function ($q) use ($storeId) {
+                                                                    $q->where('store_setting_id', $storeId)
+                                                                        ->where('quantity', '>', 0);
+                                                                });
                                                             }
+
                                                             return $query->pluck('name', 'id')->toArray();
                                                         })
                                                         ->searchable()
@@ -195,7 +205,7 @@ class TransactionForm
                                                             if ($state) {
                                                                 $product = Product::find($state);
                                                                 if ($product) {
-                                                                    $set('selling_price', $product->selling_price);
+                                                                    $set('selling_price', number_format($product->selling_price, 0, ',', '.'));
                                                                     self::recalculateItemSubtotal($get, $set);
                                                                 }
                                                             }
@@ -218,7 +228,7 @@ class TransactionForm
                                                             if ($state) {
                                                                 $bundle = Bundle::with('bundleItems.product')->find($state);
                                                                 if ($bundle) {
-                                                                    $set('selling_price', $bundle->bundle_price);
+                                                                    $set('selling_price', number_format($bundle->bundle_price, 0, ',', '.'));
                                                                     $set('product_id', null);
                                                                     $set('qty', 1);
                                                                     self::recalculateItemSubtotal($get, $set);
@@ -318,7 +328,9 @@ class TransactionForm
 
                                                     TextInput::make('selling_price')
                                                         ->label('Unit Price')
-                                                        ->numeric()
+                                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                                        ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                                         ->required()
                                                         ->debounce(500)
                                                         ->live(onBlur: true)
@@ -327,7 +339,9 @@ class TransactionForm
 
                                                     TextInput::make('discount')
                                                         ->label('Discount (Rp)')
-                                                        ->numeric()
+                                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                                        ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                                         ->default(0)
                                                         ->debounce(500)
                                                         ->live(onBlur: true)
@@ -336,7 +350,10 @@ class TransactionForm
 
                                                     TextInput::make('subtotal')
                                                         ->label('Subtotal')
-                                                        ->numeric()
+                                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                                        ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                                                        ->afterStateHydrated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
                                                         ->readOnly()
                                                         ->prefix('Rp')
                                                         ->columnSpanFull(),
@@ -454,20 +471,25 @@ class TransactionForm
                                                 ->afterStateUpdated(function (Get $get, Set $set, $state): void {
                                                     if ($state) {
                                                         $courier = Courier::find($state);
+
                                                         if ($courier) {
-                                                            $set('shiping_cost', $courier->shipping_cost);
+                                                            $set('shiping_cost', (float) $courier->shipping_cost);
                                                         }
                                                     } else {
                                                         $set('shiping_cost', 0);
                                                     }
+
                                                     self::recalculateTotals($get, $set);
                                                 }),
 
                                             TextInput::make('shiping_cost')
                                                 ->label('Shipping Cost')
-                                                ->numeric()
+                                                ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
+                                                ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
                                                 ->default(0)
                                                 ->live(onBlur: true)
+                                                ->afterStateHydrated(fn(Get $get, Set $set) => self::recalculateTotals($get, $set))
                                                 ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateTotals($get, $set))
                                                 ->prefix('Rp')
                                                 ->helperText('You can adjust this manually if needed.'),
@@ -488,10 +510,37 @@ class TransactionForm
                                             Section::make('Price Breakdown')
                                                 ->icon(Heroicon::ReceiptRefund)
                                                 ->schema([
-                                                    TextInput::make('subtotal')->label('Subtotal + Discount')->numeric()->readOnly()->prefix('Rp'),
-                                                    TextInput::make('promo_total')->label('Promo Discount')->numeric()->readOnly()->prefix('Rp'),
-                                                    TextInput::make('shiping_cost')->label('Shipping Cost')->numeric()->readOnly()->prefix('Rp'),
-                                                    TextInput::make('grand_total')->label('Grand Total')->numeric()->readOnly()->prefix('Rp'),
+                                                    TextInput::make('subtotal')
+                                                        ->label('Subtotal + Discount')
+                                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
+                                                        ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
+                                                        ->readOnly()
+                                                        ->prefix('Rp'),
+
+                                                    TextInput::make('promo_total')
+                                                        ->label('Promo Discount')
+                                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
+                                                        ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
+                                                        ->readOnly()
+                                                        ->prefix('Rp'),
+
+                                                    TextInput::make('shiping_cost')
+                                                        ->label('Shipping Cost')
+                                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
+                                                        ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
+                                                        ->readOnly()
+                                                        ->prefix('Rp'),
+
+                                                    TextInput::make('grand_total')
+                                                        ->label('Grand Total')
+                                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
+                                                        ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
+                                                        ->readOnly()
+                                                        ->prefix('Rp'),
                                                 ]),
                                             Section::make('Product Items')
                                                 ->icon(Heroicon::ShoppingBag)
@@ -506,9 +555,9 @@ class TransactionForm
                                                             $lines = [];
                                                             foreach ($items as $item) {
                                                                 $qty          = (int) ($item['qty'] ?? 0);
-                                                                $sellingPrice = (float) ($item['selling_price'] ?? 0);
-                                                                $discount     = (float) ($item['discount'] ?? 0);
-                                                                $subtotal     = (float) ($item['subtotal'] ?? 0);
+                                                                $sellingPrice = self::parseCurrency($item['selling_price'] ?? 0);
+                                                                $discount     = self::parseCurrency($item['discount'] ?? 0);
+                                                                $subtotal     = self::parseCurrency($item['subtotal'] ?? 0);
 
                                                                 if (($item['item_type'] ?? 'product') === 'bundle' && ! empty($item['bundle_id'])) {
                                                                     $bundle = Bundle::find($item['bundle_id']);
@@ -527,7 +576,7 @@ class TransactionForm
                                                                 $lines[] = "• {$name} * {$qty} @ Rp " . number_format($sellingPrice, 0, ',', '.') . "{$discountPart} = Rp " . number_format($subtotal, 0, ',', '.');
                                                             }
 
-                                                            $discountReferal = (float) ($get('use_discount_referal') ?? 0);
+                                                            $discountReferal = self::parseCurrency($get('use_discount_referal') ?? 0);
                                                             if ($discountReferal > 0) {
                                                                 $lines[] = '──────────────────────────';
                                                                 $lines[] = '🎁 Discount Referal: − Rp ' . number_format($discountReferal, 0, ',', '.');
@@ -547,6 +596,7 @@ class TransactionForm
                                                         ->label('Gunakan Referal?')
                                                         ->default(false)
                                                         ->live()
+                                                        ->dehydrated(true)
                                                         ->afterStateUpdated(function (Set $set, $state): void {
                                                             if (! $state) {
                                                                 $set('referal_customer_id', null);
@@ -578,17 +628,21 @@ class TransactionForm
                                                         ->searchable()
                                                         ->nullable()
                                                         ->live()
+                                                        ->dehydrated(true)
                                                         ->visible(fn(Get $get): bool => (bool) $get('is_referal'))
                                                         ->required(fn(Get $get): bool => (bool) $get('is_referal'))
                                                         ->helperText('Pilih customer yang mereferralkan transaksi ini. Nominal referal akan ditambahkan ke saldo mereka.'),
 
                                                     TextInput::make('nominal_referal')
                                                         ->label('Nominal Referal')
-                                                        ->numeric()
+                                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
+                                                        ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
                                                         ->default(0)
                                                         ->minValue(0)
                                                         ->prefix('Rp')
                                                         ->live(onBlur: true)
+                                                        ->dehydrated(true)
                                                         ->visible(fn(Get $get): bool => (bool) $get('is_referal'))
                                                         ->required(fn(Get $get): bool => (bool) $get('is_referal'))
                                                         ->helperText('Jumlah discount (Rupiah) yang akan ditambahkan ke saldo referal customer referral.'),
@@ -624,25 +678,38 @@ class TransactionForm
 
                                                     TextInput::make('use_discount_referal')
                                                         ->label('Discount Referal')
-                                                        ->numeric()
+                                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
+                                                        ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
                                                         ->default(0)
-                                                        ->minValue(0)
                                                         ->prefix('Rp')
                                                         ->dehydrated(true)
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(function (Get $get, Set $set, $state): void {
+
                                                             $customerId = $get('customer_id');
                                                             $maxUsage   = self::getMaxReward($get);
 
-                                                            if ((float) $state > $maxUsage) {
-                                                                $set('use_discount_referal', $maxUsage);
+                                                            $state = self::parseCurrency($state);
+
+                                                            if ($state > $maxUsage) {
+                                                                $set(
+                                                                    'use_discount_referal',
+                                                                    number_format($maxUsage, 0, ',', '.')
+                                                                );
+
                                                                 $state = $maxUsage;
                                                             }
 
                                                             if ($customerId) {
                                                                 $referal = Referal::where('customer_id', $customerId)->first();
-                                                                if ($referal && (float) $state > $referal->discount_amount) {
-                                                                    $set('use_discount_referal', $referal->discount_amount);
+
+                                                                if ($referal && $state > $referal->discount_amount) {
+
+                                                                    $set(
+                                                                        'use_discount_referal',
+                                                                        number_format($referal->discount_amount, 0, ',', '.')
+                                                                    );
                                                                 }
                                                             }
 
@@ -684,19 +751,20 @@ class TransactionForm
                                                 $component->state($record->transactionPayment->method?->value ?? $record->transactionPayment->method);
                                             }
                                         }),
-
                                     TextInput::make('payment_amount')
                                         ->label('Amount Paid')
-                                        ->numeric()
+                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                        ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
+                                        ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
                                         ->required()
                                         ->prefix('Rp')
                                         ->dehydrated(true)
                                         ->afterStateHydrated(function (TextInput $component, $record): void {
                                             if ($record && $record->transactionPayment) {
-                                                $component->state($record->transactionPayment->amount);
+                                                $amount = (float) $record->transactionPayment->amount;
+                                                $component->state(number_format($amount, 0, ',', '.'));
                                             }
                                         }),
-
                                     Select::make('payment_status')
                                         ->label('Payment Status')
                                         ->options(
@@ -712,6 +780,22 @@ class TransactionForm
                                                 $component->state($record->transactionPayment->status?->value ?? $record->transactionPayment->status);
                                             }
                                         }),
+                                    Toggle::make('is_down_payment')
+                                        ->label('Is Down Payment')
+                                        ->offIcon(Heroicon::XMark)
+                                        ->onIcon(Heroicon::Check)
+                                        ->nullable()
+                                        ->offColor('danger')
+                                        ->onColor('success')
+                                        ->inline(false)
+                                        ->default(true),
+                                    DateTimePicker::make('due_date_down_payment')
+                                        ->label('Due Date Down Payment')
+                                        ->native(false)
+                                        ->suffixIcon(Heroicon::Calendar)
+                                        ->closeOnDateSelection()
+                                        ->nullable()
+                                        ->default(now()),
                                 ]),
                         ]),
 
@@ -719,6 +803,27 @@ class TransactionForm
                     ->skippable(false)
                     ->columnSpanFull(),
             ]);
+    }
+
+    protected static function parseCurrency(mixed $value): float
+    {
+        if (blank($value)) {
+            return 0;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (float) $value;
+        }
+
+        $stringValue = (string) $value;
+
+        if (preg_match('/^\d+\.\d{1,2}$/', $stringValue)) {
+            return (float) $stringValue;
+        }
+
+        $value = preg_replace('/[^0-9]/', '', $stringValue);
+
+        return (float) $value;
     }
 
     protected static function getStoreId(Get $get): ?int
@@ -738,22 +843,30 @@ class TransactionForm
 
     protected static function recalculateItemSubtotal(Get $get, Set $set): void
     {
-        $qty      = (float) ($get('qty') ?? 0);
-        $price    = (float) ($get('selling_price') ?? 0);
-        $discount = (float) ($get('discount') ?? 0);
-        $set('subtotal', round(max(0, ($qty * $price) - $discount), 2));
+        $qty = (float) ($get('qty') ?? 0);
+        $price = self::parseCurrency($get('selling_price'));
+        $discount = self::parseCurrency($get('discount'));
+        $subtotal = max(0, ($qty * $price) - $discount);
+        $set('subtotal', number_format($subtotal, 0, ',', '.'));
     }
 
     protected static function recalculateTotals(Get $get, Set $set): void
     {
-        $items    = $get('transactionItems') ?? [];
-        $subtotal = collect($items)->sum(fn($i) => (float) ($i['subtotal'] ?? 0));
+        $items = $get('transactionItems') ?? [];
 
-        $promoTotal = 0.0;
-        $promoId    = $get('promo_id');
+        $subtotal = collect($items)->sum(function ($i) {
+            $qty = (float) ($i['qty'] ?? 0);
+            $price = self::parseCurrency($i['selling_price'] ?? 0);
+            $discount = self::parseCurrency($i['discount'] ?? 0);
+            return max(0, ($qty * $price) - $discount);
+        });
+
+        $promoTotal = 0;
+        $promoId = $get('promo_id');
 
         if ($promoId) {
             $promo = Promo::find($promoId);
+
             if ($promo && $subtotal >= (float) ($promo->min_purchase ?? 0)) {
                 $promoTotal = $promo->discount_type === PromoDiscountEnum::PERCENTAGE
                     ? round($subtotal * ($promo->discount_value / 100), 2)
@@ -761,13 +874,13 @@ class TransactionForm
             }
         }
 
-        $discountReferal = (float) ($get('use_discount_referal') ?? 0);
+        $discountReferal = self::parseCurrency($get('use_discount_referal') ?? 0);
+        $shippingCost = self::parseCurrency($get('shiping_cost') ?? 0);
+        $grandTotal = max(0, $subtotal - $promoTotal - $discountReferal + $shippingCost);
 
-        $shippingCost = (float) ($get('shiping_cost') ?? 0);
-
-        $set('subtotal',    round($subtotal, 2));
-        $set('promo_total', round($promoTotal, 2));
-        $set('grand_total', round(max(0, $subtotal - $promoTotal - $discountReferal + $shippingCost), 2));
+        $set('subtotal', number_format($subtotal, 0, ',', '.'));
+        $set('promo_total', number_format($promoTotal, 0, ',', '.'));
+        $set('grand_total', number_format($grandTotal, 0, ',', '.'));
     }
 
     protected static function getMaxReward(Get $get): float

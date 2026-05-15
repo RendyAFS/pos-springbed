@@ -12,6 +12,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Support\RawJs;
 
 class BundleForm
 {
@@ -27,9 +28,11 @@ class BundleForm
                             ->required(),
                         TextInput::make('bundle_price')
                             ->label('Bundle Price')
-                            ->numeric()
                             ->prefix('Rp.')
                             ->default(0)
+                            ->readOnly()
+                            ->dehydrateStateUsing(fn($state) => (float) str_replace('.', '', $state ?? 0))
+                            ->formatStateUsing(fn($state) => number_format((float) ($state ?? 0), 0, ',', '.'))
                             ->dehydrated(),
                         Toggle::make('is_active')
                             ->label('Is Active')
@@ -59,23 +62,27 @@ class BundleForm
 
                                         if ($state) {
                                             $price = Product::find($state)?->selling_price ?? 0;
-                                            $set('price', $price);
+                                            $set('price', number_format((float) $price, 0, ',', '.'));
                                         }
                                     })
                                     ->afterStateUpdated(function ($state, Set $set, Get $get) {
                                         $price = Product::find($state)?->selling_price ?? 0;
-                                        $set('price', $price);
+                                        $set('price', number_format((float) $price, 0, ',', '.'));
                                         self::updateBundlePrice($get, $set);
-                                    }),
+                                    })
+                                    ->columnSpanFull(),
                                 TextInput::make('price')
                                     ->label('Price')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => (float) str_replace('.', '', $state ?? 0))
+                                    ->formatStateUsing(fn($state) => number_format((float) ($state ?? 0), 0, ',', '.'))
                                     ->prefix('Rp.')
                                     ->live()
                                     ->debounce(500)
                                     ->afterStateUpdated(function (Get $get, Set $set) {
                                         self::updateBundlePrice($get, $set);
-                                    }),
+                                    })
+                                    ->columns(1),
                                 TextInput::make('qty')
                                     ->label('Quantity')
                                     ->numeric()
@@ -86,9 +93,10 @@ class BundleForm
                                     ->debounce(500)
                                     ->afterStateUpdated(function (Get $get, Set $set) {
                                         self::updateBundlePrice($get, $set);
-                                    }),
+                                    })
+                                    ->columns(1),
                             ])
-                            ->columns(3)
+                            ->columns(2)
                             ->required()
                             ->defaultItems(1)
                             ->addActionLabel('Add Product')
@@ -97,8 +105,7 @@ class BundleForm
                             ->live()
                             ->afterStateUpdated(function (Get $get, Set $set) {
                                 self::updateBundlePrice($get, $set);
-                            })
-                            ->columnSpanFull(),
+                            }),
                     ])
                     ->columnSpan(2)
             ])
@@ -113,17 +120,20 @@ class BundleForm
             ->filter(fn($item) => is_array($item))
             ->sum(function ($item) {
 
-                $price = isset($item['price']) && is_numeric($item['price'])
-                    ? (float) $item['price']
-                    : 0;
+                $price = (float) str_replace(
+                    '.',
+                    '',
+                    $item['price'] ?? 0
+                );
 
-                $qty = isset($item['qty']) && is_numeric($item['qty'])
-                    ? (int) $item['qty']
-                    : 0;
+                $qty = (int) ($item['qty'] ?? 0);
 
                 return $price * $qty;
             });
 
-        $set('../../bundle_price', $total);
+        $set(
+            '../../bundle_price',
+            number_format($total, 0, ',', '.')
+        );
     }
 }

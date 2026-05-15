@@ -77,7 +77,7 @@ class CustomerResource extends Resource
                             ->label('Address')
                             ->rows(3)
                             ->default(null),
-                    ])->columnSpan(fn ($record) => $record === null ? 'full' : 1),
+                    ])->columnSpan(fn($record) => $record === null ? 'full' : 1),
                 Section::make('Referal')
                     ->visible(fn($record) => $record !== null)
                     ->relationship('referal')
@@ -113,7 +113,7 @@ class CustomerResource extends Resource
                     ->limit(20),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->recordActions([
                 EditAction::make(),

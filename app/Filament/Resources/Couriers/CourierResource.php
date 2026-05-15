@@ -20,6 +20,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Support\RawJs;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -73,7 +74,10 @@ class CourierResource extends Resource
                     ->searchable()
                     ->required(),
                 TextInput::make('shipping_cost')
-                    ->numeric()
+                ->label('Shipping Cost')
+                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                     ->required()
                     ->prefix('Rp.'),
                 Toggle::make('is_active')
@@ -112,7 +116,7 @@ class CourierResource extends Resource
                     ->onColor('success'),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -14,6 +14,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class PurchaseOrdersTable
 {
@@ -22,6 +23,14 @@ class PurchaseOrdersTable
         return $table
             ->columns([
                 TextColumn::make('supplier_name')
+                    ->searchable(),
+                // var
+                TextColumn::make('storeSetting.store_name')
+                    ->label('Store')
+                    ->badge()
+                    ->color('gray')
+                    ->sortable()
+                    ->visible(fn() => Auth::user()?->store_setting_id === null)
                     ->searchable(),
                 TextColumn::make('invoice_number')
                     ->fontFamily(FontFamily::Mono)
@@ -42,7 +51,7 @@ class PurchaseOrdersTable
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->native(false),
             ])
             ->recordActions([
                 EditAction::make(),

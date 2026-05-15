@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PurchaseOrders\Schemas;
 use App\Models\InventoryStock;
 use App\Models\Product;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -13,6 +14,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Support\RawJs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -51,8 +53,8 @@ class PurchaseOrderForm
                                         ->where('id', $item['product_id'])
                                         ->value('selling_price');
 
-                                    $set("purchaseOrderItems.$key.qty_remaining", $stock ?? 0);
-                                    $set("purchaseOrderItems.$key.selling_price", $sellingPrice ?? 0);
+                                    $set("purchaseOrderItems.$key.qty_remaining", number_format($stock ?? 0, 0, ',', '.'));
+                                    $set("purchaseOrderItems.$key.selling_price", number_format($sellingPrice ?? 0, 0, ',', '.'));
                                 }
                             })
                             ->required(),
@@ -83,7 +85,9 @@ class PurchaseOrderForm
                     ->schema([
                         TextInput::make('total_amount')
                             ->label('Total Amount')
-                            ->numeric()
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                             ->prefix('Rp')
                             ->readOnly()
                             ->default(0),
@@ -99,15 +103,6 @@ class PurchaseOrderForm
                                     ->relationship(
                                         name: 'product',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: function ($query) {
-                                            $storeId = Auth::user()?->store_setting_id;
-
-                                            if ($storeId) {
-                                                $query->whereHas('inventoryStocks', function ($q) use ($storeId) {
-                                                    $q->where('store_setting_id', $storeId);
-                                                });
-                                            }
-                                        }
                                     )
                                     ->searchable()
                                     ->preload()
@@ -132,8 +127,8 @@ class PurchaseOrderForm
                                             ->where('id', $state)
                                             ->value('selling_price');
 
-                                        $set('qty_remaining', $stock ?? 0);
-                                        $set('selling_price', $sellingPrice ?? 0);
+                                        $set('qty_remaining', number_format($stock ?? 0, 0, ',', '.'));
+                                        $set('selling_price', number_format($sellingPrice ?? 0, 0, ',', '.'));
                                     })
                                     ->columnSpanFull(),
                                 TextInput::make('qty_purchased')
@@ -149,16 +144,23 @@ class PurchaseOrderForm
 
                                         $total = collect($items)->sum(function ($item) {
                                             $qty = (float) ($item['qty_purchased'] ?? 0);
-                                            $price = (float) ($item['cost_price'] ?? 0);
+
+                                            $price = (float) str_replace(
+                                                '.',
+                                                '',
+                                                $item['cost_price'] ?? 0
+                                            );
 
                                             return $qty * $price;
                                         });
 
-                                        $set('../../total_amount', $total);
+                                        $set('../../total_amount', number_format($total, 0, ',', '.'));
                                     }),
                                 TextInput::make('cost_price')
                                     ->label('Cost Price')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                     ->minValue(0)
                                     ->default(0)
                                     ->prefix('Rp')
@@ -170,41 +172,67 @@ class PurchaseOrderForm
 
                                         $total = collect($items)->sum(function ($item) {
                                             $qty = (float) ($item['qty_purchased'] ?? 0);
-                                            $price = (float) ($item['cost_price'] ?? 0);
+
+                                            $price = (float) str_replace(
+                                                '.',
+                                                '',
+                                                $item['cost_price'] ?? 0
+                                            );
 
                                             return $qty * $price;
                                         });
 
-                                        $set('../../total_amount', $total);
+                                        $set('../../total_amount', number_format($total, 0, ',', '.'));
                                     }),
                                 TextInput::make('qty_remaining')
                                     ->label('Current Stock')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => (float) str_replace('.', '', $state ?? 0))
+                                    ->formatStateUsing(fn($state) => number_format((float) ($state ?? 0), 0, ',', '.'))
                                     ->disabled()
                                     ->dehydrated(true)
                                     ->default(0)
+                                    ->nullable()
                                     ->helperText('Current stock in selected store')
                                     ->columnSpan(1),
                                 TextInput::make('selling_price')
                                     ->label('Current Selling Price')
                                     ->prefix('Rp')
-                                    ->numeric()
+                                    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->default(0)
                                     ->helperText('Current selling price in selected store')
-                                    ->afterStateHydrated(function (Get $get, Set $set) {
-                                        $productId = $get('product_id');
-                                        if (!$productId) {
-                                            $set('selling_price', 0);
+                                    ->afterStateHydrated(function (Get $get, Set $set, $state) {
+                                        // Jika state sudah ada (dari DB), format langsung dari $state
+                                        if ($state) {
+                                            $set('selling_price', number_format((float) $state, 0, ',', '.'));
                                             return;
                                         }
+
+                                        $productId = $get('product_id');
+                                        if (!$productId) {
+                                            $set('selling_price', '0');
+                                            return;
+                                        }
+
                                         $price = Product::query()
                                             ->where('id', $productId)
                                             ->value('selling_price');
-                                        $set('selling_price', $price ?? 0);
+
+                                        $set('selling_price', number_format((float) ($price ?? 0), 0, ',', '.'));
                                     })
-                                    ->columnSpan(1)
+                                    ->columnSpan(1),
+                                DateTimePicker::make('date_product_order')
+                                    ->label('Date Product Order')
+                                    ->native(false)
+                                    ->suffixIcon(Heroicon::Calendar)
+                                    ->closeOnDateSelection()
+                                    ->required()
+                                    ->default(now())
+                                    ->columnSpanFull(),
                             ])->columns(2),
                     ])
                     ->addActionLabel('Add Item')
