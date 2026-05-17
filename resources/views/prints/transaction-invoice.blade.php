@@ -3,11 +3,74 @@
 
 <head>
     <meta charset="UTF-8">
+    @php
+        $isA4 = ($paperSize ?? 'a5') === 'a4';
+        $pageSize = $isA4 ? 'A4' : 'A5';
+        $pageHeight = $isA4 ? '297mm' : '210mm';
+        $baseFontSz = $isA4 ? '11px' : '9px';
+
+        $bodyPad = $isA4 ? '16px 28px' : '10px 18px';
+        $bodyPadBottom = $isA4 ? '48px' : '36px';
+
+        $headerPad = $isA4 ? '18px 28px 14px' : '12px 18px 10px';
+        $metaPad = $isA4 ? '8px 28px' : '6px 18px';
+        $metaItemMr = $isA4 ? '18px' : '12px';
+        $metaLabelSz = $isA4 ? '8px' : '7px';
+        $metaValueSz = $isA4 ? '10px' : '8.5px';
+
+        $logoPr = $isA4 ? '12px' : '8px';
+        $logoSize = $isA4 ? '52px' : '38px';
+        $storeNameSz = $isA4 ? '20px' : '15px';
+        $taglineSz = $isA4 ? '9px' : '7.5px';
+        $invoiceLabelSz = $isA4 ? '28px' : '20px';
+
+        $infoRowMb = $isA4 ? '14px' : '10px';
+        $infoColPr = $isA4 ? '16px' : '10px';
+        $infoTitleSz = $isA4 ? '8px' : '7px';
+        $infoTitleMb = $isA4 ? '5px' : '3px';
+        $infoContentSz = $isA4 ? '10px' : '8.5px';
+        $infoStrongSz = $isA4 ? '11px' : '9px';
+
+        $thPad = $isA4 ? '6px 8px' : '4px 6px';
+        $thSz = $isA4 ? '9px' : '7.5px';
+        $tdPad = $isA4 ? '5px 8px' : '3px 6px';
+        $tdSz = $isA4 ? '10px' : '8.5px';
+        $colNo = $isA4 ? '20px' : '16px';
+        $colQty = $isA4 ? '40px' : '28px';
+        $colPrice = $isA4 ? '95px' : '80px';
+        $bundleSubPl = $isA4 ? '12px' : '8px';
+        $emptyRowH = $isA4 ? '14px' : '11px';
+        $itemsMb = $isA4 ? '12px' : '8px';
+
+        $footerWrapMt = $isA4 ? '4px' : '3px';
+        $footerLeftPr = $isA4 ? '14px' : '10px';
+        $termsPad = $isA4 ? '8px 10px' : '5px 7px';
+        $termsMb = $isA4 ? '10px' : '7px';
+        $termsTitleSz = $isA4 ? '8px' : '7px';
+        $termsListSz = $isA4 ? '9px' : '7.5px';
+
+        $summTdPad = $isA4 ? '3px 6px' : '2px 4px';
+        $summTdSz = $isA4 ? '10px' : '8.5px';
+        $grandSz = $isA4 ? '12px' : '10px';
+        $grandPad = $isA4 ? '6px 8px' : '4px 6px';
+        $payRowSz = $isA4 ? '9px' : '7.5px';
+        $payRowPt = $isA4 ? '3px' : '2px';
+
+        $signMt = $isA4 ? '16px' : '10px';
+        $signCellSz = $isA4 ? '9px' : '7.5px';
+        $signLineMt = $isA4 ? '22mm' : '16mm';
+        $signLineW = $isA4 ? '45mm' : '32mm';
+
+        $footerBandPad = $isA4 ? '6px 28px' : '4px 18px';
+        $footerBandSz = $isA4 ? '8px' : '7px';
+
+        $downPaymentBadgeSz = $isA4 ? '8px' : '7px';
+    @endphp
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
         @page {
-            size: {{ ($paperSize ?? 'a5') === 'a4' ? 'A4' : 'A5' }} portrait;
+            size: {{ $pageSize }} portrait;
             margin: 0;
         }
 
@@ -21,7 +84,7 @@
             font-family: 'Inter', Arial, sans-serif;
             background: #fff;
             color: #1a1a2e;
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '11px' : '9px' }};
+            font-size: {{ $baseFontSz }};
             margin: 0;
             padding: 0;
         }
@@ -33,20 +96,20 @@
 
         .page {
             width: 100%;
-            height: {{ ($paperSize ?? 'a5') === 'a4' ? '297mm' : '210mm' }};
+            height: {{ $pageHeight }};
             position: relative;
         }
 
         .body-stretch {
             display: block;
-            padding: {{ ($paperSize ?? 'a5') === 'a4' ? '16px 28px' : '10px 18px' }};
-            padding-bottom: {{ ($paperSize ?? 'a5') === 'a4' ? '48px' : '36px' }};
+            padding: {{ $bodyPad }};
+            padding-bottom: {{ $bodyPadBottom }};
         }
 
         /* ── HEADER BAND ── */
         .header-band {
             background: #1565c0;
-            padding: {{ ($paperSize ?? 'a5') === 'a4' ? '18px 28px 14px' : '12px 18px 10px' }};
+            padding: {{ $headerPad }};
             position: relative;
             overflow: hidden;
         }
@@ -89,12 +152,12 @@
         .store-logo-img {
             display: table-cell;
             vertical-align: middle;
-            padding-right: {{ ($paperSize ?? 'a5') === 'a4' ? '12px' : '8px' }};
+            padding-right: {{ $logoPr }};
         }
 
         .store-logo-img img {
-            width: {{ ($paperSize ?? 'a5') === 'a4' ? '52px' : '38px' }};
-            height: {{ ($paperSize ?? 'a5') === 'a4' ? '52px' : '38px' }};
+            width: {{ $logoSize }};
+            height: {{ $logoSize }};
             object-fit: contain;
             background: #fff;
             border-radius: 6px;
@@ -107,7 +170,7 @@
         }
 
         .store-name {
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '20px' : '15px' }};
+            font-size: {{ $storeNameSz }};
             font-weight: 800;
             color: #fff;
             letter-spacing: -0.5px;
@@ -115,13 +178,13 @@
         }
 
         .store-tagline {
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '9px' : '7.5px' }};
+            font-size: {{ $taglineSz }};
             color: rgba(255, 255, 255, 0.75);
             margin-top: 2px;
         }
 
         .invoice-label {
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '28px' : '20px' }};
+            font-size: {{ $invoiceLabelSz }};
             font-weight: 800;
             color: #fff;
             letter-spacing: 2px;
@@ -131,7 +194,7 @@
         /* ── META BAND ── */
         .meta-band {
             background: #e3f0fb;
-            padding: {{ ($paperSize ?? 'a5') === 'a4' ? '8px 28px' : '6px 18px' }};
+            padding: {{ $metaPad }};
             display: table;
             width: 100%;
             border-bottom: 2px solid #1565c0;
@@ -149,7 +212,7 @@
 
         .meta-item {
             display: inline-block;
-            margin-right: {{ ($paperSize ?? 'a5') === 'a4' ? '18px' : '12px' }};
+            margin-right: {{ $metaItemMr }};
         }
 
         .meta-item:last-child {
@@ -157,7 +220,7 @@
         }
 
         .meta-label {
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '8px' : '7px' }};
+            font-size: {{ $metaLabelSz }};
             color: #1565c0;
             font-weight: 700;
             text-transform: uppercase;
@@ -165,23 +228,23 @@
         }
 
         .meta-value {
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '10px' : '8.5px' }};
+            font-size: {{ $metaValueSz }};
             font-weight: 700;
             color: #1a1a2e;
         }
 
-        /* ── CUSTOMER / SHIPPING SECTION ── */
+        /* ── INFO ROW ── */
         .info-row {
             display: table;
             width: 100%;
-            margin-bottom: {{ ($paperSize ?? 'a5') === 'a4' ? '14px' : '10px' }};
+            margin-bottom: {{ $infoRowMb }};
         }
 
         .info-col {
             display: table-cell;
             vertical-align: top;
             width: 50%;
-            padding-right: {{ ($paperSize ?? 'a5') === 'a4' ? '16px' : '10px' }};
+            padding-right: {{ $infoColPr }};
         }
 
         .info-col:last-child {
@@ -190,18 +253,18 @@
         }
 
         .info-box-title {
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '8px' : '7px' }};
+            font-size: {{ $infoTitleSz }};
             font-weight: 700;
             color: #1565c0;
             text-transform: uppercase;
             letter-spacing: 0.6px;
             border-bottom: 1px solid #1565c0;
             padding-bottom: 2px;
-            margin-bottom: {{ ($paperSize ?? 'a5') === 'a4' ? '5px' : '3px' }};
+            margin-bottom: {{ $infoTitleMb }};
         }
 
         .info-box-content {
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '10px' : '8.5px' }};
+            font-size: {{ $infoContentSz }};
             color: #333;
             line-height: 1.5;
         }
@@ -210,14 +273,14 @@
             color: #1a1a2e;
             font-weight: 700;
             display: block;
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '11px' : '9px' }};
+            font-size: {{ $infoStrongSz }};
         }
 
         /* ── ITEMS TABLE ── */
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: {{ ($paperSize ?? 'a5') === 'a4' ? '12px' : '8px' }};
+            margin-bottom: {{ $itemsMb }};
         }
 
         .items-table thead tr {
@@ -226,8 +289,8 @@
         }
 
         .items-table th {
-            padding: {{ ($paperSize ?? 'a5') === 'a4' ? '6px 8px' : '4px 6px' }};
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '9px' : '7.5px' }};
+            padding: {{ $thPad }};
+            font-size: {{ $thSz }};
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.4px;
@@ -242,18 +305,18 @@
         }
 
         .items-table td {
-            padding: {{ ($paperSize ?? 'a5') === 'a4' ? '5px 8px' : '3px 6px' }};
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '10px' : '8.5px' }};
+            padding: {{ $tdPad }};
+            font-size: {{ $tdSz }};
             vertical-align: top;
         }
 
         .col-no {
-            width: {{ ($paperSize ?? 'a5') === 'a4' ? '20px' : '16px' }};
+            width: {{ $colNo }};
             text-align: center;
         }
 
         .col-qty {
-            width: {{ ($paperSize ?? 'a5') === 'a4' ? '40px' : '28px' }};
+            width: {{ $colQty }};
             text-align: center;
         }
 
@@ -262,12 +325,12 @@
         }
 
         .col-price {
-            width: {{ ($paperSize ?? 'a5') === 'a4' ? '95px' : '80px' }};
+            width: {{ $colPrice }};
             text-align: right;
         }
 
         .col-total {
-            width: {{ ($paperSize ?? 'a5') === 'a4' ? '95px' : '80px' }};
+            width: {{ $colPrice }};
             text-align: right;
         }
 
@@ -277,27 +340,27 @@
         }
 
         .bundle-sub {
-            padding-left: {{ ($paperSize ?? 'a5') === 'a4' ? '12px' : '8px' }};
+            padding-left: {{ $bundleSubPl }};
             color: #555;
         }
 
         .empty-row td {
-            height: {{ ($paperSize ?? 'a5') === 'a4' ? '14px' : '11px' }};
+            height: {{ $emptyRowH }};
             border-bottom: 1px solid #e8eef4;
         }
 
-        /* ── FOOTER WRAP (terms + summary) ── */
+        /* ── FOOTER WRAP ── */
         .footer-wrap {
             display: table;
             width: 100%;
-            margin-top: {{ ($paperSize ?? 'a5') === 'a4' ? '4px' : '3px' }};
+            margin-top: {{ $footerWrapMt }};
         }
 
         .footer-left {
             display: table-cell;
             vertical-align: top;
             width: 55%;
-            padding-right: {{ ($paperSize ?? 'a5') === 'a4' ? '14px' : '10px' }};
+            padding-right: {{ $footerLeftPr }};
         }
 
         .footer-right {
@@ -309,13 +372,13 @@
         .terms-box {
             border: 1px solid #c8d8e8;
             border-radius: 4px;
-            padding: {{ ($paperSize ?? 'a5') === 'a4' ? '8px 10px' : '5px 7px' }};
+            padding: {{ $termsPad }};
             background: #f9fbfd;
-            margin-bottom: {{ ($paperSize ?? 'a5') === 'a4' ? '10px' : '7px' }};
+            margin-bottom: {{ $termsMb }};
         }
 
         .terms-title {
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '8px' : '7px' }};
+            font-size: {{ $termsTitleSz }};
             font-weight: 700;
             color: #1565c0;
             text-transform: uppercase;
@@ -324,7 +387,7 @@
         }
 
         .terms-list {
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '9px' : '7.5px' }};
+            font-size: {{ $termsListSz }};
             color: #555;
             line-height: 1.5;
             list-style: none;
@@ -343,8 +406,8 @@
         }
 
         .summary-table td {
-            padding: {{ ($paperSize ?? 'a5') === 'a4' ? '3px 6px' : '2px 4px' }};
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '10px' : '8.5px' }};
+            padding: {{ $summTdPad }};
+            font-size: {{ $summTdSz }};
         }
 
         .summary-table .s-label {
@@ -369,19 +432,19 @@
         .grand-row td {
             color: #fff !important;
             font-weight: 800 !important;
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '12px' : '10px' }} !important;
-            padding: {{ ($paperSize ?? 'a5') === 'a4' ? '6px 8px' : '4px 6px' }} !important;
+            font-size: {{ $grandSz }} !important;
+            padding: {{ $grandPad }} !important;
         }
 
         .payment-status-row td {
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '9px' : '7.5px' }};
+            font-size: {{ $payRowSz }};
             color: #888;
-            padding-top: {{ ($paperSize ?? 'a5') === 'a4' ? '3px' : '2px' }};
+            padding-top: {{ $payRowPt }};
         }
 
         /* ── SIGNATURE ── */
         .sign-section {
-            margin-top: {{ ($paperSize ?? 'a5') === 'a4' ? '16px' : '10px' }};
+            margin-top: {{ $signMt }};
             display: table;
             width: 100%;
         }
@@ -390,28 +453,74 @@
             display: table-cell;
             width: 50%;
             text-align: center;
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '9px' : '7.5px' }};
+            font-size: {{ $signCellSz }};
             color: #555;
             vertical-align: top;
         }
 
         .sign-line {
-            margin: {{ ($paperSize ?? 'a5') === 'a4' ? '22mm' : '16mm' }} auto 0;
+            margin: {{ $signLineMt }} auto 0;
             border-top: 1px solid #888;
-            width: {{ ($paperSize ?? 'a5') === 'a4' ? '45mm' : '32mm' }};
+            width: {{ $signLineW }};
         }
 
         /* ── FOOTER BAND ── */
         .footer-band {
             background: #1565c0;
-            padding: {{ ($paperSize ?? 'a5') === 'a4' ? '6px 28px' : '4px 18px' }};
+            padding: {{ $footerBandPad }};
             text-align: center;
             color: rgba(255, 255, 255, 0.7);
-            font-size: {{ ($paperSize ?? 'a5') === 'a4' ? '8px' : '7px' }};
+            font-size: {{ $footerBandSz }};
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
+        }
+
+        /* ── DOWN PAYMENT BADGES ── */
+        .badge-down-payment {
+            display: inline-block;
+            font-size: {{ $downPaymentBadgeSz }};
+            font-weight: 700;
+            padding: 2px 7px;
+            border: 1px solid #e67e22;
+            color: #e67e22;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge-lunas {
+            display: inline-block;
+            font-size: {{ $downPaymentBadgeSz }};
+            font-weight: 700;
+            padding: 2px 7px;
+            border: 1px solid #27ae60;
+            color: #27ae60;
+            border-radius: 3px;
+            margin-left: 3px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .badge-belum-lunas {
+            display: inline-block;
+            font-size: {{ $downPaymentBadgeSz }};
+            font-weight: 700;
+            padding: 2px 7px;
+            border: 1px solid #c0392b;
+            color: #c0392b;
+            border-radius: 3px;
+            margin-left: 3px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .sisa-text {
+            font-size: {{ $downPaymentBadgeSz }};
+            color: #c0392b;
+            margin-top: 3px;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -436,9 +545,16 @@
         $trackingNo = $transaction->transactionShipment?->tracking_number ?? '';
 
         $itemCount = $transaction->transactionItems->count();
-        $minRows = ($paperSize ?? 'a5') === 'a4' ? 18 : 12;
+        $minRows = $isA4 ? 18 : 12;
         $emptyRows = max(0, $minRows - $itemCount);
         $rowNum = 0;
+
+        $totalDownPayment =
+            $transaction->transactionDownPayments->sum('amount') +
+            (float) ($transaction->transactionPayment?->amount ?? 0);
+        $grandTotal = (float) $transaction->grand_total;
+        $isLunas = $totalDownPayment >= $grandTotal;
+        $sisa = $grandTotal - $totalDownPayment;
     @endphp
 
     <div class="page">
@@ -640,7 +756,7 @@
                             <td colspan="2" style="padding:0; height:2px;"></td>
                         </tr>
                         <tr class="grand-row">
-                            <td class="s-label">Remaining Payment</td>
+                            <td class="s-label">Grand Total</td>
                             <td class="s-val">Rp. {{ number_format($transaction->grand_total, 0, ',', '.') }}</td>
                         </tr>
                         <tr class="payment-status-row">
@@ -649,6 +765,19 @@
                                 {{ $transaction->transactionPayment?->status?->getLabel() }}
                             </td>
                         </tr>
+                        @if ($transaction->is_down_payment)
+                            <tr>
+                                <td colspan="2" style="padding-top:5px;">
+                                    <span class="badge-down-payment">Down Payment</span>
+                                    @if ($isLunas)
+                                        <span class="badge-lunas">Lunas</span>
+                                    @else
+                                        <span class="badge-belum-lunas">Belum Lunas</span>
+                                        <div class="sisa-text">Sisa: Rp {{ number_format($sisa, 0, ',', '.') }}</div>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endif
                     </table>
                 </div>
 

@@ -19,7 +19,7 @@ class CreateTransaction extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['store_setting_id'] = Auth::user()?->store_setting_id;
+        $data['store_setting_id'] = Auth::user()?->store_setting_id ?? ($data['store_setting_id'] ?? null);
 
         $this->extraData = [
             'courier_id'           => $data['courier_id'] ?? null,

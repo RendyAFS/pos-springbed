@@ -14,6 +14,7 @@ class TransactionItem extends Model
         'selling_price',
         'discount',
         'subtotal',
+        'is_pre_order',
     ];
 
     protected $casts = [
@@ -21,6 +22,7 @@ class TransactionItem extends Model
         'selling_price' => 'decimal:2',
         'discount'      => 'decimal:2',
         'subtotal'      => 'decimal:2',
+        'is_pre_order'  => 'boolean',
     ];
 
     public function transaction()
