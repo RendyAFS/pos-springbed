@@ -785,7 +785,7 @@ class TransactionForm
                         ]),
 
                 ])
-                    ->skippable(false)
+                    ->skippable()
                     ->columnSpanFull(),
             ]);
     }
