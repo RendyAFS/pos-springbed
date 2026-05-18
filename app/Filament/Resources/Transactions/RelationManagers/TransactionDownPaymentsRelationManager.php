@@ -22,7 +22,7 @@ use Filament\Support\RawJs;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class transactionDownPaymentsRelationManager extends RelationManager
+class TransactionDownPaymentsRelationManager extends RelationManager
 {
     protected static string $relationship = 'transactionDownPayments';
 
