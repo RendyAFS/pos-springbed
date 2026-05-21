@@ -22,8 +22,9 @@ use Illuminate\Support\Facades\Auth;
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
-    protected static ?string $navigationLabel = 'Products';
-    protected static ?string $pluralLabel = 'Products';
+    protected static ?string $navigationLabel = 'Produk';
+    protected static ?string $heading = 'Produk';
+    protected static ?string $pluralLabel = 'Produk';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-square-3-stack-3d';
 
     public static function getGloballySearchableAttributes(): array

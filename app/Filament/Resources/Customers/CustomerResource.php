@@ -49,9 +49,9 @@ class CustomerResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Phone' => $record->phone,
+            'Telepone' => $record->phone,
             'Email' => $record->email,
-            'Address' => $record->address,
+            'Alamat' => $record->address,
         ];
     }
 
@@ -63,10 +63,10 @@ class CustomerResource extends Resource
                 Grid::make(1)
                     ->schema([
                         TextInput::make('name')
-                            ->label('Name')
+                            ->label('Nama')
                             ->required(),
                         TextInput::make('phone')
-                            ->label('Phone')
+                            ->label('Telepon')
                             ->tel()
                             ->required(),
                         TextInput::make('email')
@@ -74,7 +74,7 @@ class CustomerResource extends Resource
                             ->email()
                             ->default(null),
                         Textarea::make('address')
-                            ->label('Address')
+                            ->label('Alamat')
                             ->rows(3)
                             ->default(null),
                     ])->columnSpan(fn($record) => $record === null ? 'full' : 1),
@@ -102,21 +102,26 @@ class CustomerResource extends Resource
             ->recordTitleAttribute('Customer')
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nama')
                     ->searchable(),
                 TextColumn::make('phone')
+                    ->label('Telepon')
                     ->searchable(),
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
                 TextColumn::make('address')
+                    ->label('Alamat')
                     ->searchable()
                     ->limit(20),
             ])
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+
+                    ->modalHeading('Edit Customer'),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),

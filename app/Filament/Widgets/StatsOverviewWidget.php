@@ -57,29 +57,29 @@ class StatsOverviewWidget extends BaseWidget
         $salesMonthChange    = $pct($row->sales_this_month, $row->sales_last_month);
         $transactionChange   = $pct($row->tx_this_month, $row->tx_last_month);
 
-        $desc = fn($pct) => ($pct >= 0 ? '↑ ' : '↓ ') . abs(round($pct)) . '% vs last period';
+        $desc = fn($pct) => ($pct >= 0 ? '↑ ' : '↓ ') . abs(round($pct)) . '% vs Periode Sebelumnya';
 
         return [
-            Stat::make('Total Sales Today', RupiahHelper::format($row->sales_today))
+            Stat::make('Total Penjualan Hari Ini', RupiahHelper::format($row->sales_today))
                 ->description($desc($salesTodayChange))
                 ->descriptionColor($salesTodayChange >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-currency-dollar')
                 ->color('success'),
 
-            Stat::make('Total Sales This Month', RupiahHelper::format($row->sales_this_month))
+            Stat::make('Total Penjualan Bulan Ini', RupiahHelper::format($row->sales_this_month))
                 ->description($desc($salesMonthChange))
                 ->descriptionColor($salesMonthChange >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-currency-dollar')
                 ->color('success'),
 
-            Stat::make('Total Transactions', number_format($row->total_transactions, 0, ',', '.'))
+            Stat::make('Total Transaksi', number_format($row->total_transactions, 0, ',', '.'))
                 ->description($desc($transactionChange))
                 ->descriptionColor($transactionChange >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-document-text')
                 ->color('info'),
 
-            Stat::make('Pending Orders', $pendingOrders)
-                ->description('Orders awaiting processing')
+            Stat::make('Pesanan Pending', $pendingOrders)
+                ->description('Pesanan menunggu diproses')
                 ->descriptionColor('warning')
                 ->icon('heroicon-o-clock')
                 ->color('warning'),

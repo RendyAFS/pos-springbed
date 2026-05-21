@@ -46,23 +46,23 @@ class TransactionForm
 
                     Step::make('Customer')
                         ->label('Customer')
-                        ->description('Pick a customer & set the transaction date')
+                        ->description('Silahkan pilih customer dan tanggal transaksi.')
                         ->icon(Heroicon::User)
                         ->completedIcon(Heroicon::CheckCircle)
                         ->schema([
-                            Section::make('Transaction Info')
-                                ->description('Fill in the customer details and transaction time.')
+                            Section::make('Info Transaksi')
+                                ->description('Masukkan data transaksi dan customer.')
                                 ->icon(Heroicon::DocumentText)
                                 ->columns(2)
                                 ->schema([
                                     TextInput::make('transaction_code')
-                                        ->label('Transaction Code')
+                                        ->label('Kode Transaksi')
                                         ->default(fn(): string => 'TRX' . strtoupper(Str::random(8)) . now()->format('Ymd'))
                                         ->disabled()
                                         ->dehydrated(true)
                                         ->columnSpan(1),
                                     DatePicker::make('transaction_date')
-                                        ->label('Transaction Date')
+                                        ->label('Tanggal Transaksi')
                                         ->required()
                                         ->default(now())
                                         ->native(false)
@@ -81,7 +81,7 @@ class TransactionForm
                                                 ->required()
                                                 ->maxLength(255),
                                             TextInput::make('phone')
-                                                ->label('Phone Number')
+                                                ->label('Telepone')
                                                 ->tel()
                                                 ->maxLength(20),
                                             TextInput::make('email')
@@ -89,7 +89,7 @@ class TransactionForm
                                                 ->email()
                                                 ->maxLength(255),
                                             Textarea::make('address')
-                                                ->label('Address')
+                                                ->label('Alamat')
                                                 ->rows(3),
                                         ])
                                         ->createOptionUsing(function (array $data): int {
@@ -100,12 +100,12 @@ class TransactionForm
                                                 ->label('Full Name')
                                                 ->required(),
                                             TextInput::make('phone')
-                                                ->label('Phone Number'),
+                                                ->label('Telepone'),
                                             TextInput::make('email')
                                                 ->label('Email')
                                                 ->email(),
                                             Textarea::make('address')
-                                                ->label('Address'),
+                                                ->label('Alamat'),
                                         ])
                                         ->updateOptionUsing(function (array $data, $record) {
                                             $record->update($data);
@@ -114,7 +114,7 @@ class TransactionForm
                                         ->columnSpanFull(),
 
                                     Select::make('status')
-                                        ->label('Transaction Status')
+                                        ->label('Status Transaksi')
                                         ->options(
                                             collect(TransactionStatusEnum::cases())
                                                 ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
@@ -125,7 +125,7 @@ class TransactionForm
                                         ->native(false)
                                         ->columnSpan(1),
                                     Select::make('store_setting_id')
-                                        ->label('Store')
+                                        ->label('Toko')
                                         ->options(fn() => StoreSetting::pluck('store_name', 'id')->toArray())
                                         ->searchable()
                                         ->required()
@@ -138,23 +138,23 @@ class TransactionForm
                         ]),
 
                     Step::make('Products')
-                        ->label('Products')
-                        ->description('Add the items being purchased')
+                        ->label('Produk')
+                        ->description('Pilih produk atau paket yang akan dibeli.')
                         ->icon(Heroicon::ShoppingCart)
                         ->completedIcon(Heroicon::CheckCircle)
                         ->schema([
-                            Section::make('Product Items')
-                                ->description('Choose individual products or bundles.')
+                            Section::make('Produk')
+                                ->description('Pilih produk atau paket yang akan dibeli.')
                                 ->icon(Heroicon::CubeTransparent)
                                 ->schema([
                                     Repeater::make('transactionItems')
-                                        ->label('')
+                                        ->label('Item Transaksi')
                                         ->relationship('transactionItems')
                                         ->schema([
                                             Grid::make(3)
                                                 ->schema([
                                                     Radio::make('item_type')
-                                                        ->label('Item Type')
+                                                        ->label('Tipe Item')
                                                         ->options([
                                                             'product' => 'Single Product',
                                                             'bundle'  => 'Bundle',
@@ -179,7 +179,7 @@ class TransactionForm
                                                         ->columnSpanFull(),
 
                                                     Select::make('product_id')
-                                                        ->label('Product')
+                                                        ->label('Produk')
                                                         ->options(function (): array {
                                                             return Product::query()
                                                                 ->where('is_active', true)
@@ -237,11 +237,11 @@ class TransactionForm
 
                                                             $items = $bundle->bundleItems->map(function ($bi) use ($storeId) {
                                                                 $stock      = self::getAvailableStock($bi->product_id, $storeId);
-                                                                $stockLabel = $stock > 0 ? "stock: {$stock}" : '⚠️ out of stock';
+                                                                $stockLabel = $stock > 0 ? "stock: {$stock}" : '⚠️ stok habis';
                                                                 return "{$bi->product->name} × {$bi->qty} ({$stockLabel})";
                                                             })->implode(' | ');
 
-                                                            return "Bundle contents: {$items}";
+                                                            return "Detail Bundle: {$items}";
                                                         }),
 
                                                     Toggle::make('is_multi_store')
@@ -324,11 +324,11 @@ class TransactionForm
 
                                                                     if ($effectiveStock <= 0) {
                                                                         $effectiveInfo = $effectiveStock < 0
-                                                                            ? " — ⚠️ Over-committed by " . abs($effectiveStock) . " pcs (pre-order)"
-                                                                            : " — ⚠️ No remaining stock (pre-order)";
+                                                                            ? " — ⚠️ stok kurang " . abs($effectiveStock) . " pcs (pre-order)"
+                                                                            : " — ⚠️ stok tidak cukup (pre-order)";
                                                                     } elseif ($qty > $effectiveStock) {
                                                                         $deficit = $qty - $effectiveStock;
-                                                                        $effectiveInfo = " — ⚠️ {$deficit} pcs will be pre-order";
+                                                                        $effectiveInfo = " — ⚠️ {$deficit} pcs akan menjadi pre-order";
                                                                     }
                                                                 }
 
@@ -418,7 +418,7 @@ class TransactionForm
                                                         ->columnSpan(2),
 
                                                     TextInput::make('selling_price')
-                                                        ->label('Unit Price')
+                                                        ->label('Harga Jual')
                                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                                                         ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                                                         ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
@@ -452,7 +452,7 @@ class TransactionForm
                                                         ->columnSpan(2),
                                                 ]),
                                         ])
-                                        ->addActionLabel('+ Add Item')
+                                        ->addActionLabel('+ Tambah Item')
                                         ->reorderable()
                                         ->collapsible()
                                         ->cloneable()
@@ -465,20 +465,20 @@ class TransactionForm
                         ]),
 
                     Step::make('Promo & Shipping')
-                        ->label('Promo & Ship')
-                        ->description('Apply a promo and pick a courier')
+                        ->label('Promo & Pengiriman')
+                        ->description('Terapkan promo dan pilih kurir')
                         ->icon(Heroicon::Truck)
                         ->completedIcon(Heroicon::CheckCircle)
                         ->schema([
                             Grid::make(2)
                                 ->schema([
                                     Section::make('Promo / Voucher')
-                                        ->description('Pick a promo that applies to this transaction.')
+                                        ->description('Pilih promo yang berlaku untuk transaksi ini.')
                                         ->icon(Heroicon::Tag)
                                         ->schema([
                                             Select::make('promo_id')
-                                                ->label('Promo Code')
-                                                ->placeholder('Select a promo...')
+                                                ->label('Kode Promo')
+                                                ->placeholder('Pilih promo...')
                                                 ->options(function (Get $get): array {
                                                     $items      = $get('transactionItems') ?? [];
                                                     $productIds = collect($items)
@@ -514,10 +514,10 @@ class TransactionForm
                                                 ->nullable()
                                                 ->live()
                                                 ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateTotals($get, $set))
-                                                ->helperText('Only active & currently valid promos are shown. Promos with no product restriction apply to all items.'),
+                                                ->helperText('Promo yang ditampilkan hanya yang aktif dan berlaku saat ini. Promo tanpa batasan produk berlaku untuk semua item.'),
 
                                             TextEntry::make('promo_detail_info')
-                                                ->label('Promo Detail')
+                                                ->label('Detail Promo')
                                                 ->state(function (Get $get): string {
                                                     $promoId = $get('promo_id');
                                                     if (! $promoId) return '—';
@@ -548,7 +548,7 @@ class TransactionForm
                                         ->icon(Heroicon::Truck)
                                         ->schema([
                                             Select::make('courier_id')
-                                                ->label('Courier')
+                                                ->label('Kurir')
                                                 ->placeholder('Pick a courier...')
                                                 ->options(Courier::where('is_active', true)->pluck('name', 'id'))
                                                 ->searchable()
@@ -575,7 +575,7 @@ class TransactionForm
                                                 }),
 
                                             TextInput::make('shiping_cost')
-                                                ->label('Shipping Cost')
+                                                ->label('Biaya Pengiriman')
                                                 ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                                                 ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
                                                 ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
@@ -584,14 +584,14 @@ class TransactionForm
                                                 ->afterStateHydrated(fn(Get $get, Set $set) => self::recalculateTotals($get, $set))
                                                 ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateTotals($get, $set))
                                                 ->prefix('Rp')
-                                                ->helperText('You can adjust this manually if needed.'),
+                                                ->helperText('Anda bisa mengubah biaya pengiriman jika diperlukan.'),
                                         ]),
                                 ]),
                         ]),
 
                     Step::make('Summary')
-                        ->label('Summary')
-                        ->description('Review & confirm the transaction')
+                        ->label('Ringkasan')
+                        ->description('Ulasan & konfirmasi transaksi')
                         ->icon(Heroicon::ClipboardDocumentCheck)
                         ->completedIcon(Heroicon::CheckBadge)
                         ->schema([
@@ -599,7 +599,7 @@ class TransactionForm
                                 ->schema([
                                     Grid::make(1)
                                         ->schema([
-                                            Section::make('Price Breakdown')
+                                            Section::make('Rincian Harga')
                                                 ->icon(Heroicon::ReceiptRefund)
                                                 ->schema([
                                                     TextInput::make('subtotal')
@@ -619,7 +619,7 @@ class TransactionForm
                                                         ->prefix('Rp'),
 
                                                     TextInput::make('shiping_cost')
-                                                        ->label('Shipping Cost')
+                                                        ->label('Biaya Pengiriman')
                                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                                                         ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
                                                         ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
@@ -634,15 +634,15 @@ class TransactionForm
                                                         ->readOnly()
                                                         ->prefix('Rp'),
                                                 ]),
-                                            Section::make('Product Items')
+                                            Section::make('Detail Pesanan')
                                                 ->icon(Heroicon::ShoppingBag)
                                                 ->schema([
                                                     TextEntry::make('items_summary')
-                                                        ->label('Selected Products')
+                                                        ->label('Produk Dipilih')
                                                         ->listWithLineBreaks()
                                                         ->state(function (Get $get): array {
                                                             $items = $get('transactionItems') ?? [];
-                                                            if (empty($items)) return ['No products added yet.'];
+                                                            if (empty($items)) return ['Tidak ada produk yang ditambahkan.'];
 
                                                             $lines = [];
                                                             foreach ($items as $item) {
@@ -837,13 +837,13 @@ class TransactionForm
                                         ])
                                 ]),
 
-                            Section::make('Payment')
-                                ->description('Fill in the payment details for this transaction.')
+                            Section::make('Pembayaran')
+                                ->description('Input detail pembayaran transaksi ini.')
                                 ->icon(Heroicon::CreditCard)
                                 ->columns(3)
                                 ->schema([
                                     Select::make('payment_method')
-                                        ->label('Payment Method')
+                                        ->label('Metode Pembayaran')
                                         ->options(
                                             collect(TransactionPaymentMethodEnum::cases())
                                                 ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
@@ -858,7 +858,7 @@ class TransactionForm
                                             }
                                         }),
                                     TextInput::make('payment_amount')
-                                        ->label('Amount Paid')
+                                        ->label('Jumlah Terbayar')
                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                                         ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
                                         ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
@@ -872,7 +872,7 @@ class TransactionForm
                                             }
                                         }),
                                     Select::make('payment_status')
-                                        ->label('Payment Status')
+                                        ->label('Status Pembayaran')
                                         ->options(
                                             collect(TransactionPaymentStatusEnum::cases())
                                                 ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
@@ -896,7 +896,7 @@ class TransactionForm
                                         ->inline(false)
                                         ->default(false),
                                     DateTimePicker::make('due_date_down_payment')
-                                        ->label('Due Date Down Payment')
+                                        ->label('Jatuh Tempo Down Payment')
                                         ->native(false)
                                         ->suffixIcon(Heroicon::Calendar)
                                         ->closeOnDateSelection()

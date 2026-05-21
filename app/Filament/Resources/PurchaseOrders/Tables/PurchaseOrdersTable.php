@@ -23,10 +23,11 @@ class PurchaseOrdersTable
         return $table
             ->columns([
                 TextColumn::make('supplier_name')
+                    ->label('Nama Supplier')
                     ->searchable(),
                 // var
                 TextColumn::make('storeSetting.store_name')
-                    ->label('Store')
+                    ->label('Toko')
                     ->badge()
                     ->color('gray')
                     ->sortable()
@@ -43,15 +44,17 @@ class PurchaseOrdersTable
                     ->copyMessage('SKU copied')
                     ->copyMessageDuration(1500),
                 TextColumn::make('purchase_date')
+                    ->label('Tanggal Pesanan')
                     ->date()
                     ->sortable(),
                 TextColumn::make('total_amount')
+                    ->label('Total')
                     ->numeric()
                     ->sortable()
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
             ])
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
             ])
             ->recordActions([
                 EditAction::make(),

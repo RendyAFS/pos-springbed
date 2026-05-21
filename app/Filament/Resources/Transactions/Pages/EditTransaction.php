@@ -18,6 +18,8 @@ class EditTransaction extends EditRecord
 {
     protected static string $resource = TransactionResource::class;
 
+    protected static ?string $title = 'Buat Transaksi';
+
     protected array $extraData = [];
 
     protected array $oldReferalData = [];
