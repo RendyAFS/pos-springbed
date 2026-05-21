@@ -41,8 +41,8 @@ class PurchaseOrderResource extends Resource
     {
         return [
             'Invoice Number' => $record->invoice_number,
-            'Purchase Date' => $record->purchase_date,
-            'Total Amount' => RupiahHelper::format($record->total_amount),
+            'Tanggal Pembelian' => $record->purchase_date,
+            'Total' => RupiahHelper::format($record->total_amount),
         ];
     }
 
