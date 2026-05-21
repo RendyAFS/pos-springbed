@@ -1,57 +1,61 @@
 <div class="flex flex-col gap-4">
 
-    {{-- Low Stock Alert --}}
+    {{-- Info Stok --}}
     <x-filament::section>
         <x-slot name="heading">
-            ⚠️ Low Stock Alert
+            ⚠️ Info Stok
         </x-slot>
 
         @php $lowStockItems = $this->getLowStockItems() @endphp
 
         @if ($lowStockItems->isEmpty())
             <div class="py-6 text-center text-sm text-gray-400">
-                No low stock items
+                Tidak ada stok menipis
             </div>
         @else
-            <div class="divide-y divide-gray-100 dark:divide-white/5 max-h-60 overflow-y-scroll">
+            <div class="divide-y divide-gray-100 dark:divide-white/5 max-h-60 overflow-y-auto">
                 @foreach ($lowStockItems as $stock)
-                    <div class="flex items-center justify-between py-3">
-                        <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                    <div class="flex items-start justify-between gap-3 py-3">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
                                 {{ $stock->product?->name ?? '-' }}
                             </p>
+
                             <p class="text-xs text-gray-400">
                                 {{ $stock->product?->sku ?? '-' }}
                             </p>
                         </div>
-                        <span @class([
-                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-                            'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' =>
-                                $stock->quantity <= 2,
-                            'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400' =>
-                                $stock->quantity > 2 && $stock->quantity <= 5,
-                            'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' =>
-                                $stock->quantity > 5,
-                        ])>
-                            {{ $stock->quantity }} left
-                        </span>
+
+                        <div class="shrink-0">
+                            <span @class([
+                                'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' =>
+                                    $stock->quantity <= 2,
+                                'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400' =>
+                                    $stock->quantity > 2 && $stock->quantity <= 5,
+                                'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' =>
+                                    $stock->quantity > 5,
+                            ])>
+                                {{ $stock->quantity }} sisa
+                            </span>
+                        </div>
                     </div>
                 @endforeach
             </div>
         @endif
     </x-filament::section>
 
-    {{-- Active Promotions --}}
+    {{-- Promo Aktif --}}
     <x-filament::section>
         <x-slot name="heading">
-            Active Promotions
+            Promo Aktif
         </x-slot>
 
         @php $promotions = $this->getActivePromotions() @endphp
 
         @if ($promotions->isEmpty())
             <div class="py-6 text-center text-sm text-gray-400">
-                No active promotions
+                Tidak ada promo
             </div>
         @else
             <div class="divide-y divide-gray-100 dark:divide-white/5 max-h-60 overflow-y-scroll">
