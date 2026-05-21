@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Enums\TypeStockMovementEnum;
 use App\Models\Bundle;
 use App\Models\InventoryStock;
 use App\Models\Promo;
 use App\Models\PromoUsage;
+use App\Models\StockMovement;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
 use Illuminate\Support\Facades\DB;
@@ -35,12 +37,11 @@ class TransactionService
 
                             Log::info('[DEBUG] Bundle decrease', [
                                 'bundle_id'       => $item->bundle_id,
-                                'bundle_item_qty' => $item->qty,        // qty bundle di transaksi
+                                'bundle_item_qty' => $item->qty,
                                 'product_id'      => $bundleItem->product_id,
-                                'bundleItem_qty'  => $bundleItem->qty,  // qty per produk dalam bundle
+                                'bundleItem_qty'  => $bundleItem->qty,
                                 'totalQty'        => $totalQty,
                             ]);
-
 
                             $stock = InventoryStock::where([
                                 'product_id'       => $bundleItem->product_id,
@@ -65,7 +66,61 @@ class TransactionService
                             $item->save();
                         }
                     }
+                } elseif ($item->is_multi_store && !empty($item->source_stores)) {
+                    // ── Multi-store: kurangi stok per toko sesuai source_stores ──
+                    $isPreOrder = false;
+
+                    foreach ($item->source_stores as $source) {
+                        $srcStoreId = (int) $source['store_setting_id'];
+                        $srcQty     = (int) $source['qty'];
+
+                        if ($srcQty <= 0) {
+                            continue;
+                        }
+
+                        $stock = InventoryStock::where([
+                            'product_id'       => $item->product_id,
+                            'store_setting_id' => $srcStoreId,
+                        ])->lockForUpdate()->first();
+
+                        if (!$stock || $stock->quantity < $srcQty) {
+                            $isPreOrder = true;
+                        }
+
+                        if ($stock) {
+                            $stock->quantity -= $srcQty;
+                            $stock->save();
+                        } else {
+                            // Buat record stok dengan nilai negatif (pre-order)
+                            InventoryStock::create([
+                                'product_id'       => $item->product_id,
+                                'store_setting_id' => $srcStoreId,
+                                'quantity'         => -$srcQty,
+                            ]);
+                        }
+
+                        StockMovement::create([
+                            'product_id'       => $item->product_id,
+                            'store_setting_id' => $srcStoreId,
+                            'type'             => TypeStockMovementEnum::OUT,
+                            'qty'              => $srcQty,
+                            'reference_type'   => $transaction::class,
+                            'reference_id'     => $transaction->id,
+                        ]);
+
+                        Log::info('[DEBUG] Multi-store decrease', [
+                            'product_id'       => $item->product_id,
+                            'store_setting_id' => $srcStoreId,
+                            'qty'              => $srcQty,
+                        ]);
+                    }
+
+                    if ($isPreOrder) {
+                        $item->is_pre_order = true;
+                        $item->save();
+                    }
                 } else {
+                    // ── Single store: logika existing ──
                     $stock = InventoryStock::where([
                         'product_id'       => $item->product_id,
                         'store_setting_id' => $transaction->store_setting_id,

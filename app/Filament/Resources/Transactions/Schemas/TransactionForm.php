@@ -151,7 +151,7 @@ class TransactionForm
                                         ->label('')
                                         ->relationship('transactionItems')
                                         ->schema([
-                                            Section::make()
+                                            Grid::make(3)
                                                 ->schema([
                                                     Radio::make('item_type')
                                                         ->label('Item Type')
@@ -189,6 +189,7 @@ class TransactionForm
                                                         ->searchable()
                                                         ->preload()
                                                         ->live()
+                                                        ->columnSpan(2)
                                                         ->visible(fn(Get $get): bool => $get('item_type') !== 'bundle')
                                                         ->required(fn(Get $get): bool => $get('item_type') !== 'bundle')
                                                         ->afterStateUpdated(function (Get $get, Set $set, $state): void {
@@ -199,7 +200,7 @@ class TransactionForm
                                                                     self::recalculateItemSubtotal($get, $set);
                                                                 }
                                                             }
-                                                            $set('qty', 1);
+                                                            $set('qty', 0);
                                                         }),
 
                                                     Select::make('bundle_id')
@@ -243,78 +244,178 @@ class TransactionForm
                                                             return "Bundle contents: {$items}";
                                                         }),
 
+                                                    Toggle::make('is_multi_store')
+                                                        ->label('Multi Store (Parsial)')
+                                                        ->inline(false)
+                                                        ->default(false)
+                                                        ->live()
+                                                        ->afterStateUpdated(function (Set $set, Get $get, $state): void {
+                                                            if (!$state) {
+                                                                $set('source_stores', []);
+                                                                $set('qty', 0);
+                                                            } else {
+                                                                $set('qty', 0);
+                                                            }
+                                                            self::recalculateItemSubtotal($get, $set);
+                                                        }),
+
                                                     TextInput::make('qty')
                                                         ->label('Qty')
                                                         ->numeric()
-                                                        ->default(1)
-                                                        ->minValue(1)
+                                                        ->default(0)
+                                                        ->minValue(fn(Get $get): int => (bool)$get('is_multi_store') ? 0 : 1)
+                                                        ->columnSpan(2)
                                                         ->required()
+                                                        ->dehydrated(true)
+                                                        ->dehydrateStateUsing(function ($state, Get $get): int {
+                                                            if ((bool) $get('is_multi_store')) {
+                                                                $sources = $get('source_stores') ?? [];
+                                                                $total   = collect($sources)->sum(fn($s) => (int)($s['qty'] ?? 0));
+                                                                return max(1, $total);
+                                                            }
+                                                            return max(1, (int) $state);
+                                                        })
+                                                        ->readOnly(fn(Get $get): bool => (bool)$get('is_multi_store'))
                                                         ->debounce(500)
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
                                                         ->suffix('pcs')
                                                         ->helperText(function (Get $get, $component): string {
-                                                            $storeId = Auth::user()?->store_setting_id;
+                                                            $storeId = Auth::user()?->store_setting_id
+                                                                ?? ($get('../../store_setting_id') ? (int) $get('../../store_setting_id') : null);
 
-                                                            // Ambil key item saat ini dari statePath
-                                                            // statePath contoh: "transactionItems.0.qty" → key = "0"
-                                                            $statePath = $component->getStatePath();
-                                                            $parts     = explode('.', $statePath);
-                                                            // index ada di posisi kedua dari belakang (sebelum 'qty')
+                                                            $statePath  = $component->getStatePath();
+                                                            $parts      = explode('.', $statePath);
                                                             $currentKey = $parts[count($parts) - 2] ?? null;
 
+                                                            $qty          = (int) ($get('qty') ?? 1);
+                                                            $isMulti      = (bool) $get('is_multi_store');
+                                                            $sourceStores = $get('source_stores') ?? [];
+
+                                                            // ─── MODE MULTI-STORE ────────────────────────────────────────────
+                                                            if ($isMulti) {
+                                                                if (empty($sourceStores)) {
+                                                                    return '📦 Tambahkan alokasi store di bawah.';
+                                                                }
+
+                                                                $totalAllocated = collect($sourceStores)->sum(fn($s) => (int)($s['qty'] ?? 0));
+                                                                return "✅ Total alokasi: {$totalAllocated} pcs dari " . count($sourceStores) . " toko.";
+                                                            }
+
+                                                            // ─── MODE SINGLE STORE ───────────────────────────────────────────
                                                             if ($get('item_type') === 'product') {
                                                                 $productId = $get('product_id');
-                                                                if (! $productId) return 'Select a product first.';
+                                                                if (!$productId) return 'Select a product first.';
 
-                                                                $effectiveStock = self::getEffectiveStock((int) $productId, $storeId, $get, $currentKey);
-                                                                $qty            = (int) ($get('qty') ?? 1);
+                                                                // Tampilkan stok di semua toko
+                                                                $allStores = StoreSetting::all();
+                                                                $stockLines = $allStores->map(function ($store) use ($productId) {
+                                                                    $stock = InventoryStock::where('product_id', $productId)
+                                                                        ->where('store_setting_id', $store->id)
+                                                                        ->value('quantity') ?? 0;
+                                                                    $icon = $stock > 0 ? '✅' : '⚠️';
+                                                                    return "{$icon} {$store->store_name}: {$stock} pcs";
+                                                                })->implode(' | ');
 
-                                                                if ($effectiveStock <= 0) {
-                                                                    $label = $effectiveStock < 0
-                                                                        ? "⚠️ Already over-committed by " . abs($effectiveStock) . " pcs — will be pre-order."
-                                                                        : '⚠️ No remaining stock — will be pre-order (minus stock).';
-                                                                    return $label;
+                                                                // Effective stock untuk store aktif (jika ada)
+                                                                $effectiveInfo = '';
+                                                                if ($storeId) {
+                                                                    $effectiveStock = self::getEffectiveStock((int) $productId, $storeId, $get, $currentKey);
+
+                                                                    if ($effectiveStock <= 0) {
+                                                                        $effectiveInfo = $effectiveStock < 0
+                                                                            ? " — ⚠️ Over-committed by " . abs($effectiveStock) . " pcs (pre-order)"
+                                                                            : " — ⚠️ No remaining stock (pre-order)";
+                                                                    } elseif ($qty > $effectiveStock) {
+                                                                        $deficit = $qty - $effectiveStock;
+                                                                        $effectiveInfo = " — ⚠️ {$deficit} pcs will be pre-order";
+                                                                    }
                                                                 }
 
-                                                                if ($qty > $effectiveStock) {
-                                                                    $deficit = $qty - $effectiveStock;
-                                                                    return "⚠️ Effective stock: {$effectiveStock} pcs — {$deficit} pcs will be pre-order (minus stock).";
-                                                                }
-
-                                                                return "Effective stock: {$effectiveStock} pcs (actual: " . self::getAvailableStock((int) $productId, $storeId) . " pcs)";
+                                                                return "{$stockLines}{$effectiveInfo}";
                                                             }
 
                                                             if ($get('item_type') === 'bundle') {
                                                                 $bundleId = $get('bundle_id');
-                                                                if (! $bundleId) return 'Select a bundle first.';
+                                                                if (!$bundleId) return 'Select a bundle first.';
 
                                                                 $bundle = Bundle::with('bundleItems.product')->find($bundleId);
-                                                                if (! $bundle) return '';
+                                                                if (!$bundle) return '';
 
-                                                                $qty = (int) ($get('qty') ?? 1);
+                                                                $allStores = StoreSetting::all();
+                                                                $lines = [];
 
-                                                                $stockLines = $bundle->bundleItems->map(function ($bi) use ($storeId, $get, $currentKey, $qty) {
-                                                                    $effectiveStock = self::getEffectiveStock((int) $bi->product_id, $storeId, $get, $currentKey);
-                                                                    $needed         = $bi->qty * $qty;
-                                                                    $maxSet         = $bi->qty > 0 ? floor($effectiveStock / $bi->qty) : 0;
+                                                                foreach ($bundle->bundleItems as $bi) {
+                                                                    $storeParts = $allStores->map(function ($store) use ($bi) {
+                                                                        $stock = InventoryStock::where('product_id', $bi->product_id)
+                                                                            ->where('store_setting_id', $store->id)
+                                                                            ->value('quantity') ?? 0;
+                                                                        $icon = $stock > 0 ? '✅' : '⚠️';
+                                                                        return "{$icon} {$store->store_name}: {$stock} pcs";
+                                                                    })->implode(' | ');
 
-                                                                    $icon = $effectiveStock >= $needed ? '✅' : '⚠️';
-                                                                    return "{$icon} {$bi->product->name}: effective {$effectiveStock} pcs (max {$maxSet} sets)";
-                                                                })->implode(' | ');
+                                                                    $lines[] = "📦 {$bi->product->name} × {$bi->qty} → {$storeParts}";
+                                                                }
 
-                                                                $minQty = $bundle->bundleItems
-                                                                    ->map(function ($bi) use ($storeId, $get, $currentKey): int {
-                                                                        $effectiveStock = self::getEffectiveStock((int) $bi->product_id, $storeId, $get, $currentKey);
-                                                                        return $bi->qty > 0 ? (int) floor($effectiveStock / $bi->qty) : 0;
-                                                                    })
-                                                                    ->min();
-
-                                                                return "{$stockLines} — Max bundle sets: {$minQty}";
+                                                                return implode("\n", $lines);
                                                             }
 
                                                             return '';
                                                         }),
+
+                                                    Repeater::make('source_stores')
+                                                        ->label('Sumber Stok per Toko')
+                                                        ->schema([
+                                                            Select::make('store_setting_id')
+                                                                ->label('Toko')
+                                                                ->options(fn() => StoreSetting::pluck('store_name', 'id')->toArray())
+                                                                ->required()
+                                                                ->live()
+                                                                ->searchable(),
+                                                            TextInput::make('qty')
+                                                                ->label('Qty dari Toko Ini')
+                                                                ->numeric()
+                                                                ->default(1)
+                                                                ->minValue(1)
+                                                                ->required()
+                                                                ->live(onBlur: true)
+                                                                ->suffix('pcs')
+                                                                ->helperText(function (Get $get): string {
+                                                                    $storeId   = $get('store_setting_id');
+                                                                    $productId = $get('../../product_id');
+
+                                                                    if (!$storeId || !$productId) return '';
+
+                                                                    $stock = InventoryStock::where('product_id', $productId)
+                                                                        ->where('store_setting_id', $storeId)
+                                                                        ->value('quantity') ?? 0;
+
+                                                                    $inputQty = (int) ($get('qty') ?? 1);
+
+                                                                    if ($stock <= 0) {
+                                                                        return "⚠️ Stok kosong di toko ini — {$inputQty} pcs akan jadi pre-order.";
+                                                                    }
+
+                                                                    if ($inputQty > $stock) {
+                                                                        $preOrder = $inputQty - $stock;
+                                                                        return "Stok tersedia: {$stock} pcs — ⚠️ {$preOrder} pcs akan jadi pre-order.";
+                                                                    }
+
+                                                                    return "✅ Stok tersedia: {$stock} pcs";
+                                                                }),
+                                                        ])
+                                                        ->columns(2)
+                                                        ->addActionLabel('+ Tambah Toko')
+                                                        ->live()
+                                                        ->visible(fn(Get $get): bool => (bool)$get('is_multi_store'))
+                                                        ->afterStateUpdated(function (Get $get, Set $set): void {
+                                                            $sources  = $get('source_stores') ?? [];
+                                                            $totalQty = collect($sources)->sum(fn($s) => (int)($s['qty'] ?? 0));
+                                                            $set('qty', max(1, $totalQty));
+                                                            self::recalculateItemSubtotal($get, $set);
+                                                        })
+                                                        ->collapsible()
+                                                        ->columnSpan(2),
 
                                                     TextInput::make('selling_price')
                                                         ->label('Unit Price')
@@ -322,6 +423,7 @@ class TransactionForm
                                                         ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                                                         ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                                         ->required()
+                                                        ->columnSpan(1)
                                                         ->debounce(500)
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
@@ -336,7 +438,8 @@ class TransactionForm
                                                         ->debounce(500)
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
-                                                        ->prefix('Rp'),
+                                                        ->prefix('Rp')
+                                                        ->columnSpan(1),
 
                                                     TextInput::make('subtotal')
                                                         ->label('Subtotal')
@@ -346,9 +449,8 @@ class TransactionForm
                                                         ->afterStateHydrated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
                                                         ->readOnly()
                                                         ->prefix('Rp')
-                                                        ->columnSpanFull(),
-                                                ])
-                                                ->columns(2),
+                                                        ->columnSpan(2),
+                                                ]),
                                         ])
                                         ->addActionLabel('+ Add Item')
                                         ->reorderable()
@@ -563,7 +665,21 @@ class TransactionForm
                                                                     ? ' - Rp ' . number_format($discount, 0, ',', '.') . ' (disc)'
                                                                     : '';
 
-                                                                $lines[] = "• {$name} * {$qty} @ Rp " . number_format($sellingPrice, 0, ',', '.') . "{$discountPart} = Rp " . number_format($subtotal, 0, ',', '.');
+                                                                // Tampilkan info multi-store jika aktif
+                                                                $multiStorePart = '';
+                                                                if (!empty($item['is_multi_store']) && !empty($item['source_stores'])) {
+                                                                    $storeParts = collect($item['source_stores'])
+                                                                        ->filter(fn($s) => !empty($s['store_setting_id']) && (int)($s['qty'] ?? 0) > 0)
+                                                                        ->map(function ($s) {
+                                                                            $storeName = StoreSetting::find($s['store_setting_id'])?->store_name ?? 'Unknown Store';
+                                                                            return "{$storeName}: {$s['qty']} pcs";
+                                                                        })
+                                                                        ->implode(' + ');
+
+                                                                    $multiStorePart = $storeParts ? " [Multi-store: {$storeParts}]" : '';
+                                                                }
+
+                                                                $lines[] = "• {$name} * {$qty} @ Rp " . number_format($sellingPrice, 0, ',', '.') . "{$discountPart}{$multiStorePart} = Rp " . number_format($subtotal, 0, ',', '.');
                                                             }
 
                                                             $discountReferal = self::parseCurrency($get('use_discount_referal') ?? 0);
