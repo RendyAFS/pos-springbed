@@ -22,8 +22,9 @@ use Illuminate\Support\Facades\Auth;
 class PurchaseOrderResource extends Resource
 {
     protected static ?string $model = PurchaseOrder::class;
-    protected static ?string $navigationLabel = 'Purchase Orders';
-    protected static ?string $pluralLabel = 'Purchase Orders';
+    protected static ?string $navigationLabel = 'Pembelian Stok Produk';
+    protected static ?string $heading = 'Pembelian Stok Produk';
+    protected static ?string $pluralLabel = 'Pembelian Stok Produk';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
 
     public static function getGloballySearchableAttributes(): array

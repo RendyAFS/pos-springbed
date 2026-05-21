@@ -21,8 +21,8 @@ use UnitEnum;
 class ProductTypeResource extends Resource
 {
     protected static ?string $model = ProductType::class;
-    protected static ?string $navigationLabel = 'Types';
-    protected static ?string $pluralLabel = 'Types';
+    protected static ?string $navigationLabel = 'Tipe';
+    protected static ?string $pluralLabel = 'Tipe';
     protected static string | UnitEnum | null $navigationGroup = 'Master Data';
 
     public static function form(Schema $schema): Schema
@@ -30,7 +30,7 @@ class ProductTypeResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Name')
+                    ->label('Nama')
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
@@ -43,16 +43,17 @@ class ProductTypeResource extends Resource
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label('Nama')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('products_count')
-                    ->label('Products')
+                    ->label('Produk')
                     ->counts('products')
                     ->sortable(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->modalHeading('Edit Tipe'),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

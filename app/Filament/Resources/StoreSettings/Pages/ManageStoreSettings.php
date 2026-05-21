@@ -49,7 +49,9 @@ class ManageStoreSettings extends ManageRecords
                         ->send();
                 }),
 
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Tambah Toko')
+                ->modalHeading('Tambah Toko'),
         ];
     }
 }

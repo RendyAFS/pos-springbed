@@ -29,7 +29,7 @@ class ProductsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Product')
+                    ->label('Produk')
                     ->searchable()
                     ->formatStateUsing(function ($state, $record) {
 
@@ -54,19 +54,19 @@ class ProductsTable
                     ->copyMessage('SKU copied')
                     ->copyMessageDuration(1500),
                 TextColumn::make('category.name')
-                    ->label('Category')
+                    ->label('Kategori')
                     ->badge()
                     ->color('primary')
                     ->sortable(),
                 TextColumn::make('size.name')
-                    ->label('Size')
+                    ->label('Ukuran')
                     ->searchable(),
                 TextColumn::make('selling_price')
-                    ->label('Selling Price')
+                    ->label('Harga Jual')
                     ->sortable()
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                 TextColumn::make('stock')
-                    ->label('Stock')
+                    ->label('Stok')
                     ->badge()
                     ->state(function ($record) {
                         $storeId = Auth::user()?->store_setting_id;
@@ -96,7 +96,7 @@ class ProductsTable
                     ->onColor('success'),
             ])
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
             ])
             ->recordActions([
                 ActionGroup::make([

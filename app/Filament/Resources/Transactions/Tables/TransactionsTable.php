@@ -176,13 +176,13 @@ class TransactionsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('transactionShipment.courier.name')
-                    ->label('Courier')
+                    ->label('Kurir')
                     ->default('')
                     ->limit(20),
             ])
             ->defaultSort('transaction_date', 'desc')
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
                 TernaryFilter::make('is_down_payment')
                     ->label('Down Payment')
                     ->native(false)
@@ -199,7 +199,7 @@ class TransactionsTable
                             ->toArray()
                     ),
                 SelectFilter::make('payment_status')
-                    ->label('Payment Status')
+                    ->label('Status Pembayaran')
                     ->searchable()
                     ->options(
                         collect(TransactionPaymentStatusEnum::cases())
@@ -216,7 +216,7 @@ class TransactionsTable
                         );
                     }),
                 SelectFilter::make('shiping_status')
-                    ->label('Delivery Status')
+                    ->label('Status Pengiriman')
                     ->searchable()
                     ->options(
                         collect(StatusTransactionShipmentEnum::cases())

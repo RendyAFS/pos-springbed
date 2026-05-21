@@ -13,7 +13,9 @@ class ManageCustomers extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Tambah Customer')
+                ->modalHeading('Tambah Customer'),
         ];
     }
 }

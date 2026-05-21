@@ -22,8 +22,9 @@ use Illuminate\Support\Facades\Auth;
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
-    protected static ?string $navigationLabel = 'Transactions';
-    protected static ?string $pluralLabel = 'Transactions';
+    protected static ?string $navigationLabel = 'Transaksi';
+    protected static ?string $heading = 'Transaksi';
+    protected static ?string $pluralLabel = 'Transaksi';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
     public static function getGloballySearchableAttributes(): array
@@ -40,12 +41,12 @@ class TransactionResource extends Resource
     {
         return [
             'Customer'        => $record->customer?->name,
-            'Phone'           => $record->customer?->phone,
+            'Telepone'        => $record->customer?->phone,
             'Total'           => RupiahHelper::format($record->grand_total),
             'Status'          => $record->status->getLabel(),
-            'Courier'         => $record->transactionShipment?->courier?->name,
+            'Kurir'         => $record->transactionShipment?->courier?->name,
             'Payment Method'  => $record->transactionPayment?->method->getLabel(),
-            'Payment Status'  => $record->transactionPayment?->status->getLabel(),
+            'Status Pembayaran'  => $record->transactionPayment?->status->getLabel(),
             'Shipment Status' => $record->transactionShipment?->status->getLabel(),
         ];
     }

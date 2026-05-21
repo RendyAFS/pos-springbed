@@ -25,6 +25,7 @@ class UserForm
                     ->icon('heroicon-o-user')
                     ->schema([
                         TextInput::make('name')
+                            ->label('Nama')
                             ->required()
                             ->maxLength(255),
 
@@ -71,7 +72,7 @@ class UserForm
                             ->required(),
 
                         Select::make('selected_store')
-                            ->label('Available Store')
+                            ->label('Toko Tersedia')
                             ->multiple()
                             ->options(StoreSetting::query()->pluck('store_name', 'store_name'))
                             ->preload()
@@ -104,7 +105,7 @@ class UserForm
                             }),
 
                         Select::make('store_setting_id')
-                            ->label('Active Store')
+                            ->label('Toko Aktif')
                             ->options(function (Get $get) {
                                 $selectedStores = $get('selected_store');
 

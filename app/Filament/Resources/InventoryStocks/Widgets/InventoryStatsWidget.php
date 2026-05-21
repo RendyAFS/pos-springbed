@@ -44,7 +44,7 @@ class InventoryStatsWidget extends StatsOverviewWidget
                 ->descriptionIcon('heroicon-o-exclamation-triangle')
                 ->color($lowStockCount > 0 ? 'warning' : 'success'),
 
-            Stat::make('Total Inventory Value', RupiahHelper::format($totalValue))
+            Stat::make('Nilai Total Inventory', RupiahHelper::format($totalValue))
                 ->description('Based on selling price · ' . $storeLabel)
                 ->descriptionIcon('heroicon-o-banknotes')
                 ->color('success'),

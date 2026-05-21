@@ -29,7 +29,7 @@ class UserStats extends StatsOverviewWidget
                     ->count()
             )
                 ->descriptionIcon('heroicon-o-check-circle', IconPosition::Before)
-                ->description('Active users')
+                ->description('User aktif')
                 ->color('success'),
 
             Stat::make('Total Admin',
@@ -40,7 +40,7 @@ class UserStats extends StatsOverviewWidget
                     ->count()
             )
                 ->descriptionIcon('heroicon-o-shield-check', IconPosition::Before)
-                ->description('Admin users')
+                ->description('User Admin')
                 ->color('warning'),
         ];
     }

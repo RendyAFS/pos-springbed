@@ -13,6 +13,8 @@ class EditPurchaseOrder extends EditRecord
 {
     protected static string $resource = PurchaseOrderResource::class;
 
+    protected static ?string $title = 'Edit Pesanan Pembelian';
+
     protected function afterSave(): void
     {
         app(PurchaseOrderService::class)->receiveStock($this->record);

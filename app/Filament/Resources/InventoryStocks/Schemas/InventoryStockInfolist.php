@@ -18,12 +18,12 @@ class InventoryStockInfolist
         return $schema
             ->components([
 
-                Section::make('Product Information')
+                Section::make('Informasi Produk')
                     ->icon(Heroicon::ShoppingBag)
                     ->schema([
 
                         TextEntry::make('product.name')
-                            ->label('Product')
+                            ->label('Produk')
                             ->html()
                             ->formatStateUsing(function ($state, $record) {
 
@@ -50,13 +50,13 @@ class InventoryStockInfolist
                                     ->copyMessage('SKU copied'),
 
                                 TextEntry::make('product.category.name')
-                                    ->label('Category')
+                                    ->label('Kategori')
                                     ->badge()
                                     ->color('gray')
                                     ->icon(Heroicon::Tag),
 
                                 TextEntry::make('status')
-                                    ->label('Stock Status')
+                                    ->label('Status Stok')
                                     ->badge()
                                     ->state(fn($record) => $record->quantity <= 10 ? 'Low Stock' : 'In Stock')
                                     ->colors([
@@ -81,18 +81,18 @@ class InventoryStockInfolist
                             ->schema([
 
                                 TextEntry::make('quantity')
-                                    ->label('Stock Quantity')
+                                    ->label('Kuantitas Stok')
                                     ->icon(Heroicon::Cube)
                                     ->formatStateUsing(fn($state) => "{$state} pcs")
                                     ->color(fn($state) => $state <= 10 ? 'warning' : 'success'),
 
                                 TextEntry::make('product.selling_price')
-                                    ->label('Unit Price')
+                                    ->label('Harga Jual')
                                     ->icon(Heroicon::Banknotes)
                                     ->money('IDR', locale: 'id'),
 
                                 TextEntry::make('total_value')
-                                    ->label('Total Inventory Value')
+                                    ->label('Nilai Total Inventory')
                                     ->state(
                                         fn($record) =>
                                         $record->quantity * ($record->product->selling_price ?? 0)

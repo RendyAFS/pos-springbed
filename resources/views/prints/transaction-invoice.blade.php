@@ -624,7 +624,7 @@
             {{-- Customer & Order Info --}}
             <div class="info-row">
                 <div class="info-col">
-                    <div class="info-box-title">Shipping Address</div>
+                    <div class="info-box-title">Alamat Tujuan</div>
                     <div class="info-box-content">
                         <strong>{{ $customerName }}</strong>
                         @if ($customerPhone)
