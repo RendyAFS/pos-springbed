@@ -1,14 +1,26 @@
 <x-filament-panels::page>
-    @if ($this->viewMode === 'kanban')
-        @php
-            $board = $this->getKanbanBoard();
-        @endphp
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 
-        @include($board->getBoardView(), [
-            'board' => $board,
-            'columns' => $this->getKanbanColumns(),
-        ])
-    @else
-        {{ $this->table }}
-    @endif
+    <div x-data x-cloak class="w-full">
+
+        @if ($viewMode === 'kanban')
+            @php
+                $board = $this->getKanbanBoard();
+            @endphp
+
+            @include($board->getBoardView(), [
+                'board' => $board,
+                'columns' => $this->getKanbanColumns(),
+            ])
+        @endif
+
+        @if ($viewMode === 'table')
+            {{ $this->table }}
+        @endif
+
+    </div>
 </x-filament-panels::page>
