@@ -4,6 +4,16 @@
     $url = ! $hasClickAction ? $board->getRecordUrl($record) : null;
     $footerActions = $board->getCardFooterActions();
     $hasFooterActions = ! empty($footerActions);
+
+    $columnValue = $column->value ?? '';
+    $borderStyle = match($columnValue) {
+        'pending'   => 'border-left: 4px solid #9ca3af;',
+        'processed' => 'border-left: 4px solid #f59e0b;',
+        'shipped'   => 'border-left: 4px solid #06b6d4;',
+        'delivered' => 'border-left: 4px solid #22c55e;',
+        'cancelled' => 'border-left: 4px solid #ef4444;',
+        default     => 'border-left: 4px solid #d1d5db;',
+    };
 @endphp
 
 <div
@@ -14,20 +24,25 @@
     @endif
     role="listitem"
     aria-label="{{ $board->resolveCardTitle($record) }}"
+    style="{{ $borderStyle }}"
     @class([
         'fi-kanban-card rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-950/5 transition-shadow hover:shadow-md dark:bg-gray-900 dark:ring-white/10',
         'cursor-pointer' => $hasClickAction,
         'cursor-grab' => ! $hasClickAction,
     ])
 >
-    <div class="text-sm font-medium text-gray-950 dark:text-white">
+    <div class="text-sm font-semibold text-gray-950 dark:text-white" style="font-family: ui-monospace, monospace;">
         {{ $board->resolveCardTitle($record) }}
     </div>
 
     @if($description = $board->resolveCardDescription($record))
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {{ $description }}
-        </p>
+        <div class="mt-2 space-y-0.5">
+            @foreach(explode("\n", $description) as $line)
+                <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                    {{ $line }}
+                </p>
+            @endforeach
+        </div>
     @endif
 
     @if($badges = $board->resolveCardBadges($record))
@@ -35,16 +50,19 @@
             @foreach($badges as $badge)
                 @php
                     $badgeColor = $badge['color'] ?? 'gray';
-                    $badgeClasses = match($badgeColor) {
-                        'primary' => 'bg-primary-50 text-primary-700 dark:bg-primary-400/10 dark:text-primary-400',
-                        'success' => 'bg-success-50 text-success-700 dark:bg-success-400/10 dark:text-success-400',
-                        'warning' => 'bg-warning-50 text-warning-700 dark:bg-warning-400/10 dark:text-warning-400',
-                        'danger' => 'bg-danger-50 text-danger-700 dark:bg-danger-400/10 dark:text-danger-400',
-                        'info' => 'bg-info-50 text-info-700 dark:bg-info-400/10 dark:text-info-400',
-                        default => 'bg-gray-50 text-gray-700 dark:bg-gray-400/10 dark:text-gray-400',
+                    $badgeStyle = match($badgeColor) {
+                        'success' => 'background:#dcfce7; color:#166534;',
+                        'warning' => 'background:#fef9c3; color:#854d0e;',
+                        'danger'  => 'background:#fee2e2; color:#991b1b;',
+                        'info'    => 'background:#cffafe; color:#155e75;',
+                        'primary' => 'background:#ede9fe; color:#5b21b6;',
+                        default   => 'background:#f3f4f6; color:#374151;',
                     };
                 @endphp
-                <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium {{ $badgeClasses }}">
+                <span
+                    class="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium"
+                    style="{{ $badgeStyle }}"
+                >
                     {{ $badge['label'] }}
                 </span>
             @endforeach
@@ -58,10 +76,10 @@
                     $actionUrl = $footerAction->record($record)->getUrl();
                     $actionColorClasses = match($footerAction->getColor() ?? 'gray') {
                         'primary' => 'text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-400/10',
-                        'danger' => 'text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-400/10',
+                        'danger'  => 'text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-400/10',
                         'success' => 'text-success-500 hover:bg-success-50 dark:hover:bg-success-400/10',
                         'warning' => 'text-warning-500 hover:bg-warning-50 dark:hover:bg-warning-400/10',
-                        default => 'text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/10 dark:hover:text-gray-300',
+                        default   => 'text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/10 dark:hover:text-gray-300',
                     };
                 @endphp
 
@@ -80,10 +98,9 @@
                         @endif
                     </a>
                 @else
-                    {{$footerAction}}
+                    {{ $footerAction }}
                 @endif
             @endforeach
         </div>
     @endif
-
 </div>

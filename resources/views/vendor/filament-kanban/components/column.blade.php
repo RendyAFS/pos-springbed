@@ -1,5 +1,18 @@
 @php
-    $color = $board->resolveColumnColor($column);
+    $colorFromBoard = $board->resolveColumnColor($column);
+    $color = $colorFromBoard;
+
+    if (! in_array($color, ['primary', 'success', 'warning', 'danger', 'info'])) {
+        $color = match($column->value ?? '') {
+            'pending'   => 'gray',
+            'processed' => 'warning',
+            'shipped'   => 'info',
+            'delivered' => 'success',
+            'cancelled' => 'danger',
+            default     => 'gray',
+        };
+    }
+
     $wipLimit = $board->getWipLimit($column->value);
     $isOverWip = $board->isOverWipLimit($column);
     $summary = $board->resolveColumnSummary($column);
@@ -7,41 +20,68 @@
     $hasHeaderAction = $board->hasColumnHeaderAction();
     $hasEmptyState = $board->hasEmptyState() && $column->count === 0;
 
-    $colorClasses = match($color) {
-        'primary' => 'bg-primary-50 dark:bg-primary-400/10 border-primary-200 dark:border-primary-400/20',
-        'success' => 'bg-success-50 dark:bg-success-400/10 border-success-200 dark:border-success-400/20',
-        'warning' => 'bg-warning-50 dark:bg-warning-400/10 border-warning-200 dark:border-warning-400/20',
-        'danger' => 'bg-danger-50 dark:bg-danger-400/10 border-danger-200 dark:border-danger-400/20',
-        'info' => 'bg-info-50 dark:bg-info-400/10 border-info-200 dark:border-info-400/20',
-        default => 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10',
+    $columnBgStyle = match($color) {
+        'warning' => 'background-color: #fffbeb; border-color: #fde68a;',
+        'success' => 'background-color: #f0fdf4; border-color: #bbf7d0;',
+        'danger'  => 'background-color: #fff1f2; border-color: #fecdd3;',
+        'info'    => 'background-color: #ecfeff; border-color: #a5f3fc;',
+        'primary' => 'background-color: #f5f3ff; border-color: #ddd6fe;',
+        default   => 'background-color: #f9fafb; border-color: #e5e7eb;',
     };
 
-    $badgeColorClasses = $isOverWip
-        ? 'bg-danger-100 text-danger-700 dark:bg-danger-400/20 dark:text-danger-400'
+    // Dark mode handled via CSS class fallback (Tailwind class tetap dipakai untuk dark)
+    $columnDarkClass = match($color) {
+        'warning' => 'dark:bg-warning-400/10 dark:border-warning-400/20',
+        'success' => 'dark:bg-success-400/10 dark:border-success-400/20',
+        'danger'  => 'dark:bg-danger-400/10 dark:border-danger-400/20',
+        'info'    => 'dark:bg-info-400/10 dark:border-info-400/20',
+        'primary' => 'dark:bg-primary-400/10 dark:border-primary-400/20',
+        default   => 'dark:bg-white/5 dark:border-white/10',
+    };
+
+    $badgeBgStyle = $isOverWip
+        ? 'background-color:#fee2e2; color:#991b1b;'
         : match($color) {
-            'primary' => 'bg-primary-100 text-primary-700 dark:bg-primary-400/20 dark:text-primary-400',
-            'success' => 'bg-success-100 text-success-700 dark:bg-success-400/20 dark:text-success-400',
-            'warning' => 'bg-warning-100 text-warning-700 dark:bg-warning-400/20 dark:text-warning-400',
-            'danger' => 'bg-danger-100 text-danger-700 dark:bg-danger-400/20 dark:text-danger-400',
-            'info' => 'bg-info-100 text-info-700 dark:bg-info-400/20 dark:text-info-400',
-            default => 'bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-400',
+            'warning' => 'background-color:#fef3c7; color:#92400e;',
+            'success' => 'background-color:#dcfce7; color:#166534;',
+            'danger'  => 'background-color:#fee2e2; color:#991b1b;',
+            'info'    => 'background-color:#cffafe; color:#155e75;',
+            'primary' => 'background-color:#ede9fe; color:#5b21b6;',
+            default   => 'background-color:#f3f4f6; color:#374151;',
         };
+
+    $headerTextStyle = match($color) {
+        'warning' => 'color:#92400e;',
+        'success' => 'color:#166534;',
+        'danger'  => 'color:#991b1b;',
+        'info'    => 'color:#155e75;',
+        'primary' => 'color:#5b21b6;',
+        default   => '',
+    };
+
+    $topBorderStyle = match($color) {
+        'warning' => 'border-top: 3px solid #f59e0b;',
+        'success' => 'border-top: 3px solid #22c55e;',
+        'danger'  => 'border-top: 3px solid #ef4444;',
+        'info'    => 'border-top: 3px solid #06b6d4;',
+        'primary' => 'border-top: 3px solid #8b5cf6;',
+        default   => 'border-top: 3px solid #9ca3af;',
+    };
 @endphp
 
 <div
     @class([
         'fi-kanban-column flex-shrink-0 rounded-xl border',
-        $colorClasses,
-        'ring-2 ring-danger-500/50' => $isOverWip,
+        $columnDarkClass,
+        'ring-2 ring-red-500/50' => $isOverWip,
     ])
-    style="width: {{ $board->getColumnWidth() }};"
+    style="{{ $columnBgStyle }} {{ $topBorderStyle }} width: {{ $board->getColumnWidth() }};"
     @if($isCollapsible)
         x-data="{ collapsed: localStorage.getItem('kanban-col-{{ $column->value }}') === '1' }"
     @endif
     role="group"
     aria-label="{{ $column->label }}"
 >
-    {{-- Column header --}}
     <div class="flex items-center justify-between gap-2 p-3">
         <div class="flex items-center gap-2 min-w-0">
             @if($isCollapsible)
@@ -63,17 +103,19 @@
             @if($column->icon)
                 <x-filament::icon
                     :icon="$column->icon"
-                    class="h-5 w-5 text-gray-500 dark:text-gray-400 shrink-0"
+                    class="h-5 w-5 shrink-0"
+                    style="{{ $headerTextStyle }}"
                 />
             @endif
-            <h3 class="text-sm font-semibold text-gray-950 dark:text-white truncate">
+            <h3 class="text-sm font-semibold truncate" style="{{ $headerTextStyle ?: 'color: rgb(3 7 18);' }}">
                 {{ $column->label }}
             </h3>
         </div>
 
         <div class="flex items-center gap-1.5 shrink-0">
             <span
-                class="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium {{ $badgeColorClasses }}"
+                class="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium"
+                style="{{ $badgeBgStyle }}"
                 @if($isOverWip) title="Over WIP limit ({{ $wipLimit }})" @endif
             >
                 {{ $column->count }}@if($wipLimit) / {{ $wipLimit }}@endif
@@ -92,14 +134,12 @@
         </div>
     </div>
 
-    {{-- Column summary --}}
     @if($summary)
         <div class="px-3 pb-1 text-xs text-gray-500 dark:text-gray-400">
             {{ $summary }}
         </div>
     @endif
 
-    {{-- Card container (SortableJS target) --}}
     <div
         data-kanban-column
         data-column-value="{{ $column->value }}"

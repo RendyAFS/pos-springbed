@@ -15,6 +15,7 @@
         collapsible: @js($board->isCollapsible()),
         dragConstraints: @js($board->getDragConstraints()),
     })" class="fi-kanban-board">
+
     @if ($hasFilters || $hasSearch)
         <div class="mb-4 flex items-center gap-2 shrink-0">
             @if ($hasSearch)
@@ -24,7 +25,6 @@
                             <div class="fi-input-wrp-prefix fi-input-wrp-prefix-has-content fi-inline">
                                 <x-filament::icon icon="heroicon-m-magnifying-glass" class="fi-icon fi-size-md" />
                             </div>
-
                             <div class="fi-input-wrp-content-ctn">
                                 <input type="search" wire:model.live.debounce.300ms="kanbanSearch" placeholder="Search"
                                     aria-label="Search board" autocomplete="off"
@@ -36,7 +36,7 @@
             @endif
 
             @if ($hasFilters)
-                <div x-data="{ open: false }" class="relative">
+                <div x-data="{ open: false }" class="relative shrink-0">
                     <button type="button" x-on:click="open = !open" :aria-expanded="open.toString()"
                         aria-controls="kanban-filters-panel" aria-label="Toggle filters" @class([
                             'relative flex items-center justify-center rounded-lg p-2 text-sm shadow-sm ring-1 transition duration-75',
@@ -61,11 +61,12 @@
                         x-transition:leave="transition ease-in duration-75"
                         x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
                         id="kanban-filters-panel" role="dialog" aria-label="Filters"
-                        class="absolute inset-s-0 z-20 mt-2 w-72 sm:w-96 rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
+                        style="position: absolute; right: 0; top: calc(100% + 8px); z-index: 50; width: min(384px, 90vw);"
+                        class="rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
                         x-cloak>
                         <div class="mb-3 flex items-center justify-between">
                             <h4 class="text-sm font-medium text-gray-950 dark:text-white">
-                                Filters
+                                Filter
                             </h4>
 
                             @if ($activeFilterCount > 0)
@@ -83,7 +84,6 @@
         </div>
     @endif
 
-    {{-- Loading overlay --}}
     @if ($hasLoading)
         <div wire:loading.delay
             class="fi-kanban-loading absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 dark:bg-gray-900/60">
@@ -91,7 +91,6 @@
         </div>
     @endif
 
-    {{-- BOARD SCROLL ONLY --}}
     <div class="fi-kanban-scroll relative overflow-x-auto overflow-y-hidden pb-4" wire:ignore.self>
         <div class="flex min-w-max items-start gap-4" style="min-height: 60vh;">
             @foreach ($columns as $column)

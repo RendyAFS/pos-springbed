@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 class RupiahHelper
 {
-    public static function format($rupiah_number, $prefix = 'Rp '): string
+    public static function format(int|float|string|null $rupiah_number, string $prefix = 'Rp '): string
     {
         if ($rupiah_number === null || $rupiah_number === '') {
             return $prefix . '0';
@@ -13,7 +13,7 @@ class RupiahHelper
         return $prefix . number_format((float) $rupiah_number, 0, ',', '.');
     }
 
-    public static function number($rupiah_number): string
+    public static function number(int|float|string|null $rupiah_number): string
     {
         if ($rupiah_number === null || $rupiah_number === '') {
             return '0';
