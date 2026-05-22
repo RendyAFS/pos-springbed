@@ -27,10 +27,10 @@ class ListTransactions extends ListRecords
     {
         return [
             Action::make('toggleView')
-                ->label(fn () => $this->viewMode === 'kanban'
+                ->label(fn() => $this->viewMode === 'kanban'
                     ? 'Table View'
                     : 'Kanban View')
-                ->icon(fn () => $this->viewMode === 'kanban'
+                ->icon(fn() => $this->viewMode === 'kanban'
                     ? Heroicon::Bars3BottomLeft
                     : Heroicon::ViewColumns)
                 ->color('gray')
@@ -53,7 +53,7 @@ class ListTransactions extends ListRecords
             ->cardDescription(fn($record) => $record->customer?->name ?? '—')
             ->searchable(['transaction_code', 'customer.name'])
             ->collapsible()
-            ->columnWidth('300px');
+            ->columnWidth('320px');
     }
 
     public function table(Table $table): Table

@@ -18,16 +18,18 @@
     @if ($hasFilters || $hasSearch)
         <div class="mb-4 flex items-center gap-2 shrink-0">
             @if ($hasSearch)
-                <div class="w-full sm:max-w-md">
-                    <div class="fi-input-wrp">
-                        <div class="fi-input-wrp-prefix fi-input-wrp-prefix-has-content fi-inline">
-                            <x-filament::icon icon="heroicon-m-magnifying-glass" class="fi-icon fi-size-md" />
-                        </div>
+                <div class="w-full p-2">
+                    <div class="flex justify-end">
+                        <div class="fi-input-wrp">
+                            <div class="fi-input-wrp-prefix fi-input-wrp-prefix-has-content fi-inline">
+                                <x-filament::icon icon="heroicon-m-magnifying-glass" class="fi-icon fi-size-md" />
+                            </div>
 
-                        <div class="fi-input-wrp-content-ctn">
-                            <input type="search" wire:model.live.debounce.300ms="kanbanSearch" placeholder="Search"
-                                aria-label="Search board" autocomplete="off"
-                                class="fi-input fi-input-has-inline-prefix" />
+                            <div class="fi-input-wrp-content-ctn">
+                                <input type="search" wire:model.live.debounce.300ms="kanbanSearch" placeholder="Search"
+                                    aria-label="Search board" autocomplete="off"
+                                    class="fi-input fi-input-has-inline-prefix" />
+                            </div>
                         </div>
                     </div>
                 </div>

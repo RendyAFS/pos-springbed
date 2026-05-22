@@ -5,7 +5,9 @@ namespace App\Filament\Resources\Transactions;
 use App\Filament\Resources\Transactions\Pages\CreateTransaction;
 use App\Filament\Resources\Transactions\Pages\EditTransaction;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
+use App\Filament\Resources\Transactions\Pages\ViewTransaction;
 use App\Filament\Resources\Transactions\Schemas\TransactionForm;
+use App\Filament\Resources\Transactions\Schemas\TransactionInfolist;
 use App\Filament\Resources\Transactions\Tables\TransactionsTable;
 use App\Helpers\RupiahHelper;
 use App\Models\Transaction;
@@ -92,11 +94,17 @@ class TransactionResource extends Resource
         ];
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return TransactionInfolist::configure($schema);
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => ListTransactions::route('/'),
             'create' => CreateTransaction::route('/create'),
+            'view'   => ViewTransaction::route('/{record}'),
             'edit' => EditTransaction::route('/{record}/edit'),
         ];
     }
