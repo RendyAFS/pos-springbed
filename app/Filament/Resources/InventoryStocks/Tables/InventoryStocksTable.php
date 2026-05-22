@@ -20,7 +20,7 @@ class InventoryStocksTable
         return $table
             ->columns([
                 TextColumn::make('storeSetting.store_name')
-                    ->label('Store')
+                    ->label('Toko')
                     ->badge()
                     ->color('gray')
                     ->sortable()
@@ -37,7 +37,7 @@ class InventoryStocksTable
                     ->copyMessageDuration(1500),
 
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label('Produk')
                     ->html()
                     ->searchable()
                     ->formatStateUsing(function ($state, $record) {
@@ -54,24 +54,24 @@ class InventoryStocksTable
                         ");
                     }),
                 TextColumn::make('product.category.name')
-                    ->label('Category')
+                    ->label('Kategori')
                     ->badge()
                     ->color('primary')
                     ->sortable(),
 
                 TextColumn::make('quantity')
-                    ->label('Stock')
+                    ->label('Stok')
                     ->default(0)
                     ->alignCenter()
                     ->weight('bold'),
 
                 TextColumn::make('product.selling_price')
-                    ->label('Unit Price')
+                    ->label('Harga Jual')
                     ->sortable()
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
 
                 TextColumn::make('total_value')
-                    ->label('Total Value')
+                    ->label('Total Nilai')
                     ->state(function ($record) {
                         return $record->quantity * ($record->product->selling_price ?? 0);
                     })

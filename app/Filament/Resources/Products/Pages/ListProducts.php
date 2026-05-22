@@ -123,7 +123,8 @@ class ListProducts extends ListRecords
                     }
                 }),
 
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Tambah Produk'),
         ];
     }
 }

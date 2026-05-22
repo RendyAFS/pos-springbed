@@ -22,15 +22,15 @@ class PromoForm
     {
         return $schema
             ->components([
-                Section::make('Promo Information')
-                    ->description('Basic information about the promotion')
+                Section::make('Informasi Promo')
+                    ->description('Informasi dasar tentang promo')
                     ->schema([
                         TextInput::make('name')
-                            ->label('Promo Name')
+                            ->label('Nama Promo')
                             ->required()
                             ->maxLength(100),
                         Select::make('type')
-                            ->label('Promo Type')
+                            ->label('Jenis Promo')
                             ->options(
                                 collect(PromoTypeEnum::cases())
                                     ->mapWithKeys(fn($case) => [
@@ -54,16 +54,15 @@ class PromoForm
                             ->preload()
                             ->searchable()
                             ->nullable()
-                            ->label('Products Included')
-                            ->helperText('Leave empty if promo applies to all products')
+                            ->label('Produk')
+                            ->helperText('Biarkan kosong jika promo berlaku untuk semua produk')
                             ->columnSpanFull(),
                     ])->columns(2),
-                Section::make('Discount Configuration')
-                    ->description('Configure how the discount will be applied')
+                Section::make('Pengaturan Diskon')
+                    ->description('Atur bagaimana diskon akan diterapkan')
                     ->schema([
-
                         Select::make('discount_type')
-                            ->label('Discount Type')
+                            ->label('Jenis Diskon')
                             ->options(
                                 collect(PromoDiscountEnum::cases())
                                     ->mapWithKeys(fn($case) => [
@@ -79,7 +78,7 @@ class PromoForm
                             })
                             ->columnSpanFull(),
                         TextInput::make('discount_value')
-                            ->label('Discount Value')
+                            ->label('Nilai Diskon')
                             ->required()
                             ->default(0)
                             ->live()
@@ -132,23 +131,23 @@ class PromoForm
                                     : 1
                             ),
                         TextInput::make('min_purchase')
-                            ->label('Minimum Purchase')
+                            ->label('Minimum Pembelian')
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                             ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                             ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                             ->prefix('Rp.')
                             ->default(0)
-                            ->helperText('Minimum cart total required to activate this promo'),
+                            ->helperText('Jumlah minimum pembelian untuk mengaktifkan promo ini'),
                     ])
                     ->columns(2),
 
-                Section::make('Schedule')
-                    ->description('Set when the promo is active')
+                Section::make('Jadwal')
+                    ->description('Atur kapan promo aktif')
                     ->schema([
                         Grid::make(2)
                             ->schema([
                                 DateTimePicker::make('start_date')
-                                    ->label('Start Date')
+                                    ->label('Tanggal Mulai')
                                     ->native(false)
                                     ->seconds(false)
                                     ->suffixIcon(Heroicon::Calendar)
@@ -156,7 +155,7 @@ class PromoForm
                                     ->live(),
 
                                 DateTimePicker::make('end_date')
-                                    ->label('End Date')
+                                    ->label('Tanggal Berakhir')
                                     ->native(false)
                                     ->seconds(false)
                                     ->suffixIcon(Heroicon::Calendar)
@@ -174,17 +173,17 @@ class PromoForm
                             ->default(true),
                     ]),
 
-                Section::make('Usage Limit')
-                    ->description('Limit how many times this promo can be used')
+                Section::make('Pembatasan Penggunaan')
+                    ->description('Batas penggunaan promo')
                     ->schema([
                         Grid::make(2)
                             ->schema([
                                 TextInput::make('usage_limit')
-                                    ->label('Usage Limit')
+                                    ->label('Batas Penggunaan')
                                     ->numeric()
                                     ->placeholder('Unlimited if empty'),
                                 TextInput::make('usage_count')
-                                    ->label('Usage Count')
+                                    ->label('Jumlah Penggunaan')
                                     ->numeric()
                                     ->default(0)
                                     ->disabled()

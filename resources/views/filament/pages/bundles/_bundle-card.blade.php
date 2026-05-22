@@ -142,7 +142,7 @@
 
         {{-- Bundle price --}}
         <div class="flex justify-between items-center">
-            <span class="text-sm font-bold text-gray-900 dark:text-white">Bundle Price:</span>
+            <span class="text-sm font-bold text-gray-900 dark:text-white">Harga Bundle:</span>
             <span class="text-xl font-extrabold text-primary-600 dark:text-primary-400">
                 Rp {{ number_format($bundlePrice, 0, ',', '.') }}
             </span>

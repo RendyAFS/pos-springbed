@@ -20,7 +20,7 @@ class SalesOverviewChartWidget extends ChartWidget
     use HasStoreFilter;
 
     protected static ?int $sort            = 2;
-    protected ?string $heading             = 'Sales Overview';
+    protected ?string $heading             = 'Ringkasan Penjualan';
     protected string $color                = 'primary';
     protected int|string|array $columnSpan = 2;
     protected ?string $pollingInterval     = '30s';
@@ -29,26 +29,26 @@ class SalesOverviewChartWidget extends ChartWidget
     {
         return $schema->components([
             Select::make('period')
-                ->label('Period')
+                ->label('Periode')
                 ->native(false)
                 ->options([
-                    'daily'   => 'Daily',
-                    'monthly' => 'Monthly',
+                    'daily'   => 'Harian',
+                    'monthly' => 'Bulanan',
                 ])
                 ->default('daily')
                 ->live()
                 ->afterStateUpdated(function ($state) {
                     if ($state === 'daily') {
-                        $this->filters['startDate'] = now()->subDays(6)->format('Y-m-d');
-                        $this->filters['endDate']   = now()->format('Y-m-d');
+                        $this->filters['startDate'] = now()->subDays(6)->format('Y-F-d');
+                        $this->filters['endDate']   = now()->format('Y-F-d');
                     } else {
-                        $this->filters['startDate'] = now()->subMonths(11)->startOfMonth()->format('Y-m-d');
-                        $this->filters['endDate']   = now()->format('Y-m-d');
+                        $this->filters['startDate'] = now()->subMonths(11)->startOfMonth()->format('Y-F-d');
+                        $this->filters['endDate']   = now()->format('Y-F-d');
                     }
                 }),
 
             DatePicker::make('startDate')
-                ->label('Start Date')
+                ->label('Tanggal Mulai')
                 ->default(now()->subDays(6))
                 ->maxDate(now())
                 ->native(false)
@@ -56,7 +56,7 @@ class SalesOverviewChartWidget extends ChartWidget
                 ->closeOnDateSelection(),
 
             DatePicker::make('endDate')
-                ->label('End Date')
+                ->label('Tanggal Akhir')
                 ->default(now())
                 ->maxDate(now())
                 ->native(false)
@@ -98,7 +98,7 @@ class SalesOverviewChartWidget extends ChartWidget
             $current = $startDate->copy();
             while ($current->lte($endDate)) {
                 $key      = $current->toDateString();
-                $labels[] = $current->format('d M');
+                $labels[] = $current->translatedFormat('d F');
                 $data[]   = (float) ($rows[$key] ?? 0);
                 $current->addDay();
             }
@@ -114,8 +114,8 @@ class SalesOverviewChartWidget extends ChartWidget
             $current = $startDate->copy()->startOfMonth();
             $end     = $endDate->copy()->startOfMonth();
             while ($current->lte($end)) {
-                $key      = $current->format('Y-m');
-                $labels[] = $current->format('M Y');
+                $key      = $current->format('Y-F');
+                $labels[] = $current->translatedFormat('F Y');
                 $data[]   = (float) ($rows[$key] ?? 0);
                 $current->addMonth();
             }
@@ -123,7 +123,7 @@ class SalesOverviewChartWidget extends ChartWidget
 
         return [
             'datasets' => [[
-                'label'                     => 'Sales (Rp)',
+                'label'                     => 'Penjualan (Rp)',
                 'data'                      => $data,
                 'fill'                      => true,
                 'tension'                   => 0.4,
@@ -154,8 +154,8 @@ class SalesOverviewChartWidget extends ChartWidget
                         grid: { borderDash: [4, 4] },
                         ticks: {
                             callback: (value) => {
-                                if (value >= 1000000000) return (value / 1000000000) + 'B';
-                                if (value >= 1000000)    return (value / 1000000) + 'M';
+                                if (value >= 1000000000) return (value / 1000000000) + 'M';
+                                if (value >= 1000000)    return (value / 1000000) + 'JT';
                                 if (value >= 1000)       return (value / 1000) + 'K';
                                 return value;
                             },

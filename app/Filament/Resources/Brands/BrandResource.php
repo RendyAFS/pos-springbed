@@ -57,7 +57,7 @@ class BrandResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Name')
+                    ->label('Nama')
                     ->required()
                     ->maxLength(255),
                 Toggle::make('is_active')
@@ -77,7 +77,7 @@ class BrandResource extends Resource
             ->recordTitleAttribute('Brand')
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label('Nama')
                     ->searchable(),
                 ToggleColumn::make('is_active')
                     ->label('Active')
@@ -87,10 +87,11 @@ class BrandResource extends Resource
                     ->onColor('success'),
             ])
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->modalHeading('Edit Brand'),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),

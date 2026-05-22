@@ -30,7 +30,7 @@ class ProductForm
     {
         return $schema
             ->components([
-                Section::make('Product Information')
+                Section::make('Informasi Produk')
                     ->icon(Heroicon::ArchiveBox)
                     ->schema([
                         Select::make('brand_id')
@@ -40,25 +40,25 @@ class ProductForm
                             ->preload()
                             ->required(),
                         Select::make('categoriy_id')
-                            ->label('Category')
+                            ->label('Kategori')
                             ->relationship('category', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         Select::make('size_id')
-                            ->label('Size')
+                            ->label('Ukuran')
                             ->relationship('size', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         Select::make('type_id')
-                            ->label('Type')
+                            ->label('Tipe')
                             ->relationship('type', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         TextInput::make('name')
-                            ->label('Name')
+                            ->label('Nama')
                             ->required()
                             ->columnSpanFull(),
                     ])->columns(2),
@@ -67,7 +67,7 @@ class ProductForm
                     ->icon(Heroicon::DocumentText)
                     ->schema([
                         TextInput::make('selling_price')
-                            ->label('Selling Price')
+                            ->label('Harga Jual')
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                             ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                             ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
@@ -77,11 +77,11 @@ class ProductForm
                             ->label('SKU')
                             ->default(null),
                         TextInput::make('weight')
-                            ->label('Weight')
+                            ->label('Berat')
                             ->numeric()
                             ->default(null),
                         Select::make('color')
-                            ->label('Color')
+                            ->label('Warna')
                             ->options([
                                 'merah' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #ef4444"></span>Merah</span>',
                                 'pink' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #ec4899"></span>Pink</span>',
@@ -110,7 +110,7 @@ class ProductForm
                     ])->columns(2),
                 Section::make('Inventory')
                     ->icon(Heroicon::ArchiveBox)
-                    ->description('Manage stock per store location')
+                    ->description('Kelola stok per lokasi toko')
                     ->schema([
                         ViewField::make('stock_summary')
                             ->view('filament.components.products.stock-summary')
@@ -167,7 +167,7 @@ class ProductForm
                             ->label('Edit Stock')
                             ->color('primary')
                             ->icon('heroicon-o-adjustments-horizontal')
-                            ->modalHeading('Stock Adjustment')
+                            ->modalHeading('Perubahan Stok')
                             ->modalWidth('2xl')
                             ->fillForm(function ($livewire) {
                                 $state = $livewire->form->getState();
@@ -216,17 +216,17 @@ class ProductForm
                             })
                             ->schema([
                                 Repeater::make('stocks')
-                                    ->label('')
+                                    ->label('Stok')
                                     ->schema([
                                         Select::make('store_setting_id')
-                                            ->label('Store')
+                                            ->label('Toko')
                                             ->options(StoreSetting::pluck('store_name', 'id'))
                                             ->disabled()
                                             ->dehydrated(true)
                                             ->columnSpan(2),
 
                                         TextInput::make('quantity')
-                                            ->label('New Stock Quantity')
+                                            ->label('New Kuantitas Stok')
                                             ->numeric()
                                             ->minValue(0)
                                             ->required()
@@ -234,7 +234,7 @@ class ProductForm
                                             ->columnSpan(1),
 
                                         Textarea::make('reason')
-                                            ->label('Reason')
+                                            ->label('Notes')
                                             ->nullable()
                                             ->rows(2)
                                             ->columnSpan(3),
@@ -262,10 +262,11 @@ class ProductForm
                             }),
                     ])->columnSpanFull(),
                 Repeater::make('productImages')
+                    ->label('Kelola Gambar Produk')
                     ->relationship()
                     ->schema([
                         FileUpload::make('image_product')
-                            ->label('Image Product')
+                            ->label('Gambar Produk')
                             ->nullable()
                             ->image()
                             ->imageEditor()

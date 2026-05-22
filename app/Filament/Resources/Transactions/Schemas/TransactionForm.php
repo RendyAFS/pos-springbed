@@ -46,23 +46,23 @@ class TransactionForm
 
                     Step::make('Customer')
                         ->label('Customer')
-                        ->description('Pick a customer & set the transaction date')
+                        ->description('Silahkan pilih customer dan tanggal transaksi.')
                         ->icon(Heroicon::User)
                         ->completedIcon(Heroicon::CheckCircle)
                         ->schema([
-                            Section::make('Transaction Info')
-                                ->description('Fill in the customer details and transaction time.')
+                            Section::make('Info Transaksi')
+                                ->description('Masukkan data transaksi dan customer.')
                                 ->icon(Heroicon::DocumentText)
                                 ->columns(2)
                                 ->schema([
                                     TextInput::make('transaction_code')
-                                        ->label('Transaction Code')
+                                        ->label('Kode Transaksi')
                                         ->default(fn(): string => 'TRX' . strtoupper(Str::random(8)) . now()->format('Ymd'))
                                         ->disabled()
                                         ->dehydrated(true)
                                         ->columnSpan(1),
                                     DatePicker::make('transaction_date')
-                                        ->label('Transaction Date')
+                                        ->label('Tanggal Transaksi')
                                         ->required()
                                         ->default(now())
                                         ->native(false)
@@ -81,7 +81,7 @@ class TransactionForm
                                                 ->required()
                                                 ->maxLength(255),
                                             TextInput::make('phone')
-                                                ->label('Phone Number')
+                                                ->label('Telepone')
                                                 ->tel()
                                                 ->maxLength(20),
                                             TextInput::make('email')
@@ -89,7 +89,7 @@ class TransactionForm
                                                 ->email()
                                                 ->maxLength(255),
                                             Textarea::make('address')
-                                                ->label('Address')
+                                                ->label('Alamat')
                                                 ->rows(3),
                                         ])
                                         ->createOptionUsing(function (array $data): int {
@@ -100,12 +100,12 @@ class TransactionForm
                                                 ->label('Full Name')
                                                 ->required(),
                                             TextInput::make('phone')
-                                                ->label('Phone Number'),
+                                                ->label('Telepone'),
                                             TextInput::make('email')
                                                 ->label('Email')
                                                 ->email(),
                                             Textarea::make('address')
-                                                ->label('Address'),
+                                                ->label('Alamat'),
                                         ])
                                         ->updateOptionUsing(function (array $data, $record) {
                                             $record->update($data);
@@ -114,7 +114,7 @@ class TransactionForm
                                         ->columnSpanFull(),
 
                                     Select::make('status')
-                                        ->label('Transaction Status')
+                                        ->label('Status Transaksi')
                                         ->options(
                                             collect(TransactionStatusEnum::cases())
                                                 ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
@@ -125,7 +125,7 @@ class TransactionForm
                                         ->native(false)
                                         ->columnSpan(1),
                                     Select::make('store_setting_id')
-                                        ->label('Store')
+                                        ->label('Toko')
                                         ->options(fn() => StoreSetting::pluck('store_name', 'id')->toArray())
                                         ->searchable()
                                         ->required()
@@ -138,23 +138,23 @@ class TransactionForm
                         ]),
 
                     Step::make('Products')
-                        ->label('Products')
-                        ->description('Add the items being purchased')
+                        ->label('Produk')
+                        ->description('Pilih produk atau paket yang akan dibeli.')
                         ->icon(Heroicon::ShoppingCart)
                         ->completedIcon(Heroicon::CheckCircle)
                         ->schema([
-                            Section::make('Product Items')
-                                ->description('Choose individual products or bundles.')
+                            Section::make('Produk')
+                                ->description('Pilih produk atau paket yang akan dibeli.')
                                 ->icon(Heroicon::CubeTransparent)
                                 ->schema([
                                     Repeater::make('transactionItems')
-                                        ->label('')
+                                        ->label('Item Transaksi')
                                         ->relationship('transactionItems')
                                         ->schema([
-                                            Section::make()
+                                            Grid::make(3)
                                                 ->schema([
                                                     Radio::make('item_type')
-                                                        ->label('Item Type')
+                                                        ->label('Tipe Item')
                                                         ->options([
                                                             'product' => 'Single Product',
                                                             'bundle'  => 'Bundle',
@@ -179,7 +179,7 @@ class TransactionForm
                                                         ->columnSpanFull(),
 
                                                     Select::make('product_id')
-                                                        ->label('Product')
+                                                        ->label('Produk')
                                                         ->options(function (): array {
                                                             return Product::query()
                                                                 ->where('is_active', true)
@@ -189,6 +189,7 @@ class TransactionForm
                                                         ->searchable()
                                                         ->preload()
                                                         ->live()
+                                                        ->columnSpan(2)
                                                         ->visible(fn(Get $get): bool => $get('item_type') !== 'bundle')
                                                         ->required(fn(Get $get): bool => $get('item_type') !== 'bundle')
                                                         ->afterStateUpdated(function (Get $get, Set $set, $state): void {
@@ -199,7 +200,7 @@ class TransactionForm
                                                                     self::recalculateItemSubtotal($get, $set);
                                                                 }
                                                             }
-                                                            $set('qty', 1);
+                                                            $set('qty', 0);
                                                         }),
 
                                                     Select::make('bundle_id')
@@ -236,92 +237,193 @@ class TransactionForm
 
                                                             $items = $bundle->bundleItems->map(function ($bi) use ($storeId) {
                                                                 $stock      = self::getAvailableStock($bi->product_id, $storeId);
-                                                                $stockLabel = $stock > 0 ? "stock: {$stock}" : '⚠️ out of stock';
+                                                                $stockLabel = $stock > 0 ? "stock: {$stock}" : '⚠️ stok habis';
                                                                 return "{$bi->product->name} × {$bi->qty} ({$stockLabel})";
                                                             })->implode(' | ');
 
-                                                            return "Bundle contents: {$items}";
+                                                            return "Detail Bundle: {$items}";
+                                                        }),
+
+                                                    Toggle::make('is_multi_store')
+                                                        ->label('Multi Store (Parsial)')
+                                                        ->inline(false)
+                                                        ->default(false)
+                                                        ->live()
+                                                        ->afterStateUpdated(function (Set $set, Get $get, $state): void {
+                                                            if (!$state) {
+                                                                $set('source_stores', []);
+                                                                $set('qty', 0);
+                                                            } else {
+                                                                $set('qty', 0);
+                                                            }
+                                                            self::recalculateItemSubtotal($get, $set);
                                                         }),
 
                                                     TextInput::make('qty')
                                                         ->label('Qty')
                                                         ->numeric()
-                                                        ->default(1)
-                                                        ->minValue(1)
+                                                        ->default(0)
+                                                        ->minValue(fn(Get $get): int => (bool)$get('is_multi_store') ? 0 : 1)
+                                                        ->columnSpan(2)
                                                         ->required()
+                                                        ->dehydrated(true)
+                                                        ->dehydrateStateUsing(function ($state, Get $get): int {
+                                                            if ((bool) $get('is_multi_store')) {
+                                                                $sources = $get('source_stores') ?? [];
+                                                                $total   = collect($sources)->sum(fn($s) => (int)($s['qty'] ?? 0));
+                                                                return max(1, $total);
+                                                            }
+                                                            return max(1, (int) $state);
+                                                        })
+                                                        ->readOnly(fn(Get $get): bool => (bool)$get('is_multi_store'))
                                                         ->debounce(500)
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
                                                         ->suffix('pcs')
                                                         ->helperText(function (Get $get, $component): string {
-                                                            $storeId = Auth::user()?->store_setting_id;
+                                                            $storeId = Auth::user()?->store_setting_id
+                                                                ?? ($get('../../store_setting_id') ? (int) $get('../../store_setting_id') : null);
 
-                                                            // Ambil key item saat ini dari statePath
-                                                            // statePath contoh: "transactionItems.0.qty" → key = "0"
-                                                            $statePath = $component->getStatePath();
-                                                            $parts     = explode('.', $statePath);
-                                                            // index ada di posisi kedua dari belakang (sebelum 'qty')
+                                                            $statePath  = $component->getStatePath();
+                                                            $parts      = explode('.', $statePath);
                                                             $currentKey = $parts[count($parts) - 2] ?? null;
 
+                                                            $qty          = (int) ($get('qty') ?? 1);
+                                                            $isMulti      = (bool) $get('is_multi_store');
+                                                            $sourceStores = $get('source_stores') ?? [];
+
+                                                            // ─── MODE MULTI-STORE ────────────────────────────────────────────
+                                                            if ($isMulti) {
+                                                                if (empty($sourceStores)) {
+                                                                    return '📦 Tambahkan alokasi store di bawah.';
+                                                                }
+
+                                                                $totalAllocated = collect($sourceStores)->sum(fn($s) => (int)($s['qty'] ?? 0));
+                                                                return "✅ Total alokasi: {$totalAllocated} pcs dari " . count($sourceStores) . " toko.";
+                                                            }
+
+                                                            // ─── MODE SINGLE STORE ───────────────────────────────────────────
                                                             if ($get('item_type') === 'product') {
                                                                 $productId = $get('product_id');
-                                                                if (! $productId) return 'Select a product first.';
+                                                                if (!$productId) return 'Select a product first.';
 
-                                                                $effectiveStock = self::getEffectiveStock((int) $productId, $storeId, $get, $currentKey);
-                                                                $qty            = (int) ($get('qty') ?? 1);
+                                                                // Tampilkan stok di semua toko
+                                                                $allStores = StoreSetting::all();
+                                                                $stockLines = $allStores->map(function ($store) use ($productId) {
+                                                                    $stock = InventoryStock::where('product_id', $productId)
+                                                                        ->where('store_setting_id', $store->id)
+                                                                        ->value('quantity') ?? 0;
+                                                                    $icon = $stock > 0 ? '✅' : '⚠️';
+                                                                    return "{$icon} {$store->store_name}: {$stock} pcs";
+                                                                })->implode(' | ');
 
-                                                                if ($effectiveStock <= 0) {
-                                                                    $label = $effectiveStock < 0
-                                                                        ? "⚠️ Already over-committed by " . abs($effectiveStock) . " pcs — will be pre-order."
-                                                                        : '⚠️ No remaining stock — will be pre-order (minus stock).';
-                                                                    return $label;
+                                                                // Effective stock untuk store aktif (jika ada)
+                                                                $effectiveInfo = '';
+                                                                if ($storeId) {
+                                                                    $effectiveStock = self::getEffectiveStock((int) $productId, $storeId, $get, $currentKey);
+
+                                                                    if ($effectiveStock <= 0) {
+                                                                        $effectiveInfo = $effectiveStock < 0
+                                                                            ? " — ⚠️ stok kurang " . abs($effectiveStock) . " pcs (pre-order)"
+                                                                            : " — ⚠️ stok tidak cukup (pre-order)";
+                                                                    } elseif ($qty > $effectiveStock) {
+                                                                        $deficit = $qty - $effectiveStock;
+                                                                        $effectiveInfo = " — ⚠️ {$deficit} pcs akan menjadi pre-order";
+                                                                    }
                                                                 }
 
-                                                                if ($qty > $effectiveStock) {
-                                                                    $deficit = $qty - $effectiveStock;
-                                                                    return "⚠️ Effective stock: {$effectiveStock} pcs — {$deficit} pcs will be pre-order (minus stock).";
-                                                                }
-
-                                                                return "Effective stock: {$effectiveStock} pcs (actual: " . self::getAvailableStock((int) $productId, $storeId) . " pcs)";
+                                                                return "{$stockLines}{$effectiveInfo}";
                                                             }
 
                                                             if ($get('item_type') === 'bundle') {
                                                                 $bundleId = $get('bundle_id');
-                                                                if (! $bundleId) return 'Select a bundle first.';
+                                                                if (!$bundleId) return 'Select a bundle first.';
 
                                                                 $bundle = Bundle::with('bundleItems.product')->find($bundleId);
-                                                                if (! $bundle) return '';
+                                                                if (!$bundle) return '';
 
-                                                                $qty = (int) ($get('qty') ?? 1);
+                                                                $allStores = StoreSetting::all();
+                                                                $lines = [];
 
-                                                                $stockLines = $bundle->bundleItems->map(function ($bi) use ($storeId, $get, $currentKey, $qty) {
-                                                                    $effectiveStock = self::getEffectiveStock((int) $bi->product_id, $storeId, $get, $currentKey);
-                                                                    $needed         = $bi->qty * $qty;
-                                                                    $maxSet         = $bi->qty > 0 ? floor($effectiveStock / $bi->qty) : 0;
+                                                                foreach ($bundle->bundleItems as $bi) {
+                                                                    $storeParts = $allStores->map(function ($store) use ($bi) {
+                                                                        $stock = InventoryStock::where('product_id', $bi->product_id)
+                                                                            ->where('store_setting_id', $store->id)
+                                                                            ->value('quantity') ?? 0;
+                                                                        $icon = $stock > 0 ? '✅' : '⚠️';
+                                                                        return "{$icon} {$store->store_name}: {$stock} pcs";
+                                                                    })->implode(' | ');
 
-                                                                    $icon = $effectiveStock >= $needed ? '✅' : '⚠️';
-                                                                    return "{$icon} {$bi->product->name}: effective {$effectiveStock} pcs (max {$maxSet} sets)";
-                                                                })->implode(' | ');
+                                                                    $lines[] = "📦 {$bi->product->name} × {$bi->qty} → {$storeParts}";
+                                                                }
 
-                                                                $minQty = $bundle->bundleItems
-                                                                    ->map(function ($bi) use ($storeId, $get, $currentKey): int {
-                                                                        $effectiveStock = self::getEffectiveStock((int) $bi->product_id, $storeId, $get, $currentKey);
-                                                                        return $bi->qty > 0 ? (int) floor($effectiveStock / $bi->qty) : 0;
-                                                                    })
-                                                                    ->min();
-
-                                                                return "{$stockLines} — Max bundle sets: {$minQty}";
+                                                                return implode("\n", $lines);
                                                             }
 
                                                             return '';
                                                         }),
 
+                                                    Repeater::make('source_stores')
+                                                        ->label('Sumber Stok per Toko')
+                                                        ->schema([
+                                                            Select::make('store_setting_id')
+                                                                ->label('Toko')
+                                                                ->options(fn() => StoreSetting::pluck('store_name', 'id')->toArray())
+                                                                ->required()
+                                                                ->live()
+                                                                ->searchable(),
+                                                            TextInput::make('qty')
+                                                                ->label('Qty dari Toko Ini')
+                                                                ->numeric()
+                                                                ->default(1)
+                                                                ->minValue(1)
+                                                                ->required()
+                                                                ->live(onBlur: true)
+                                                                ->suffix('pcs')
+                                                                ->helperText(function (Get $get): string {
+                                                                    $storeId   = $get('store_setting_id');
+                                                                    $productId = $get('../../product_id');
+
+                                                                    if (!$storeId || !$productId) return '';
+
+                                                                    $stock = InventoryStock::where('product_id', $productId)
+                                                                        ->where('store_setting_id', $storeId)
+                                                                        ->value('quantity') ?? 0;
+
+                                                                    $inputQty = (int) ($get('qty') ?? 1);
+
+                                                                    if ($stock <= 0) {
+                                                                        return "⚠️ Stok kosong di toko ini — {$inputQty} pcs akan jadi pre-order.";
+                                                                    }
+
+                                                                    if ($inputQty > $stock) {
+                                                                        $preOrder = $inputQty - $stock;
+                                                                        return "Stok tersedia: {$stock} pcs — ⚠️ {$preOrder} pcs akan jadi pre-order.";
+                                                                    }
+
+                                                                    return "✅ Stok tersedia: {$stock} pcs";
+                                                                }),
+                                                        ])
+                                                        ->columns(2)
+                                                        ->addActionLabel('+ Tambah Toko')
+                                                        ->live()
+                                                        ->visible(fn(Get $get): bool => (bool)$get('is_multi_store'))
+                                                        ->afterStateUpdated(function (Get $get, Set $set): void {
+                                                            $sources  = $get('source_stores') ?? [];
+                                                            $totalQty = collect($sources)->sum(fn($s) => (int)($s['qty'] ?? 0));
+                                                            $set('qty', max(1, $totalQty));
+                                                            self::recalculateItemSubtotal($get, $set);
+                                                        })
+                                                        ->collapsible()
+                                                        ->columnSpan(2),
+
                                                     TextInput::make('selling_price')
-                                                        ->label('Unit Price')
+                                                        ->label('Harga Jual')
                                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                                                         ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                                                         ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                                                         ->required()
+                                                        ->columnSpan(1)
                                                         ->debounce(500)
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
@@ -336,7 +438,8 @@ class TransactionForm
                                                         ->debounce(500)
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
-                                                        ->prefix('Rp'),
+                                                        ->prefix('Rp')
+                                                        ->columnSpan(1),
 
                                                     TextInput::make('subtotal')
                                                         ->label('Subtotal')
@@ -346,11 +449,10 @@ class TransactionForm
                                                         ->afterStateHydrated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
                                                         ->readOnly()
                                                         ->prefix('Rp')
-                                                        ->columnSpanFull(),
-                                                ])
-                                                ->columns(2),
+                                                        ->columnSpan(2),
+                                                ]),
                                         ])
-                                        ->addActionLabel('+ Add Item')
+                                        ->addActionLabel('+ Tambah Item')
                                         ->reorderable()
                                         ->collapsible()
                                         ->cloneable()
@@ -363,20 +465,20 @@ class TransactionForm
                         ]),
 
                     Step::make('Promo & Shipping')
-                        ->label('Promo & Ship')
-                        ->description('Apply a promo and pick a courier')
+                        ->label('Promo & Pengiriman')
+                        ->description('Terapkan promo dan pilih kurir')
                         ->icon(Heroicon::Truck)
                         ->completedIcon(Heroicon::CheckCircle)
                         ->schema([
                             Grid::make(2)
                                 ->schema([
                                     Section::make('Promo / Voucher')
-                                        ->description('Pick a promo that applies to this transaction.')
+                                        ->description('Pilih promo yang berlaku untuk transaksi ini.')
                                         ->icon(Heroicon::Tag)
                                         ->schema([
                                             Select::make('promo_id')
-                                                ->label('Promo Code')
-                                                ->placeholder('Select a promo...')
+                                                ->label('Kode Promo')
+                                                ->placeholder('Pilih promo...')
                                                 ->options(function (Get $get): array {
                                                     $items      = $get('transactionItems') ?? [];
                                                     $productIds = collect($items)
@@ -412,10 +514,10 @@ class TransactionForm
                                                 ->nullable()
                                                 ->live()
                                                 ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateTotals($get, $set))
-                                                ->helperText('Only active & currently valid promos are shown. Promos with no product restriction apply to all items.'),
+                                                ->helperText('Promo yang ditampilkan hanya yang aktif dan berlaku saat ini. Promo tanpa batasan produk berlaku untuk semua item.'),
 
                                             TextEntry::make('promo_detail_info')
-                                                ->label('Promo Detail')
+                                                ->label('Detail Promo')
                                                 ->state(function (Get $get): string {
                                                     $promoId = $get('promo_id');
                                                     if (! $promoId) return '—';
@@ -446,7 +548,7 @@ class TransactionForm
                                         ->icon(Heroicon::Truck)
                                         ->schema([
                                             Select::make('courier_id')
-                                                ->label('Courier')
+                                                ->label('Kurir')
                                                 ->placeholder('Pick a courier...')
                                                 ->options(Courier::where('is_active', true)->pluck('name', 'id'))
                                                 ->searchable()
@@ -473,7 +575,7 @@ class TransactionForm
                                                 }),
 
                                             TextInput::make('shiping_cost')
-                                                ->label('Shipping Cost')
+                                                ->label('Biaya Pengiriman')
                                                 ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                                                 ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
                                                 ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
@@ -482,14 +584,14 @@ class TransactionForm
                                                 ->afterStateHydrated(fn(Get $get, Set $set) => self::recalculateTotals($get, $set))
                                                 ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateTotals($get, $set))
                                                 ->prefix('Rp')
-                                                ->helperText('You can adjust this manually if needed.'),
+                                                ->helperText('Anda bisa mengubah biaya pengiriman jika diperlukan.'),
                                         ]),
                                 ]),
                         ]),
 
                     Step::make('Summary')
-                        ->label('Summary')
-                        ->description('Review & confirm the transaction')
+                        ->label('Ringkasan')
+                        ->description('Ulasan & konfirmasi transaksi')
                         ->icon(Heroicon::ClipboardDocumentCheck)
                         ->completedIcon(Heroicon::CheckBadge)
                         ->schema([
@@ -497,7 +599,7 @@ class TransactionForm
                                 ->schema([
                                     Grid::make(1)
                                         ->schema([
-                                            Section::make('Price Breakdown')
+                                            Section::make('Rincian Harga')
                                                 ->icon(Heroicon::ReceiptRefund)
                                                 ->schema([
                                                     TextInput::make('subtotal')
@@ -517,7 +619,7 @@ class TransactionForm
                                                         ->prefix('Rp'),
 
                                                     TextInput::make('shiping_cost')
-                                                        ->label('Shipping Cost')
+                                                        ->label('Biaya Pengiriman')
                                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                                                         ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
                                                         ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
@@ -532,15 +634,15 @@ class TransactionForm
                                                         ->readOnly()
                                                         ->prefix('Rp'),
                                                 ]),
-                                            Section::make('Product Items')
+                                            Section::make('Detail Pesanan')
                                                 ->icon(Heroicon::ShoppingBag)
                                                 ->schema([
                                                     TextEntry::make('items_summary')
-                                                        ->label('Selected Products')
+                                                        ->label('Produk Dipilih')
                                                         ->listWithLineBreaks()
                                                         ->state(function (Get $get): array {
                                                             $items = $get('transactionItems') ?? [];
-                                                            if (empty($items)) return ['No products added yet.'];
+                                                            if (empty($items)) return ['Tidak ada produk yang ditambahkan.'];
 
                                                             $lines = [];
                                                             foreach ($items as $item) {
@@ -563,7 +665,21 @@ class TransactionForm
                                                                     ? ' - Rp ' . number_format($discount, 0, ',', '.') . ' (disc)'
                                                                     : '';
 
-                                                                $lines[] = "• {$name} * {$qty} @ Rp " . number_format($sellingPrice, 0, ',', '.') . "{$discountPart} = Rp " . number_format($subtotal, 0, ',', '.');
+                                                                // Tampilkan info multi-store jika aktif
+                                                                $multiStorePart = '';
+                                                                if (!empty($item['is_multi_store']) && !empty($item['source_stores'])) {
+                                                                    $storeParts = collect($item['source_stores'])
+                                                                        ->filter(fn($s) => !empty($s['store_setting_id']) && (int)($s['qty'] ?? 0) > 0)
+                                                                        ->map(function ($s) {
+                                                                            $storeName = StoreSetting::find($s['store_setting_id'])?->store_name ?? 'Unknown Store';
+                                                                            return "{$storeName}: {$s['qty']} pcs";
+                                                                        })
+                                                                        ->implode(' + ');
+
+                                                                    $multiStorePart = $storeParts ? " [Multi-store: {$storeParts}]" : '';
+                                                                }
+
+                                                                $lines[] = "• {$name} * {$qty} @ Rp " . number_format($sellingPrice, 0, ',', '.') . "{$discountPart}{$multiStorePart} = Rp " . number_format($subtotal, 0, ',', '.');
                                                             }
 
                                                             $discountReferal = self::parseCurrency($get('use_discount_referal') ?? 0);
@@ -721,13 +837,13 @@ class TransactionForm
                                         ])
                                 ]),
 
-                            Section::make('Payment')
-                                ->description('Fill in the payment details for this transaction.')
+                            Section::make('Pembayaran')
+                                ->description('Input detail pembayaran transaksi ini.')
                                 ->icon(Heroicon::CreditCard)
                                 ->columns(3)
                                 ->schema([
                                     Select::make('payment_method')
-                                        ->label('Payment Method')
+                                        ->label('Metode Pembayaran')
                                         ->options(
                                             collect(TransactionPaymentMethodEnum::cases())
                                                 ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
@@ -742,7 +858,7 @@ class TransactionForm
                                             }
                                         }),
                                     TextInput::make('payment_amount')
-                                        ->label('Amount Paid')
+                                        ->label('Jumlah Terbayar')
                                         ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                                         ->dehydrateStateUsing(fn($state) => self::parseCurrency($state))
                                         ->formatStateUsing(fn($state) => number_format(self::parseCurrency($state), 0, ',', '.'))
@@ -756,7 +872,7 @@ class TransactionForm
                                             }
                                         }),
                                     Select::make('payment_status')
-                                        ->label('Payment Status')
+                                        ->label('Status Pembayaran')
                                         ->options(
                                             collect(TransactionPaymentStatusEnum::cases())
                                                 ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
@@ -780,7 +896,7 @@ class TransactionForm
                                         ->inline(false)
                                         ->default(false),
                                     DateTimePicker::make('due_date_down_payment')
-                                        ->label('Due Date Down Payment')
+                                        ->label('Jatuh Tempo Down Payment')
                                         ->native(false)
                                         ->suffixIcon(Heroicon::Calendar)
                                         ->closeOnDateSelection()

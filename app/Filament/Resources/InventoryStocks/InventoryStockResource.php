@@ -23,7 +23,8 @@ use Illuminate\Support\Facades\Auth;
 class InventoryStockResource extends Resource
 {
     protected static ?string $model = InventoryStock::class;
-    protected static ?string $navigationLabel = 'Inventory';
+    protected static ?string $navigationLabel = 'Inventori';
+    protected ?string $heading = 'Inventori';
     protected static ?string $pluralLabel = 'Inventory';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-archive-box';
 
@@ -47,12 +48,12 @@ class InventoryStockResource extends Resource
         return [
             'Store'         => $product?->storeSetting?->store_name,
             'SKU'           => $product?->sku,
-            'Type'          => $product?->type?->name,
-            'Category'      => $product?->category?->name,
+            'Tipe'          => $product?->type?->name,
+            'Kategori'      => $product?->category?->name,
             'Brand'         => $product?->brand?->name,
             'Stock'         => ($record->quantity ?? 0) . ' pcs',
-            'Selling Price' => RupiahHelper::format($product?->selling_price ?? 0),
-            'Total Value'   => RupiahHelper::format(($record->quantity ?? 0) * ($product?->selling_price ?? 0)),
+            'Harga Jual'    => RupiahHelper::format($product?->selling_price ?? 0),
+            'Total Nilai'   => RupiahHelper::format(($record->quantity ?? 0) * ($product?->selling_price ?? 0)),
         ];
     }
 

@@ -33,7 +33,7 @@ class TransactionDownPaymentsRelationManager extends RelationManager
                 Grid::make(2)
                     ->schema([
                         TextInput::make('amount')
-                            ->label('Amount')
+                            ->label('Jumlah')
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                             ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                             ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
@@ -41,7 +41,7 @@ class TransactionDownPaymentsRelationManager extends RelationManager
                             ->prefix('Rp.')
                             ->columns(1),
                         DatePicker::make('paid_at')
-                            ->label('Paid At')
+                            ->label('Tanggal Bayar')
                             ->native(false)
                             ->suffixIcon(Heroicon::Calendar)
                             ->closeOnDateSelection()
@@ -64,11 +64,11 @@ class TransactionDownPaymentsRelationManager extends RelationManager
             ->recordTitleAttribute('transaction')
             ->columns([
                 TextColumn::make('amount')
-                    ->label('Amount')
+                    ->label('Jumlah')
                     ->sortable()
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                 TextColumn::make('paid_at')
-                    ->label('Paid At')
+                    ->label('Tanggal Bayar')
                     ->dateTime('d M Y H:i')
                     ->sortable(),
                 TextColumn::make('notes')
@@ -80,7 +80,8 @@ class TransactionDownPaymentsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Add Down Payment')
+                    ->label('Tambah Down Payment')
+                    ->modalHeading('Tambahkan Down Payment')
                     ->icon(Heroicon::Plus),
             ])
             ->recordActions([

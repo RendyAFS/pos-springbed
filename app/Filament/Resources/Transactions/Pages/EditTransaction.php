@@ -18,6 +18,8 @@ class EditTransaction extends EditRecord
 {
     protected static string $resource = TransactionResource::class;
 
+    protected static ?string $title = 'Buat Transaksi';
+
     protected array $extraData = [];
 
     protected array $oldReferalData = [];
@@ -80,6 +82,12 @@ class EditTransaction extends EditRecord
         if (isset($data['transactionItems'])) {
             foreach ($data['transactionItems'] as &$item) {
                 unset($item['item_type']);
+
+                if (!empty($item['is_multi_store']) && !empty($item['source_stores'])) {
+                    $totalQty = collect($item['source_stores'])
+                        ->sum(fn($s) => (int)($s['qty'] ?? 0));
+                    $item['qty'] = max(1, $totalQty);
+                }
             }
             unset($item);
         }

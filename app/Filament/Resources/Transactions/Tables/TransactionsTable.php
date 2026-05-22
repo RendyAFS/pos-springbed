@@ -16,6 +16,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -176,13 +177,13 @@ class TransactionsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('transactionShipment.courier.name')
-                    ->label('Courier')
+                    ->label('Kurir')
                     ->default('')
                     ->limit(20),
             ])
             ->defaultSort('transaction_date', 'desc')
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
                 TernaryFilter::make('is_down_payment')
                     ->label('Down Payment')
                     ->native(false)
@@ -199,7 +200,7 @@ class TransactionsTable
                             ->toArray()
                     ),
                 SelectFilter::make('payment_status')
-                    ->label('Payment Status')
+                    ->label('Status Pembayaran')
                     ->searchable()
                     ->options(
                         collect(TransactionPaymentStatusEnum::cases())
@@ -216,7 +217,7 @@ class TransactionsTable
                         );
                     }),
                 SelectFilter::make('shiping_status')
-                    ->label('Delivery Status')
+                    ->label('Status Pengiriman')
                     ->searchable()
                     ->options(
                         collect(StatusTransactionShipmentEnum::cases())
@@ -325,6 +326,7 @@ class TransactionsTable
                         ->color('primary')
                         ->url(fn($record) => route('transactions.invoice', $record) . '?paper=a4')
                         ->openUrlInNewTab(),
+                    ViewAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),

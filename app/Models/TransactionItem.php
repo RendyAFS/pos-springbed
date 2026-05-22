@@ -15,14 +15,18 @@ class TransactionItem extends Model
         'discount',
         'subtotal',
         'is_pre_order',
+        'is_multi_store',
+        'source_stores'
     ];
 
     protected $casts = [
-        'qty'           => 'integer',
-        'selling_price' => 'decimal:2',
-        'discount'      => 'decimal:2',
-        'subtotal'      => 'decimal:2',
-        'is_pre_order'  => 'boolean',
+        'qty'            => 'integer',
+        'selling_price'  => 'decimal:2',
+        'discount'       => 'decimal:2',
+        'subtotal'       => 'decimal:2',
+        'is_pre_order'   => 'boolean',
+        'is_multi_store' => 'boolean',
+        'source_stores'  => 'array'
     ];
 
     public function transaction()

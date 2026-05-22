@@ -58,7 +58,7 @@
         {{-- Submit --}}
         <div class="max-w-sm mx-auto">
             <x-filament::button type="submit" class="w-full" size="lg">
-                Change Store
+                Ganti Toko
             </x-filament::button>
         </div>
 

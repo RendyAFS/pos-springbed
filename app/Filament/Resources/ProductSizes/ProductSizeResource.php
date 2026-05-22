@@ -19,8 +19,8 @@ use UnitEnum;
 class ProductSizeResource extends Resource
 {
     protected static ?string $model = ProductSize::class;
-    protected static ?string $navigationLabel = 'Sizes';
-    protected static ?string $pluralLabel = 'Sizes';
+    protected static ?string $navigationLabel = 'Ukuran';
+    protected static ?string $pluralLabel = 'Ukuran';
     protected static string | UnitEnum | null $navigationGroup = 'Master Data';
 
     public static function form(Schema $schema): Schema
@@ -28,7 +28,7 @@ class ProductSizeResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Name')
+                    ->label('Nama')
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
@@ -41,16 +41,17 @@ class ProductSizeResource extends Resource
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label('Nama')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('products_count')
-                    ->label('Products')
+                    ->label('Produk')
                     ->counts('products')
                     ->sortable(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->modalHeading('Edit Ukuran'),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

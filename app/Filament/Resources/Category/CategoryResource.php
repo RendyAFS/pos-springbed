@@ -31,8 +31,8 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
     protected static ?string $slug = 'categories';
-    protected static ?string $navigationLabel = 'Category';
-    protected static ?string $pluralLabel = 'Category';
+    protected static ?string $navigationLabel = 'Kategori';
+    protected static ?string $pluralLabel = 'Kategori';
     protected static string | UnitEnum | null $navigationGroup = 'Master Data';
 
     public static function getGloballySearchableAttributes(): array
@@ -57,7 +57,7 @@ class CategoryResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Name')
+                    ->label('Nama')
                     ->required(),
                 Toggle::make('is_active')
                     ->label('Is Active')
@@ -73,7 +73,7 @@ class CategoryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('Category')
+            ->recordTitleAttribute('Kategori')
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
@@ -86,10 +86,12 @@ class CategoryResource extends Resource
 
             ])
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+
+                    ->modalHeading('Edit Kategori'),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),
