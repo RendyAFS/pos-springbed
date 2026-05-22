@@ -7,7 +7,7 @@
 
     <div x-data x-cloak class="w-full">
 
-        <div wire:key="kanban-view" x-show="$wire.viewMode === 'kanban'">
+        @if ($viewMode === 'kanban')
             @php
                 $board = $this->getKanbanBoard();
             @endphp
@@ -16,11 +16,11 @@
                 'board' => $board,
                 'columns' => $this->getKanbanColumns(),
             ])
-        </div>
+        @endif
 
-        <div wire:key="table-view" x-show="$wire.viewMode === 'table'">
+        @if ($viewMode === 'table')
             {{ $this->table }}
-        </div>
+        @endif
 
     </div>
 </x-filament-panels::page>
