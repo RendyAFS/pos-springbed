@@ -40,10 +40,10 @@ class ProductResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Type'          => $record->type?->name,
-            'Size'          => $record->size?->name,
+            'Tipe'          => $record->type?->name,
+            'Ukuran'        => $record->size?->name,
             'SKU'           => $record->sku,
-            'Selling Price' => RupiahHelper::format($record->selling_price),
+            'Harga Jual'    => RupiahHelper::format($record->selling_price),
             'Status'        => $record->is_active ? 'Active' : 'Inactive',
         ];
     }

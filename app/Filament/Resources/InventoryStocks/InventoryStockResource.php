@@ -48,12 +48,12 @@ class InventoryStockResource extends Resource
         return [
             'Store'         => $product?->storeSetting?->store_name,
             'SKU'           => $product?->sku,
-            'Type'          => $product?->type?->name,
+            'Tipe'          => $product?->type?->name,
             'Kategori'      => $product?->category?->name,
             'Brand'         => $product?->brand?->name,
             'Stock'         => ($record->quantity ?? 0) . ' pcs',
-            'Selling Price' => RupiahHelper::format($product?->selling_price ?? 0),
-            'Total Value'   => RupiahHelper::format(($record->quantity ?? 0) * ($product?->selling_price ?? 0)),
+            'Harga Jual'    => RupiahHelper::format($product?->selling_price ?? 0),
+            'Total Nilai'   => RupiahHelper::format(($record->quantity ?? 0) * ($product?->selling_price ?? 0)),
         ];
     }
 

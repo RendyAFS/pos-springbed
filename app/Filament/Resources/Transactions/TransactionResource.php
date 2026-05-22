@@ -40,14 +40,14 @@ class TransactionResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Customer'        => $record->customer?->name,
-            'Telepone'        => $record->customer?->phone,
-            'Total'           => RupiahHelper::format($record->grand_total),
-            'Status'          => $record->status->getLabel(),
-            'Kurir'         => $record->transactionShipment?->courier?->name,
-            'Payment Method'  => $record->transactionPayment?->method->getLabel(),
-            'Status Pembayaran'  => $record->transactionPayment?->status->getLabel(),
-            'Shipment Status' => $record->transactionShipment?->status->getLabel(),
+            'Customer'          => $record->customer?->name,
+            'Telepone'          => $record->customer?->phone,
+            'Total'             => RupiahHelper::format($record->grand_total),
+            'Status'            => $record->status->getLabel(),
+            'Kurir'             => $record->transactionShipment?->courier?->name,
+            'Metode Pembayaran' => $record->transactionPayment?->method->getLabel(),
+            'Status Pembayaran' => $record->transactionPayment?->status->getLabel(),
+            'Status Pengiriman' => $record->transactionShipment?->status->getLabel(),
         ];
     }
 

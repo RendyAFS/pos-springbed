@@ -34,6 +34,7 @@ use App\Models\User;
 use Illuminate\Support\HtmlString;
 use Jacobtims\FilamentLogger\FilamentLoggerPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
+use Wezlo\FilamentKanban\FilamentKanbanPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -112,6 +113,7 @@ class AdminPanelProvider extends PanelProvider
                     ->collapsed(),
             ])
             ->plugins([
+                FilamentKanbanPlugin::make(),
                 GlobalSearchModalPlugin::make(),
                 FilamentLoggerPlugin::make(),
                 FilamentShieldPlugin::make()
