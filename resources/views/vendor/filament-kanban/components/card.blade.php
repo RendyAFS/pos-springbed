@@ -9,37 +9,37 @@
     $cfg = match ($columnValue) {
         'pending' => [
             'title' => 'text-gray-500 dark:text-gray-300',
-            'border' => 'border-s-gray-400',
+            'border' => 'fi-kanban-border-pending',
             'badgeColor' => 'fi-color fi-color-gray fi-text-color-600 dark:fi-text-color-400',
         ],
 
         'processed' => [
-            'title' => 'text-primary-500',
-            'border' => 'border-s-primary-500',
-            'badgeColor' => 'fi-color fi-color-primary fi-text-color-700 dark:fi-text-color-400',
+            'title' => 'text-amber-500',
+            'border' => 'fi-kanban-border-processing',
+            'badgeColor' => 'fi-color fi-color-warning fi-text-color-700 dark:fi-text-color-400',
         ],
 
         'shipped' => [
             'title' => 'text-blue-500',
-            'border' => 'border-s-blue-500',
+            'border' => 'fi-kanban-border-shipped',
             'badgeColor' => 'fi-color fi-color-info fi-text-color-700 dark:fi-text-color-400',
         ],
 
         'delivered' => [
             'title' => 'text-green-500',
-            'border' => 'border-s-green-500',
+            'border' => 'fi-kanban-border-delivered',
             'badgeColor' => 'fi-color fi-color-success fi-text-color-700 dark:fi-text-color-400',
         ],
 
         'cancelled' => [
             'title' => 'text-red-500',
-            'border' => 'border-s-red-500',
+            'border' => 'fi-kanban-border-cancelled',
             'badgeColor' => 'fi-color fi-color-danger fi-text-color-700 dark:fi-text-color-400',
         ],
 
         default => [
             'title' => 'text-gray-500 dark:text-gray-300',
-            'border' => 'border-s-gray-300',
+            'border' => 'fi-kanban-border-gray',
             'badgeColor' => 'fi-color fi-color-gray fi-text-color-600 dark:fi-text-color-400',
         ],
     };

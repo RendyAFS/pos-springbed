@@ -7,6 +7,7 @@
 @source '../../../../vendor/awcodes/light-switch/resources/**/*.blade.php';
 @source '../../../../vendor/jeffgreco13/filament-breezy/resources/**/*';
 
+@import "./custom-kanban.css";
 /* ui-switcher */
 input[type="range"].ui-switcher-slider::-webkit-slider-thumb,
 .dark input[type="range"].ui-switcher-slider::-webkit-slider-thumb {
@@ -19,6 +20,10 @@ input[type="range"].ui-switcher-slider::-moz-range-thumb,
     background: var(--ui-switcher-primary) !important;
     border-color: rgb(255, 255, 255, 0.8) !important;
 }
+
+
+
+/* Scroll */
 /* Chrome, Edge, Safari */
 ::-webkit-scrollbar {
     width: 6px;
@@ -43,23 +48,4 @@ input[type="range"].ui-switcher-slider::-moz-range-thumb,
 * {
     scrollbar-width: thin;
     scrollbar-color: rgba(128, 128, 128, 0.5) transparent;
-}
-
-.fi-kanban-board {
-    height: calc(100vh - 12rem);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.fi-kanban-scroll {
-    flex: 1;
-    overflow-x: auto;
-    overflow-y: hidden;
-}
-
-.fi-kanban-column {
-    overflow-y: auto;
-    max-height: calc(100vh - 16rem);
-    min-width: 300px;
 }
