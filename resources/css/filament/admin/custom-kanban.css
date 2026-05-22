@@ -16,9 +16,11 @@
 }
 
 .fi-kanban-column {
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
     min-height: 0;
-    height: 100%;
+    height: auto;
     max-height: calc(100vh - 16rem);
     min-width: 300px;
     padding-bottom: 2rem;
