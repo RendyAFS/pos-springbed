@@ -2,37 +2,7 @@
     $colorFromBoard = $board->resolveColumnColor($column);
     $color = $colorFromBoard;
 
-    $cfg = match ($color) {
-        'warning' => [
-            'bg' => 'bg-primary-50 dark:bg-primary-950/40',
-            'title' => 'text-primary-700 dark:text-primary-50',
-            'badge' => 'bg-primary-100 text-primary-700',
-        ],
-
-        'success' => [
-            'bg' => 'bg-green-50 dark:bg-green-950/40',
-            'title' => 'text-green-700 dark:text-green-50',
-            'badge' => 'bg-green-100 text-green-700',
-        ],
-
-        'danger' => [
-            'bg' => 'bg-red-50 dark:bg-red-950/40',
-            'title' => 'text-red-700 dark:text-red-50',
-            'badge' => 'bg-red-100 text-red-700',
-        ],
-
-        'info' => [
-            'bg' => 'bg-blue-50 dark:bg-blue-950/40',
-            'title' => 'text-blue-500 dark:text-blue-50',
-            'badge' => 'bg-blue-100 text-blue-500',
-        ],
-
-        'gray' => [
-            'bg' => 'bg-gray-50 dark:bg-gray-800/40',
-            'title' => 'text-gray-700 dark:text-gray-50',
-            'badge' => 'bg-gray-100 text-gray-700',
-        ],
-    };
+    $themeClass = "fi-kanban-theme-{$color}";
 
     $wipLimit = $board->getWipLimit($column->value);
     $isOverWip = $board->isOverWipLimit($column);
@@ -44,7 +14,7 @@
 
 <div @class([
     'fi-kanban-column flex-shrink-0 rounded-xl',
-    $cfg['bg'],
+    $themeClass,
     'ring-2 ring-danger-500/40' => $isOverWip,
 ]) style="width: {{ $board->getColumnWidth() }};"
     @if ($isCollapsible) x-data="{ collapsed: localStorage.getItem('kanban-col-{{ $column->value }}') === '1' }" @endif
@@ -62,9 +32,9 @@
             @endif
 
             @if ($column->icon)
-                <x-filament::icon :icon="$column->icon" class="h-5 w-5 shrink-0 {{ $cfg['title'] }}" />
+                <x-filament::icon :icon="$column->icon" class="fi-kanban-title h-5 w-5 shrink-0" />
             @endif
-            <h3 class="text-sm font-semibold truncate {{ $cfg['title'] }}">
+            <h3 class="fi-kanban-title text-sm font-semibold truncate">
                 {{ $column->label }}
             </h3>
         </div>
@@ -74,7 +44,7 @@
                 'inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium',
                 $isOverWip
                     ? 'bg-danger-100 text-danger-700 dark:bg-danger-500/15 dark:text-danger-400'
-                    : $cfg['badge'],
+                    : 'fi-kanban-badge',
             ])
                 @if ($isOverWip) title="Over WIP limit ({{ $wipLimit }})" @endif>
                 {{ $column->count }}@if ($wipLimit)

@@ -77,6 +77,15 @@ class ListTransactions extends ListRecords
                 TransactionStatusEnum::CANCELLED->value => 'danger',
                 default                                 => 'gray',
             })
+            ->cardFooterActions([
+                Action::make('view')
+                    ->icon(Heroicon::Eye)
+                    ->url(fn($record) => TransactionResource::getUrl('view', ['record' => $record])),
+
+                Action::make('edit')
+                    ->icon(Heroicon::PencilSquare)
+                    ->url(fn($record) => TransactionResource::getUrl('edit', ['record' => $record])),
+            ])
             ->modifyQueryUsing(function ($query) {
                 $filters = $this->kanbanFilters ?? [];
 

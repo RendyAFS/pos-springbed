@@ -92,7 +92,7 @@
     @endif
 
     <div class="fi-kanban-scroll relative overflow-x-auto overflow-y-hidden pb-4" wire:ignore.self>
-        <div class="flex min-w-max items-start gap-4" style="min-height: 60vh;">
+        <div class="flex min-w-max items-start gap-4 h-full">
             @foreach ($columns as $column)
                 @include($board->getColumnView(), [
                     'column' => $column,
