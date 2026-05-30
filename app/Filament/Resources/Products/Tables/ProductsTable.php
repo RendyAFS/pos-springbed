@@ -70,24 +70,32 @@ class ProductsTable
                     ->badge()
                     ->state(function ($record) {
                         $storeId = Auth::user()?->store_setting_id;
+
                         if ($storeId) {
                             return $record->inventoryStocks
                                 ->where('store_setting_id', $storeId)
                                 ->sum('quantity');
                         }
+
                         return $record->inventoryStocks->sum('quantity');
                     })
-                    ->default(0)
-                    ->color(function ($state) {
-                        if ($state <= 5) {
-                            return 'danger';
+                    ->sortable(
+                        query: function ($query, string $direction) {
+
+                            $storeId = Auth::user()?->store_setting_id;
+
+                            return $query
+                                ->withSum(
+                                    ['inventoryStocks as stock' => function ($q) use ($storeId) {
+                                        if ($storeId) {
+                                            $q->where('store_setting_id', $storeId);
+                                        }
+                                    }],
+                                    'quantity'
+                                )
+                                ->orderBy('stock', $direction);
                         }
-                        if ($state <= 10) {
-                            return 'warning';
-                        }
-                        return 'success';
-                    })
-                    ->sortable(),
+                    ),
                 ToggleColumn::make('is_active')
                     ->label('Active')
                     ->offIcon(Heroicon::XMark)
