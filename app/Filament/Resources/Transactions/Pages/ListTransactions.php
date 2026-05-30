@@ -89,6 +89,8 @@ class ListTransactions extends ListRecords
             ->modifyQueryUsing(function ($query) {
                 $filters = $this->kanbanFilters ?? [];
 
+                $query->withoutTrashed();
+
                 if (!empty($filters['payment_status'])) {
                     $query->whereHas(
                         'transactionPayment',
