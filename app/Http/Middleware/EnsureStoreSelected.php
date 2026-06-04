@@ -24,6 +24,10 @@ class EnsureStoreSelected
             return $next($request);
         }
 
+        if ($request->routeIs('filament.admin.auth.logout')) {
+            return $next($request);
+        }
+
         if ($request->session()->get('selected_store')) {
             return $next($request);
         }
