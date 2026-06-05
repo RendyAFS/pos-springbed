@@ -253,7 +253,7 @@ class ListTransactions extends ListRecords
                 'color' => 'success',
             ];
 
-            $deliveredAt = $record->transactionShipment?->updated_at;
+            $deliveredAt = $record->updated_at;
             if ($deliveredAt) {
                 $badges[] = [
                     'label' => Carbon::parse($deliveredAt)->translatedFormat('d F Y'),
