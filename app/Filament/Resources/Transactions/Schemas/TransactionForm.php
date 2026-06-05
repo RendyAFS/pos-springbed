@@ -276,7 +276,7 @@ class TransactionForm
                                                             }
                                                             return max(1, (int) $state);
                                                         })
-                                                        ->readOnly(fn(Get $get): bool => (bool)$get('is_multi_store'))
+                                                        ->disabled(fn(Get $get): bool => (bool)$get('is_multi_store'))
                                                         ->debounce(500)
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(fn(Get $get, Set $set) => self::recalculateItemSubtotal($get, $set))
@@ -463,8 +463,7 @@ class TransactionForm
                                             fn($action) => $action->after(fn(Get $get, Set $set) => self::recalculateTotals($get, $set))
                                         ),
                                 ]),
-                        ])
-                        ->disabled(fn() => self::isEditPage()),
+                        ]),
 
                     Step::make('Promo & Shipping')
                         ->label('Promo & Pengiriman')
@@ -1032,11 +1031,5 @@ class TransactionForm
 
         $store = StoreSetting::find($storeId);
         return (float) ($store?->set_max_reward ?? 200000);
-    }
-
-    protected static function isEditPage(): bool
-    {
-        return request()->routeIs('*.transactions.edit')
-            || str_contains(request()->route()?->getName() ?? '', '.edit');
     }
 }
