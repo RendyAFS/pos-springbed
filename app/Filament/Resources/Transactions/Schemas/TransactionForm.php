@@ -906,6 +906,7 @@ class TransactionForm
 
                 ])
                     ->skippable()
+                    ->disabled(fn() => self::isEditPage())
                     ->columnSpanFull(),
             ]);
     }
@@ -1030,5 +1031,11 @@ class TransactionForm
 
         $store = StoreSetting::find($storeId);
         return (float) ($store?->set_max_reward ?? 200000);
+    }
+
+    protected static function isEditPage(): bool
+    {
+        return request()->routeIs('*.transactions.edit')
+            || str_contains(request()->route()?->getName() ?? '', '.edit');
     }
 }

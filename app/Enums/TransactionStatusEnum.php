@@ -6,8 +6,8 @@ enum TransactionStatusEnum: string
 {
     case PENDING   = 'pending';
     case PROCESSED = 'processed';
-    case SHIPPED   = 'shipped';
-    case DELIVERED = 'delivered';
+        case SHIPPED   = 'shipped';
+        case DELIVERED = 'delivered';
     case CANCELLED = 'cancelled';
 
     public function getLabel(): string

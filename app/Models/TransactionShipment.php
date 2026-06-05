@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\StatusTransactionShipmentEnum;
 use Illuminate\Database\Eloquent\Model;
 
 class TransactionShipment extends Model
@@ -11,11 +10,6 @@ class TransactionShipment extends Model
         'transaction_id',
         'courier_id',
         'tracking_number',
-        'status',
-    ];
-
-    protected $casts = [
-        'status' => StatusTransactionShipmentEnum::class,
     ];
 
     public function transaction()

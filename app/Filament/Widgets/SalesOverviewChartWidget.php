@@ -67,9 +67,7 @@ class SalesOverviewChartWidget extends ChartWidget
 
     private function baseQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return $this->applyStoreFilter(
-            Transaction::query()->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
-        );
+        return $this->applyStoreFilter(Transaction::query()->whereNotIn('status', [TransactionStatusEnum::CANCELLED]), 'store_setting_id', true);
     }
 
     protected function getData(): array

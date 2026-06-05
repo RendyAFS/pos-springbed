@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
-use App\Enums\StatusTransactionShipmentEnum;
 use App\Enums\TransactionPaymentStatusEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Filament\Resources\Transactions\Tables\TransactionsTable;
@@ -12,7 +11,10 @@ use App\Models\Transaction;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Grid;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Wezlo\FilamentKanban\Concerns\HasKanbanBoard;
@@ -27,17 +29,50 @@ class ListTransactions extends ListRecords
     protected string $view = 'filament.pages.transactions.list-transactions';
 
     public string $viewMode = 'kanban';
+    public ?string $date_from = null;
+    public ?string $date_until = null;
 
     public function mount(): void
     {
         parent::mount();
 
         $this->viewMode = (string) session('transactions_view_mode', 'kanban');
+        $this->date_from = Carbon::now()->startOfMonth()->toDateString();
+        $this->date_until = Carbon::now()->endOfMonth()->toDateString();
     }
 
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('filterDate')
+                ->label('Filter')
+                ->icon(Heroicon::Funnel)
+                ->color('gray')
+                ->visible(fn() => $this->viewMode === 'kanban')
+                ->fillForm([
+                    'date_from' => $this->date_from,
+                    'date_until' => $this->date_until,
+                ])
+                ->schema([
+                    Grid::make(2)
+                        ->schema([
+                            DatePicker::make('date_from')
+                                ->label('Dari Tanggal')
+                                ->native(false)
+                                ->suffixIcon(Heroicon::Calendar)
+                                ->closeOnDateSelection(),
+                            DatePicker::make('date_until')
+                                ->label('Sampai Tanggal')
+                                ->native(false)
+                                ->suffixIcon(Heroicon::Calendar)
+                                ->closeOnDateSelection(),
+                        ])
+                ])
+                ->action(function (array $data) {
+                    $this->date_from = $data['date_from'];
+                    $this->date_until = $data['date_until'];
+                })
+                ->modalWidth(Width::ExtraLarge),
             Action::make('toggleView')
                 ->label(fn() => $this->viewMode === 'kanban'
                     ? 'Table View'
@@ -94,17 +129,23 @@ class ListTransactions extends ListRecords
                 if (!empty($filters['payment_status'])) {
                     $query->whereHas(
                         'transactionPayment',
-                        fn($q) =>
-                        $q->where('status', $filters['payment_status'])
+                        fn($q) => $q->where('status', $filters['payment_status'])
                     );
                 }
 
                 if (!empty($filters['shipment_status'])) {
                     $query->whereHas(
                         'transactionShipment',
-                        fn($q) =>
-                        $q->where('status', $filters['shipment_status'])
+                        fn($q) => $q->where('status', $filters['shipment_status'])
                     );
+                }
+
+                if ($this->date_from) {
+                    $query->whereDate('created_at', '>=', $this->date_from);
+                }
+
+                if ($this->date_until) {
+                    $query->whereDate('created_at', '<=', $this->date_until);
                 }
 
                 return $query;
@@ -117,7 +158,7 @@ class ListTransactions extends ListRecords
 
         $lines = [];
 
-        $customerName = $record->customer?->name ?? '-';
+        $customerName  = $record->customer?->name ?? '-';
         $customerPhone = $record->customer?->phone;
 
         $date = $record->transaction_date
@@ -131,7 +172,15 @@ class ListTransactions extends ListRecords
         $lines[] = $customerName
             . ($customerPhone ? " • {$customerPhone}" : '');
 
-        $lines[] = "Tanggal: {$date}";
+        $lines[] = "Tanggal Transaksi: {$date}";
+
+        if ($record->is_down_payment && $record->transactionDownPayments?->isNotEmpty()) {
+            $lastDp     = $record->transactionDownPayments->sortByDesc('paid_at')->first();
+            $lastDpDate = $lastDp->paid_at
+                ? Carbon::parse($lastDp->paid_at)->translatedFormat('d F Y')
+                : '-';
+            $lines[] = "DP Terakhir: {$lastDpDate}";
+        }
 
         $lines[] = "Total: " . RupiahHelper::format($amount);
 
@@ -148,16 +197,14 @@ class ListTransactions extends ListRecords
             }
         }
 
-        $courier = $record->transactionShipment?->courier?->name;
+        $courier  = $record->transactionShipment?->courier?->name;
         $tracking = $record->transactionShipment?->tracking_number;
 
         if ($courier) {
             $delivery = "Pengiriman: {$courier}";
-
             if ($tracking) {
                 $delivery .= " • {$tracking}";
             }
-
             $lines[] = $delivery;
         }
 
@@ -174,6 +221,8 @@ class ListTransactions extends ListRecords
 
     private function buildCardBadges(Transaction $record): array
     {
+        Carbon::setLocale('id');
+
         $badges = [];
 
         $paymentStatus = $record->transactionPayment?->status;
@@ -186,18 +235,31 @@ class ListTransactions extends ListRecords
                     TransactionPaymentStatusEnum::FAILED  => 'danger',
                 },
             ];
+
+            if ($paymentStatus === TransactionPaymentStatusEnum::PAID) {
+                $paidAt = $record->transactionPayment?->paid_at;
+                if ($paidAt) {
+                    $badges[] = [
+                        'label' => Carbon::parse($paidAt)->translatedFormat('d F Y'),
+                        'color' => 'gray',
+                    ];
+                }
+            }
         }
 
-        $shipmentStatus = $record->transactionShipment?->status;
-        if ($shipmentStatus instanceof StatusTransactionShipmentEnum) {
+        if ($record->status === TransactionStatusEnum::DELIVERED) {
             $badges[] = [
-                'label' => $shipmentStatus->getLabel(),
-                'color' => match ($shipmentStatus) {
-                    StatusTransactionShipmentEnum::DELIVERED => 'success',
-                    StatusTransactionShipmentEnum::PENDING   => 'warning',
-                    StatusTransactionShipmentEnum::CANCELLED => 'danger',
-                },
+                'label' => TransactionStatusEnum::DELIVERED->getLabel(),
+                'color' => 'success',
             ];
+
+            $deliveredAt = $record->transactionShipment?->updated_at;
+            if ($deliveredAt) {
+                $badges[] = [
+                    'label' => Carbon::parse($deliveredAt)->translatedFormat('d F Y'),
+                    'color' => 'gray',
+                ];
+            }
         }
 
         return $badges;
