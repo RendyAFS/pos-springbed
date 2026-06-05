@@ -248,6 +248,7 @@ class TransactionForm
                                                         ->label('Multi Store (Parsial)')
                                                         ->inline(false)
                                                         ->default(false)
+                                                        ->dehydrated(true)
                                                         ->live()
                                                         ->afterStateUpdated(function (Set $set, Get $get, $state): void {
                                                             if (!$state) {
@@ -462,7 +463,8 @@ class TransactionForm
                                             fn($action) => $action->after(fn(Get $get, Set $set) => self::recalculateTotals($get, $set))
                                         ),
                                 ]),
-                        ]),
+                        ])
+                        ->disabled(fn() => self::isEditPage()),
 
                     Step::make('Promo & Shipping')
                         ->label('Promo & Pengiriman')
@@ -906,7 +908,6 @@ class TransactionForm
 
                 ])
                     ->skippable()
-                    ->disabled(fn() => self::isEditPage())
                     ->columnSpanFull(),
             ]);
     }
