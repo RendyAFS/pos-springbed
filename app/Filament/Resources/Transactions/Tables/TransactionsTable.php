@@ -211,12 +211,14 @@ class TransactionsTable
                     ->schema([
                         DatePicker::make('from')
                             ->label('Dari Tanggal')
+                            ->default(Carbon::now()->startOfMonth())
                             ->native(false)
                             ->suffixIcon(Heroicon::Calendar)
                             ->closeOnDateSelection(),
 
                         DatePicker::make('until')
                             ->label('Sampai Tanggal')
+                            ->default(Carbon::now()->endOfMonth())
                             ->native(false)
                             ->suffixIcon(Heroicon::Calendar)
                             ->closeOnDateSelection(),
