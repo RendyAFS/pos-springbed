@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
-use App\Enums\StatusTransactionShipmentEnum;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\TransactionPayment;
 use App\Models\TransactionShipment;
@@ -75,7 +74,6 @@ class CreateTransaction extends CreateRecord
             TransactionShipment::create([
                 'transaction_id' => $this->record->id,
                 'courier_id'     => $extra['courier_id'],
-                'status'         => StatusTransactionShipmentEnum::PENDING,
             ]);
         }
 

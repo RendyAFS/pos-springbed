@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Transactions\Pages;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\TransactionPayment;
 use App\Models\TransactionShipment;
-use App\Enums\StatusTransactionShipmentEnum;
 use App\Services\ReferalService;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
@@ -116,8 +115,6 @@ class EditTransaction extends EditRecord
                 ['transaction_id' => $this->record->id],
                 [
                     'courier_id' => $extra['courier_id'],
-                    'status'     => $this->record->transactionShipment?->status
-                        ?? StatusTransactionShipmentEnum::PENDING,
                 ]
             );
         } elseif ($this->record->transactionShipment) {

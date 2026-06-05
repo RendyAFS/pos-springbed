@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
-use App\Enums\StatusTransactionShipmentEnum;
 use App\Enums\TransactionPaymentStatusEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Filament\Resources\Transactions\Tables\TransactionsTable;
@@ -117,7 +116,7 @@ class ListTransactions extends ListRecords
 
         $lines = [];
 
-        $customerName = $record->customer?->name ?? '-';
+        $customerName  = $record->customer?->name ?? '-';
         $customerPhone = $record->customer?->phone;
 
         $date = $record->transaction_date
@@ -131,7 +130,15 @@ class ListTransactions extends ListRecords
         $lines[] = $customerName
             . ($customerPhone ? " • {$customerPhone}" : '');
 
-        $lines[] = "Tanggal: {$date}";
+        $lines[] = "Tanggal Transaksi: {$date}";
+
+        if ($record->is_down_payment && $record->transactionDownPayments?->isNotEmpty()) {
+            $lastDp     = $record->transactionDownPayments->sortByDesc('paid_at')->first();
+            $lastDpDate = $lastDp->paid_at
+                ? Carbon::parse($lastDp->paid_at)->translatedFormat('d F Y')
+                : '-';
+            $lines[] = "DP Terakhir: {$lastDpDate}";
+        }
 
         $lines[] = "Total: " . RupiahHelper::format($amount);
 
@@ -148,16 +155,14 @@ class ListTransactions extends ListRecords
             }
         }
 
-        $courier = $record->transactionShipment?->courier?->name;
+        $courier  = $record->transactionShipment?->courier?->name;
         $tracking = $record->transactionShipment?->tracking_number;
 
         if ($courier) {
             $delivery = "Pengiriman: {$courier}";
-
             if ($tracking) {
                 $delivery .= " • {$tracking}";
             }
-
             $lines[] = $delivery;
         }
 
@@ -174,6 +179,8 @@ class ListTransactions extends ListRecords
 
     private function buildCardBadges(Transaction $record): array
     {
+        Carbon::setLocale('id');
+
         $badges = [];
 
         $paymentStatus = $record->transactionPayment?->status;
@@ -186,18 +193,31 @@ class ListTransactions extends ListRecords
                     TransactionPaymentStatusEnum::FAILED  => 'danger',
                 },
             ];
+
+            if ($paymentStatus === TransactionPaymentStatusEnum::PAID) {
+                $paidAt = $record->transactionPayment?->paid_at;
+                if ($paidAt) {
+                    $badges[] = [
+                        'label' => Carbon::parse($paidAt)->translatedFormat('d F Y'),
+                        'color' => 'gray',
+                    ];
+                }
+            }
         }
 
-        $shipmentStatus = $record->transactionShipment?->status;
-        if ($shipmentStatus instanceof StatusTransactionShipmentEnum) {
+        if ($record->status === TransactionStatusEnum::DELIVERED) {
             $badges[] = [
-                'label' => $shipmentStatus->getLabel(),
-                'color' => match ($shipmentStatus) {
-                    StatusTransactionShipmentEnum::DELIVERED => 'success',
-                    StatusTransactionShipmentEnum::PENDING   => 'warning',
-                    StatusTransactionShipmentEnum::CANCELLED => 'danger',
-                },
+                'label' => TransactionStatusEnum::DELIVERED->getLabel(),
+                'color' => 'success',
             ];
+
+            $deliveredAt = $record->transactionShipment?->updated_at;
+            if ($deliveredAt) {
+                $badges[] = [
+                    'label' => Carbon::parse($deliveredAt)->translatedFormat('d F Y'),
+                    'color' => 'gray',
+                ];
+            }
         }
 
         return $badges;

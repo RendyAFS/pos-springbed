@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\Transactions\Tables;
 
-use App\Enums\StatusTransactionShipmentEnum;
 use App\Enums\TransactionPaymentStatusEnum;
 use App\Enums\TransactionStatusEnum;
+use Filament\Support\Enums\Width;
 use App\Helpers\RupiahHelper;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -17,6 +18,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -28,6 +30,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TernaryFilter;
 
 class TransactionsTable
@@ -160,22 +163,6 @@ class TransactionsTable
                     })
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('transactionShipment.status')
-                    ->label('Delivery')
-                    ->badge()
-                    ->formatStateUsing(
-                        fn($state) => $state instanceof StatusTransactionShipmentEnum
-                            ? $state->getLabel()
-                            : $state
-                    )
-                    ->color(fn($state): string => match ($state instanceof StatusTransactionShipmentEnum ? $state : StatusTransactionShipmentEnum::tryFrom($state)) {
-                        StatusTransactionShipmentEnum::PENDING   => 'warning',
-                        StatusTransactionShipmentEnum::DELIVERED => 'success',
-                        StatusTransactionShipmentEnum::CANCELLED => 'danger',
-                        default                                  => 'gray',
-                    })
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('transactionShipment.courier.name')
                     ->label('Kurir')
                     ->default('')
@@ -183,13 +170,15 @@ class TransactionsTable
             ])
             ->defaultSort('transaction_date', 'desc')
             ->filters([
-                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan')
+                    ->columnSpanFull(),
                 TernaryFilter::make('is_down_payment')
                     ->label('Down Payment')
                     ->native(false)
                     ->placeholder('All')
                     ->trueLabel('Down Payment')
-                    ->falseLabel('Non-Down Payment'),
+                    ->falseLabel('Non-Down Payment')
+                    ->columnSpanFull(),
                 SelectFilter::make('status'),
                 SelectFilter::make('status')
                     ->label('Status')
@@ -216,24 +205,46 @@ class TransactionsTable
                             })
                         );
                     }),
-                SelectFilter::make('shiping_status')
-                    ->label('Status Pengiriman')
-                    ->searchable()
-                    ->options(
-                        collect(StatusTransactionShipmentEnum::cases())
-                            ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                            ->toArray()
-                    )
+                Filter::make('created_at')
+                    ->label('Tanggal Transaksi')
+                    ->columns(2)
+                    ->schema([
+                        DatePicker::make('from')
+                            ->label('Dari Tanggal')
+                            ->native(false)
+                            ->suffixIcon(Heroicon::Calendar)
+                            ->closeOnDateSelection(),
+
+                        DatePicker::make('until')
+                            ->label('Sampai Tanggal')
+                            ->native(false)
+                            ->suffixIcon(Heroicon::Calendar)
+                            ->closeOnDateSelection(),
+                    ])
                     ->query(function ($query, array $data) {
-                        return $query->when(
-                            $data['value'] ?? null,
-                            fn($query, $value) =>
-                            $query->whereHas('transactionShipment', function ($q) use ($value) {
-                                $q->where('status', $value);
-                            })
-                        );
-                    }),
+                        return $query
+                            ->when(
+                                $data['from'] ?? null,
+                                fn($query, $date) => $query->whereDate('created_at', '>=', $date)
+                            )
+                            ->when(
+                                $data['until'] ?? null,
+                                fn($query, $date) => $query->whereDate('created_at', '<=', $date)
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['from'] ?? null) {
+                            $indicators[] = 'Dari: ' . Carbon::parse($data['from'])->translatedFormat('d F Y');
+                        }
+                        if ($data['until'] ?? null) {
+                            $indicators[] = 'Sampai: ' . Carbon::parse($data['until'])->translatedFormat('d F Y');
+                        }
+                        return $indicators;
+                    })->columnSpanFull(),
             ], layout: FiltersLayout::Modal)
+            ->filtersFormWidth(Width::ExtraLarge)
+            ->filtersFormColumns(2)
             ->recordActions([
                 ActionGroup::make([
                     Action::make('updateAllStatus')
@@ -269,17 +280,6 @@ class TransactionsTable
                                 ->label('No. Resi')
                                 ->default(fn($record) => $record->transactionShipment?->tracking_number)
                                 ->visible(fn($record) => $record->transactionShipment !== null),
-
-                            Select::make('shipment_status')
-                                ->label('Status Delivery')
-                                ->options(
-                                    collect(StatusTransactionShipmentEnum::cases())
-                                        ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                                        ->toArray()
-                                )
-                                ->default(fn($record) => $record->transactionShipment?->status?->value)
-                                ->visible(fn($record) => $record->transactionShipment !== null)
-                                ->native(false),
                         ])
                         ->action(function ($record, array $data): void {
 
