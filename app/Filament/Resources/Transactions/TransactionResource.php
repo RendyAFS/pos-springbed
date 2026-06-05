@@ -68,10 +68,15 @@ class TransactionResource extends Resource
                 'transactionItems.bundle'
             ]);
 
-        $storeId = Auth::user()?->store_setting_id;
+        $user    = Auth::user();
+        $storeId = $user?->store_setting_id;
 
         if (! is_null($storeId)) {
             $query->where('store_setting_id', $storeId);
+        }
+
+        if ($user?->roles->contains('id', 4)) {
+            $query->where('created_by', $user->id);
         }
 
         return $query;

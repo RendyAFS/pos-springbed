@@ -24,9 +24,7 @@ class StatsOverviewWidget extends BaseWidget
         $lastMonth    = Carbon::now()->subMonth()->startOfMonth();
         $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
 
-        $row = $this->applyStoreFilter(
-            Transaction::query()->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
-        )
+        $row = $this->applyStoreFilter(Transaction::query()->whereNotIn('status', [TransactionStatusEnum::CANCELLED]), 'store_setting_id', true)
             ->selectRaw("
                 SUM(CASE WHEN DATE(transaction_date) = ? THEN grand_total ELSE 0 END)           AS sales_today,
                 SUM(CASE WHEN DATE(transaction_date) = ? THEN grand_total ELSE 0 END)           AS sales_yesterday,
