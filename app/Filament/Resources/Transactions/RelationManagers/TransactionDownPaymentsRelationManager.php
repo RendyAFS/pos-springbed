@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\RelationManagers;
 
+use App\Enums\PaymentMethodDpEnum;
 use App\Helpers\RupiahHelper;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\BulkActionGroup;
@@ -12,6 +13,7 @@ use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -40,6 +42,15 @@ class TransactionDownPaymentsRelationManager extends RelationManager
                             ->required()
                             ->prefix('Rp.')
                             ->columns(1),
+                        Select::make('method_payment')
+                            ->options(
+                                collect(PaymentMethodDpEnum::cases())
+                                    ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                    ->toArray()
+                            )
+                            ->label('Metode Pembayaran')
+                            ->searchable()
+                            ->columns(1),
                         DatePicker::make('paid_at')
                             ->label('Tanggal Bayar')
                             ->native(false)
@@ -67,6 +78,12 @@ class TransactionDownPaymentsRelationManager extends RelationManager
                     ->label('Jumlah')
                     ->sortable()
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                TextColumn::make('method_payment')
+                    ->label('Metode Pembayaran')
+                    ->formatStateUsing(
+                        fn(?PaymentMethodDpEnum $state) => $state?->getLabel()
+                    )
+                    ->sortable(),
                 TextColumn::make('paid_at')
                     ->label('Tanggal Bayar')
                     ->dateTime('d M Y H:i')

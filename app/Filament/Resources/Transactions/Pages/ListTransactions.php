@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Transactions\Pages;
 
 use App\Enums\TransactionPaymentStatusEnum;
 use App\Enums\TransactionStatusEnum;
+use App\Exports\TransactionsExport;
 use App\Filament\Resources\Transactions\Tables\TransactionsTable;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Helpers\RupiahHelper;
@@ -17,6 +18,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Maatwebsite\Excel\Facades\Excel;
 use Wezlo\FilamentKanban\Concerns\HasKanbanBoard;
 use Wezlo\FilamentKanban\KanbanBoard;
 
@@ -88,7 +90,41 @@ class ListTransactions extends ListRecords
 
                     session(['transactions_view_mode' => $this->viewMode]);
                 }),
-
+            Action::make('exportExcel')
+                ->label('Export Excel')
+                ->icon(Heroicon::ArrowDownTray)
+                ->color('success')
+                ->fillForm([
+                    'export_date_from'  => $this->date_from,
+                    'export_date_until' => $this->date_until,
+                ])
+                ->schema([
+                    Grid::make(2)
+                        ->schema([
+                            DatePicker::make('export_date_from')
+                                ->label('Dari Tanggal')
+                                ->native(false)
+                                ->suffixIcon(Heroicon::Calendar)
+                                ->closeOnDateSelection()
+                                ->required(),
+                            DatePicker::make('export_date_until')
+                                ->label('Sampai Tanggal')
+                                ->native(false)
+                                ->suffixIcon(Heroicon::Calendar)
+                                ->closeOnDateSelection()
+                                ->required()
+                                ->afterOrEqual('export_date_from'),
+                        ])
+                ])
+                ->action(function (array $data) {
+                    return Excel::download(
+                        new TransactionsExport($data['export_date_from'], $data['export_date_until']),
+                        'transaksi-' . $data['export_date_from'] . '-sd-' . $data['export_date_until'] . '.xlsx'
+                    );
+                })
+                ->modalWidth(Width::Large)
+                ->modalHeading('Export Transaksi')
+                ->modalSubmitActionLabel('Export'),
             CreateAction::make()
                 ->label('Tambah Transaksi'),
         ];
