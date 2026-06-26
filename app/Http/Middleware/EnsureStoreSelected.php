@@ -20,7 +20,7 @@ class EnsureStoreSelected
             return $next($request);
         }
 
-        if ($user->hasRole('Super Admin')) {
+        if ($user->hasAnyRole(['Super Admin', 'Owner'])) {
             return $next($request);
         }
 

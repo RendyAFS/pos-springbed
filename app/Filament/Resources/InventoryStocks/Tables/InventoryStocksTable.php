@@ -87,6 +87,20 @@ class InventoryStocksTable
                         'warning' => 'Low',
                     ]),
             ])
+            ->filters([
+                SelectFilter::make('store_setting_id')
+                    ->label('Toko')
+                    ->relationship('storeSetting', 'store_name')
+                    ->searchable()
+                    ->preload()
+                    ->visible(function () {
+                        /** @var User $user */
+                        $user = Auth::user();
+
+                        return $user?->hasAnyRole(['Super Admin', 'Owner'])
+                            || $user?->store_setting_id === null;
+                    }),
+            ])
             ->defaultSort('quantity', 'desc');
     }
 }
