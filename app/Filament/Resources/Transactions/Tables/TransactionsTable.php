@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Transactions\Tables;
 
+use App\Enums\PaymentMethodDpEnum;
 use App\Enums\TransactionPaymentStatusEnum;
 use App\Enums\TransactionStatusEnum;
 use Filament\Support\Enums\Width;
 use App\Helpers\RupiahHelper;
 use Carbon\Carbon;
+use App\Models\Transaction;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -20,10 +22,13 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\IconPosition;
+use Filament\Support\RawJs;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -328,7 +333,75 @@ class TransactionsTable
                         ->color('primary')
                         ->url(fn($record) => route('transactions.invoice', $record) . '?paper=a4')
                         ->openUrlInNewTab(),
-                    ViewAction::make(),
+                    Action::make('addDownPayment')
+                        ->label('Tambah DP')
+                        ->icon(Heroicon::Banknotes)
+                        ->color('warning')
+                        ->visible(fn($record) => $record->is_down_payment)
+                        ->modalHeading(fn($record) => "Tambah Down Payment - {$record->transaction_code}")
+                        ->modalWidth(Width::ExtraLarge)
+                        ->schema([
+                            Grid::make(2)
+                                ->schema([
+                                    TextInput::make('amount')
+                                        ->label('Jumlah')
+                                        ->columnSpanFull()
+                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                        ->dehydrateStateUsing(
+                                            fn($state) => $state
+                                                ? (float) str_replace('.', '', $state)
+                                                : null
+                                        )
+                                        ->formatStateUsing(
+                                            fn($state) => $state
+                                                ? number_format((float) $state, 0, ',', '.')
+                                                : null
+                                        )
+                                        ->required()
+                                        ->prefix('Rp.'),
+
+                                    Select::make('method_payment')
+                                        ->label('Metode Pembayaran')
+                                        ->options(
+                                            collect(PaymentMethodDpEnum::cases())
+                                                ->mapWithKeys(
+                                                    fn($case) => [$case->value => $case->getLabel()]
+                                                )
+                                                ->toArray()
+                                        )
+                                        ->searchable()
+                                        ->required()
+                                        ->native(false),
+
+                                    DatePicker::make('paid_at')
+                                        ->label('Tanggal Bayar')
+                                        ->native(false)
+                                        ->suffixIcon(Heroicon::Calendar)
+                                        ->closeOnDateSelection()
+                                        ->default(now())
+                                        ->required(),
+
+                                    Textarea::make('notes')
+                                        ->label('Notes')
+                                        ->rows(3)
+                                        ->columnSpanFull(),
+                                ]),
+                        ])
+                        ->action(function (Transaction $record, array $data) {
+
+                            $record->transactionDownPayments()->create([
+                                'amount'          => $data['amount'],
+                                'method_payment'  => $data['method_payment'],
+                                'paid_at'         => $data['paid_at'],
+                                'notes'           => $data['notes'],
+                            ]);
+
+                            Notification::make()
+                                ->title('Down Payment berhasil ditambahkan')
+                                ->success()
+                                ->send();
+                        })
+                        ->modalSubmitActionLabel('Simpan'),
                     EditAction::make(),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),

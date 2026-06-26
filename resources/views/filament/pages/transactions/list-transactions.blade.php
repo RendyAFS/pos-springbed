@@ -23,4 +23,23 @@
         @endif
 
     </div>
+
+    <x-filament::modal id="down-payment-modal" width="4xl">
+        <x-slot name="heading">
+            Tambah Down Payment
+        </x-slot>
+
+        <form wire:submit="saveDownPayment" class="space-y-4">
+
+            {{ $this->downPaymentForm }}
+
+            <div class="flex justify-end">
+                <x-filament::button type="submit">
+                    Simpan
+                </x-filament::button>
+            </div>
+
+        </form>
+    </x-filament::modal>
+
 </x-filament-panels::page>

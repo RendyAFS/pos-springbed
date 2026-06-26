@@ -12,6 +12,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class EditTransaction extends EditRecord
 {
@@ -89,6 +90,16 @@ class EditTransaction extends EditRecord
                 }
             }
             unset($item);
+        }
+
+        $user = Auth::user();
+        $allowedStores = $user?->selected_store ?? [];
+
+        if (
+            isset($data['store_setting_id']) &&
+            ! in_array((int) $data['store_setting_id'], $allowedStores)
+        ) {
+            abort(403);
         }
 
         return $data;

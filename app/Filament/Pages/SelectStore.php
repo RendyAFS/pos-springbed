@@ -30,7 +30,7 @@ class SelectStore extends Page
             'store_setting_id' => $this->store_setting_id,
         ]);
 
-        session()->put('selected_store', $store?->store_name);
+        session()->put('selected_store', $store?->id);
 
         return redirect()->intended('/admin');
     }
@@ -47,7 +47,7 @@ class SelectStore extends Page
         }
 
         return StoreSetting::select('id', 'store_name', 'address')
-            ->whereIn('store_name', $allowedStores)
+            ->whereIn('id', $allowedStores)
             ->get();
     }
 }

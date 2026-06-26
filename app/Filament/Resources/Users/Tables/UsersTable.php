@@ -35,14 +35,13 @@ class UsersTable
                     ->label('Nama')
                     ->searchable(),
 
-                TextColumn::make('selected_store')
+                TextColumn::make('selected_store_names')
                     ->label('Toko Tersedia')
                     ->badge()
                     ->separator(', ')
-                    ->color('gray')
-                    ->searchable(),
+                    ->color('gray'),
 
-                TextColumn::make('storeSetting.store_name')
+                    TextColumn::make('storeSetting.store_name')
                     ->label('Toko Aktif')
                     ->badge()
                     ->color('success')
