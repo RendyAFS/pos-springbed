@@ -43,12 +43,12 @@ class TransactionDownPaymentsRelationManager extends RelationManager
                             ->prefix('Rp.')
                             ->columns(1),
                         Select::make('method_payment')
+                            ->label('Metode Pembayaran')
                             ->options(
                                 collect(PaymentMethodDpEnum::cases())
                                     ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                                     ->toArray()
                             )
-                            ->label('Metode Pembayaran')
                             ->searchable()
                             ->columns(1),
                         DatePicker::make('paid_at')

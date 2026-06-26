@@ -68,7 +68,7 @@
     @endif
 
     @if ($badges = $board->resolveCardBadges($record))
-        <div class="mt-2 flex flex-wrap gap-1">
+        <div class="mt-2 flex flex-wrap items-start gap-1">
             @foreach ($badges as $badge)
                 @php
                     $badgeClass = match ($badge['color'] ?? 'gray') {
@@ -81,8 +81,8 @@
                     };
                 @endphp
 
-                <span class="{{ $badgeClass }} fi-badge fi-size-sm">
-                    {{ $badge['label'] }}
+                <span class="{{ $badgeClass }} fi-badge fi-size-sm self-start">
+                    {!! nl2br(e($badge['label'])) !!}
                 </span>
             @endforeach
         </div>
@@ -117,6 +117,17 @@
                     {{ $footerAction }}
                 @endif
             @endforeach
+            @php
+                $isDownPayment = $record->is_down_payment ?? false;
+            @endphp
+
+            @if ($isDownPayment)
+                <button type="button" wire:click="openDownPaymentModal({{ $record->id }})"
+                    class="rounded-md p-1 transition text-success-500 hover:bg-success-50" x-on:click.stop
+                    title="Tambah Down Payment">
+                    <x-filament::icon icon="heroicon-m-banknotes" class="h-4 w-4" />
+                </button>
+            @endif
         </div>
     @endif
 </div>

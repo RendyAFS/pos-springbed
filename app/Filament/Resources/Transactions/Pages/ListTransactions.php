@@ -2,37 +2,49 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
+use App\Enums\PaymentMethodDpEnum;
 use App\Enums\TransactionPaymentStatusEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Exports\TransactionsExport;
 use App\Filament\Resources\Transactions\Tables\TransactionsTable;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Helpers\RupiahHelper;
-use App\Models\Transaction;
 use Carbon\Carbon;
+use App\Models\Transaction;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
+use Filament\Support\RawJs;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Facades\Excel;
 use Wezlo\FilamentKanban\Concerns\HasKanbanBoard;
 use Wezlo\FilamentKanban\KanbanBoard;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Schema;
 
-class ListTransactions extends ListRecords
+class ListTransactions extends ListRecords implements HasForms
 {
     use HasKanbanBoard;
+    use InteractsWithForms;
 
     protected static string $resource = TransactionResource::class;
 
     protected string $view = 'filament.pages.transactions.list-transactions';
 
-    public string $viewMode = 'kanban';
-    public ?string $date_from = null;
-    public ?string $date_until = null;
+    public string $viewMode            = 'kanban';
+    public ?string $date_from          = null;
+    public ?string $date_until         = null;
+    public ?int $selectedTransactionId = null;
+    public ?array $downPaymentData     = [];
 
     public function mount(): void
     {
@@ -261,10 +273,31 @@ class ListTransactions extends ListRecords
 
         $badges = [];
 
+        // Badge Lunas / Belum Lunas
+        $paymentAmount = (float) ($record->transactionPayment?->amount ?? 0);
+        $dpAmount = (float) ($record->transactionDownPayments?->sum('amount') ?? 0);
+        $grandTotal = (float) $record->grand_total;
+
+        $totalPaid = $record->is_down_payment
+            ? $paymentAmount + $dpAmount
+            : $paymentAmount;
+
+        $isPaidOff = $totalPaid >= $grandTotal;
+
+        $badges[] = [
+            'label' => $isPaidOff ? 'Lunas' : 'Belum Lunas',
+            'color' => $isPaidOff ? 'success' : 'warning',
+        ];
+
+        // Badge Status Pembayaran
         $paymentStatus = $record->transactionPayment?->status;
         if ($paymentStatus instanceof TransactionPaymentStatusEnum) {
             $badges[] = [
-                'label' => $paymentStatus->getLabel(),
+                'label' => match ($paymentStatus) {
+                    TransactionPaymentStatusEnum::PENDING => 'Pending Payment',
+                    TransactionPaymentStatusEnum::FAILED  => 'Failed Payment',
+                    default => $paymentStatus->getLabel(),
+                },
                 'color' => match ($paymentStatus) {
                     TransactionPaymentStatusEnum::PAID    => 'success',
                     TransactionPaymentStatusEnum::PENDING => 'warning',
@@ -274,31 +307,100 @@ class ListTransactions extends ListRecords
 
             if ($paymentStatus === TransactionPaymentStatusEnum::PAID) {
                 $paidAt = $record->transactionPayment?->paid_at;
-                if ($paidAt) {
-                    $badges[] = [
-                        'label' => Carbon::parse($paidAt)->translatedFormat('d F Y'),
-                        'color' => 'gray',
-                    ];
-                }
+
+                $badges[count($badges) - 1]['label'] .= $paidAt
+                    ? "\n" . Carbon::parse($paidAt)->translatedFormat('d F Y')
+                    : '';
             }
         }
 
+        // Badge Dikirim / Belum Dikirim
         if ($record->status === TransactionStatusEnum::DELIVERED) {
-            $badges[] = [
-                'label' => TransactionStatusEnum::DELIVERED->getLabel(),
-                'color' => 'success',
-            ];
 
             $deliveredAt = $record->updated_at;
-            if ($deliveredAt) {
-                $badges[] = [
-                    'label' => Carbon::parse($deliveredAt)->translatedFormat('d F Y'),
-                    'color' => 'gray',
-                ];
-            }
+
+            $badges[] = [
+                'label' => TransactionStatusEnum::DELIVERED->getLabel()
+                    . ($deliveredAt
+                        ? "\n" . Carbon::parse($deliveredAt)->translatedFormat('d F Y')
+                        : ''),
+                'color' => 'success',
+            ];
         }
 
         return $badges;
+    }
+
+    public function getForms(): array
+    {
+        return [
+            'downPaymentForm',
+        ];
+    }
+
+    public function downPaymentForm(Schema $schema): Schema
+    {
+        return $schema
+            ->statePath('downPaymentData')
+            ->components([
+                Grid::make(2)
+                    ->schema([
+                        TextInput::make('amount')
+                            ->label('Jumlah')
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                            ->required()
+                            ->prefix('Rp.')
+                            ->columnSpanFull(),
+                        Select::make('method_payment')
+                            ->label('Metode Pembayaran')
+                            ->native()
+                            ->options(
+                                collect(PaymentMethodDpEnum::cases())
+                                    ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                    ->toArray()
+                            )
+                            ->columns(1),
+                        DatePicker::make('paid_at')
+                            ->label('Tanggal Bayar')
+                            ->closeOnDateSelection()
+                            ->required()
+                            ->default(now())
+                            ->columns(1),
+                        Textarea::make('notes')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
+    public function openDownPaymentModal(int $transactionId): void
+    {
+        $this->selectedTransactionId = $transactionId;
+        $this->reset('downPaymentData');
+
+        $this->downPaymentForm->fill();
+
+        $this->dispatch('open-modal', id: 'down-payment-modal');
+    }
+
+    public function saveDownPayment(): void
+    {
+        $transaction = Transaction::findOrFail($this->selectedTransactionId);
+
+        $data = $this->downPaymentForm->getState();
+
+        $transaction->transactionDownPayments()->create($data);
+
+        Notification::make()
+            ->title('Down Payment berhasil ditambahkan')
+            ->success()
+            ->send();
+
+        $this->dispatch('close-modal', id: 'down-payment-modal');
+
+        $this->reset('downPaymentData', 'selectedTransactionId');
     }
 
     public function table(Table $table): Table
