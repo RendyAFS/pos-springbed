@@ -18,7 +18,9 @@ class TransactionService
     public function processTransaction(Transaction $transaction): void
     {
         DB::transaction(function () use ($transaction) {
-
+            if (! $transaction->store_setting_id) {
+                throw new \Exception('Transaction store not set');
+            }
             /** @var InventoryService $inventoryService */
             $inventoryService = app(InventoryService::class);
 

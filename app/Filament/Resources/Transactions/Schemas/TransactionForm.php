@@ -126,13 +126,29 @@ class TransactionForm
                                         ->columnSpan(1),
                                     Select::make('store_setting_id')
                                         ->label('Toko')
-                                        ->options(fn() => StoreSetting::pluck('store_name', 'id')->toArray())
+                                        ->options(function () {
+                                            $user = Auth::user();
+
+                                            $allowedStores = $user?->selected_store ?? [];
+
+                                            return StoreSetting::query()
+                                                ->whereIn('id', $allowedStores)
+                                                ->pluck('store_name', 'id')
+                                                ->toArray();
+                                        })
                                         ->searchable()
                                         ->required()
                                         ->native(false)
                                         ->live()
                                         ->dehydrated(true)
-                                        ->visible(fn(): bool => is_null(Auth::user()?->store_setting_id))
+                                        ->visible(function (): bool {
+                                            $user = Auth::user();
+
+                                            return $user
+                                                && ! is_null($user->store_setting_id)
+                                                && is_array($user->selected_store)
+                                                && count($user->selected_store) > 1;
+                                        })
                                         ->columnSpan(1),
                                 ]),
                         ]),
