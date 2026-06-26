@@ -10,6 +10,7 @@ use App\Models\PromoUsage;
 use App\Models\StockMovement;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -45,10 +46,12 @@ class TransactionService
                                 'totalQty'        => $totalQty,
                             ]);
 
-                            $stock = InventoryStock::where([
-                                'product_id'       => $bundleItem->product_id,
+                            $stock = InventoryStock::firstOrCreate([
+                                'product_id' => $item->product_id,
                                 'store_setting_id' => $transaction->store_setting_id,
-                            ])->first();
+                            ], [
+                                'quantity' => 0
+                            ]);
 
                             if (!$stock || $stock->quantity < $totalQty) {
                                 $isPreOrder = true;
@@ -75,6 +78,10 @@ class TransactionService
                     foreach ($item->source_stores as $source) {
                         $srcStoreId = (int) $source['store_setting_id'];
                         $srcQty     = (int) $source['qty'];
+
+                        if (! in_array($srcStoreId, Auth::user()->selected_store ?? [])) {
+                            abort(403, 'Invalid source store');
+                        }
 
                         if ($srcQty <= 0) {
                             continue;

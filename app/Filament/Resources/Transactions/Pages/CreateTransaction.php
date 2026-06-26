@@ -27,7 +27,13 @@ class CreateTransaction extends CreateRecord
             if (count($allowedStores) === 1) {
                 $data['store_setting_id'] = $allowedStores[0];
             } else {
-                abort(422, 'Store wajib dipilih');
+                $sessionStore = session('selected_store');
+
+                if ($sessionStore && in_array($sessionStore, $allowedStores)) {
+                    $data['store_setting_id'] = $sessionStore;
+                } else {
+                    abort(422, 'Store wajib dipilih');
+                }
             }
         }
 

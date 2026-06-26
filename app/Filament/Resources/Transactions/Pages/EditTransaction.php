@@ -96,8 +96,8 @@ class EditTransaction extends EditRecord
         $allowedStores = $user?->selected_store ?? [];
 
         if (
-            ! empty($data['store_setting_id']) &&
-            ! in_array($data['store_setting_id'], $allowedStores)
+            isset($data['store_setting_id']) &&
+            ! in_array((int) $data['store_setting_id'], $allowedStores)
         ) {
             abort(403);
         }
