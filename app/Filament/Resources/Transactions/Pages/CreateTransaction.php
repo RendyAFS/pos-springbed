@@ -20,27 +20,7 @@ class CreateTransaction extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $user = Auth::user();
-        $allowedStores = $user?->selected_store ?? [];
-
-        if (empty($data['store_setting_id'])) {
-            if (count($allowedStores) === 1) {
-                $data['store_setting_id'] = $allowedStores[0];
-            } else {
-                $sessionStore = session('selected_store');
-
-                if ($sessionStore && in_array($sessionStore, $allowedStores)) {
-                    $data['store_setting_id'] = $sessionStore;
-                } else {
-                    abort(422, 'Store wajib dipilih');
-                }
-            }
-        }
-
-        if (! in_array($data['store_setting_id'], $allowedStores)) {
-            abort(403, 'Store tidak diizinkan');
-        }
-
+        $data['store_setting_id'] = Auth::user()?->store_setting_id ?? ($data['store_setting_id'] ?? null);
 
         $this->extraData = [
             'courier_id'           => $data['courier_id'] ?? null,
