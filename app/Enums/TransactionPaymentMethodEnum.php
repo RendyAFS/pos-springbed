@@ -4,16 +4,24 @@ namespace App\Enums;
 
 enum TransactionPaymentMethodEnum: string
 {
-    case TRANSFER = 'transfer';
-    case QRIS     = 'qris';
-    case COD      = 'cod';
+    case TRANSFER         = 'transfer';
+    case QRIS             = 'qris';
+    case COD              = 'cod';
+    case EDC              = 'edc';
+    case TRANSFER_BCA     = 'transfer_bca';
+    case TRANSFER_MANDIRI = 'transfer_mandiri';
+    case SHOPEEPAYLATER   = 'shopeepaylater';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::TRANSFER => 'Transfer',
-            self::QRIS     => 'QRIS',
-            self::COD      => 'COD',
+            self::TRANSFER         => 'Transfer',
+            self::QRIS             => 'QRIS',
+            self::COD              => 'COD',
+            self::EDC              => 'EDC',
+            self::TRANSFER_BCA     => 'Transfer BCA',
+            self::TRANSFER_MANDIRI => 'Transfer Mandiri',
+            self::SHOPEEPAYLATER   => 'Shopeepaylater',
         };
     }
 }
