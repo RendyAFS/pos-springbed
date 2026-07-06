@@ -50,7 +50,7 @@ class CustomerResource extends Resource
     {
         return [
             'Telepone' => $record->phone,
-            'Email' => $record->email,
+            // 'Email' => $record->email,
             'Alamat' => $record->address,
         ];
     }
@@ -69,10 +69,10 @@ class CustomerResource extends Resource
                             ->label('Telepon')
                             ->tel()
                             ->required(),
-                        TextInput::make('email')
-                            ->label('Email address')
-                            ->email()
-                            ->default(null),
+                        // TextInput::make('email')
+                        //     ->label('Email address')
+                        //     ->email()
+                        //     ->default(null),
                         Textarea::make('address')
                             ->label('Alamat')
                             ->rows(3)
@@ -107,14 +107,15 @@ class CustomerResource extends Resource
                 TextColumn::make('phone')
                     ->label('Telepon')
                     ->searchable(),
-                TextColumn::make('email')
-                    ->label('Email address')
-                    ->searchable(),
+                // TextColumn::make('email')
+                //     ->label('Email address')
+                //     ->searchable(),
                 TextColumn::make('address')
                     ->label('Alamat')
                     ->searchable()
                     ->limit(20),
             ])
+            ->defaultSort('id', 'desc')
             ->filters([
                 TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
             ])
