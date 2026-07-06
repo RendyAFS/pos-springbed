@@ -121,6 +121,14 @@
                     </button>
                 @endif
             @endforeach
+            @if ($record->is_down_payment ?? false)
+                <button type="button"
+                    wire:click.stop="mountAction('addDownPayment', { record: {{ $record->getKey() }} })"
+                    class="rounded-md p-1 transition text-success-500 hover:bg-success-50 dark:hover:bg-success-400/10"
+                    title="Tambah Down Payment">
+                    <x-filament::icon icon="heroicon-o-banknotes" class="h-4 w-4" />
+                </button>
+            @endif
         </div>
     @endif
 </div>
