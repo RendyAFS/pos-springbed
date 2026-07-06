@@ -37,6 +37,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Schemas\Components\Text;
+use Illuminate\Support\HtmlString;
 
 class TransactionsTable
 {
@@ -334,31 +336,94 @@ class TransactionsTable
                         ->url(fn($record) => route('transactions.invoice', $record) . '?paper=a4')
                         ->openUrlInNewTab(),
                     Action::make('addDownPayment')
-                        ->label('Tambah DP')
+                        ->label('Pelunasan/Penambahan DP')
                         ->icon(Heroicon::Banknotes)
                         ->color('warning')
                         ->visible(fn($record) => $record->is_down_payment)
                         ->modalHeading(fn($record) => "Tambah Down Payment - {$record->transaction_code}")
                         ->modalWidth(Width::ExtraLarge)
                         ->schema([
+                            Text::make(function ($record) {
+                                $grandTotal   = (float) $record->grand_total;
+                                $totalPaid    = (float) $record->transactionDownPayments->sum('amount')
+                                    + (float) ($record->transactionPayment?->amount ?? 0);
+                                $remaining    = max($grandTotal - $totalPaid, 0);
+                                $isPaid       = $remaining <= 0;
+                                $statusLabel  = $isPaid ? 'Lunas' : 'Belum Lunas';
+                                $statusColor  = $isPaid ? 'success' : 'danger';
+
+                                $rows = '
+                                    <tr>
+                                        <td class="py-1 pr-4 text-gray-600 dark:text-gray-400">Grand Total</td>
+                                        <td class="py-1 text-right font-medium">' . e(RupiahHelper::format($grandTotal)) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1 pr-4 text-gray-600 dark:text-gray-400">Total Sudah Dibayar</td>
+                                        <td class="py-1 text-right font-medium">' . e(RupiahHelper::format($totalPaid)) . '</td>
+                                    </tr>
+                                    <tr class="border-t border-gray-200 dark:border-gray-700">
+                                        <td class="py-1 pr-4 font-semibold">Sisa Pembayaran</td>
+                                        <td class="py-1 text-right font-semibold ' . ($isPaid ? 'text-success-600' : 'text-danger-600') . '">'
+                                    . e(RupiahHelper::format($remaining)) . '
+                                        </td>
+                                    </tr>
+                                ';
+
+                                $html = '
+                                    <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                                        <table class="w-full text-sm">
+                                            ' . $rows . '
+                                        </table>
+                                        <div class="mt-2">
+                                            <span class="inline-flex items-center fi-badge fi-size-sm font-medium text-' . $statusColor . '-600 ring-1 ring-inset ring-' . $statusColor . '-600/20">
+                                                ' . $statusLabel . '
+                                            </span>
+                                        </div>
+                                    </div>
+                                ';
+
+                                return new HtmlString($html);
+                            })
+                                ->columnSpanFull(),
+
                             Grid::make(2)
                                 ->schema([
                                     TextInput::make('amount')
-                                        ->label('Jumlah')
-                                        ->columnSpanFull()
-                                        ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                                        ->dehydrateStateUsing(
-                                            fn($state) => $state
-                                                ? (float) str_replace('.', '', $state)
-                                                : null
-                                        )
-                                        ->formatStateUsing(
-                                            fn($state) => $state
-                                                ? number_format((float) $state, 0, ',', '.')
-                                                : null
-                                        )
-                                        ->required()
-                                        ->prefix('Rp.'),
+    ->label('Jumlah')
+    ->columnSpanFull()
+    ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+    ->dehydrateStateUsing(
+        fn($state) => $state
+            ? (float) str_replace('.', '', $state)
+            : null
+    )
+    ->formatStateUsing(
+        fn($state) => $state
+            ? number_format((float) $state, 0, ',', '.')
+            : null
+    )
+    ->default(function ($record) {
+        $grandTotal = (float) $record->grand_total;
+        $totalPaid  = (float) $record->transactionDownPayments->sum('amount')
+            + (float) ($record->transactionPayment?->amount ?? 0);
+        $remaining  = max($grandTotal - $totalPaid, 0);
+
+        return $remaining > 0 ? $remaining : null;
+    })
+    ->required()
+    ->prefix('Rp.')
+    ->rules([
+        fn($record) => function (string $attribute, $value, \Closure $fail) use ($record) {
+            $grandTotal = (float) $record->grand_total;
+            $totalPaid  = (float) $record->transactionDownPayments->sum('amount')
+                + (float) ($record->transactionPayment?->amount ?? 0);
+            $remaining  = $grandTotal - $totalPaid;
+
+            if ((float) $value > $remaining) {
+                $fail('Jumlah melebihi sisa pembayaran (' . RupiahHelper::format($remaining) . ').');
+            }
+        },
+    ]),
 
                                     Select::make('method_payment')
                                         ->label('Metode Pembayaran')

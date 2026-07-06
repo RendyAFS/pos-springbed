@@ -92,8 +92,12 @@
         <div class="mt-2 flex items-center justify-end gap-1 border-t border-gray-100 pt-2 dark:border-white/5">
             @foreach ($footerActions as $footerAction)
                 @php
-                    $actionUrl = $footerAction->record($record)->getUrl();
-                    $actionColorClasses = match ($footerAction->getColor() ?? 'gray') {
+                    $action = clone $footerAction;
+                    $action->record($record);
+
+                    $actionUrl = $action->getUrl();
+
+                    $actionColorClasses = match ($action->getColor() ?? 'gray') {
                         'primary' => 'text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-400/10',
                         'danger' => 'text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-400/10',
                         'success' => 'text-success-500 hover:bg-success-50 dark:hover:bg-success-400/10',
@@ -104,30 +108,19 @@
                 @endphp
 
                 @if ($actionUrl)
-                    <a href="{{ $actionUrl }}" @if ($footerAction->shouldOpenUrlInNewTab()) target="_blank" @endif
-                        class="rounded-md p-1 transition {{ $actionColorClasses }}"
-                        title="{{ $footerAction->getLabel() }}" x-on:click.stop>
-                        @if ($footerAction->getIcon())
-                            <x-filament::icon :icon="$footerAction->getIcon()" class="h-4 w-4" />
-                        @else
-                            <span class="text-xs">{{ $footerAction->getLabel() }}</span>
-                        @endif
+                    <a href="{{ $actionUrl }}" @if ($action->shouldOpenUrlInNewTab()) target="_blank" @endif
+                        class="rounded-md p-1 transition {{ $actionColorClasses }}" title="{{ $action->getLabel() }}"
+                        x-on:click.stop>
+                        <x-filament::icon :icon="$action->getIcon()" class="h-4 w-4" />
                     </a>
                 @else
-                    {{ $footerAction }}
+                    <button type="button"
+                        wire:click.stop="mountAction('{{ $action->getName() }}', { record: {{ $record->getKey() }} })"
+                        class="rounded-md p-1 transition {{ $actionColorClasses }}" title="{{ $action->getLabel() }}">
+                        <x-filament::icon :icon="$action->getIcon()" class="h-4 w-4" />
+                    </button>
                 @endif
             @endforeach
-            @php
-                $isDownPayment = $record->is_down_payment ?? false;
-            @endphp
-
-            @if ($isDownPayment)
-                <button type="button" wire:click="openDownPaymentModal({{ $record->id }})"
-                    class="rounded-md p-1 transition text-success-500 hover:bg-success-50" x-on:click.stop
-                    title="Tambah Down Payment">
-                    <x-filament::icon icon="heroicon-m-banknotes" class="h-4 w-4" />
-                </button>
-            @endif
         </div>
     @endif
 </div>

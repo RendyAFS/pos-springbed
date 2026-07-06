@@ -72,7 +72,7 @@ class TransactionDownPaymentsRelationManager extends RelationManager
     {
         return $table
             ->heading('Down Payments')
-            ->recordTitleAttribute('transaction')
+            ->recordTitleAttribute('method_payment')
             ->columns([
                 TextColumn::make('amount')
                     ->label('Jumlah')

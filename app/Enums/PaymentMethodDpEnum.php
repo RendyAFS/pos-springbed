@@ -17,7 +17,7 @@ enum PaymentMethodDpEnum: string
         return match ($this) {
             self::TRANSFER         => 'Transfer',
             self::QRIS             => 'QRIS',
-            self::CASH             => 'Cash',
+            self::CASH             => 'Cash / Tunai',
             self::EDC              => 'EDC',
             self::TRANSFER_BCA     => 'Transfer BCA',
             self::TRANSFER_MANDIRI => 'Transfer Mandiri',
