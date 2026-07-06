@@ -30,7 +30,6 @@ class BundleForm
                             ->label('Harga Bundle')
                             ->prefix('Rp.')
                             ->default(0)
-                            ->readOnly()
                             ->dehydrateStateUsing(fn($state) => (float) str_replace('.', '', $state ?? 0))
                             ->formatStateUsing(fn($state) => number_format((float) ($state ?? 0), 0, ',', '.'))
                             ->dehydrated(),
