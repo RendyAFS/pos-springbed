@@ -17,6 +17,8 @@ use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
@@ -105,7 +107,31 @@ class ProductsTable
             ])
             ->filters([
                 TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
-            ])
+
+                SelectFilter::make('brand_id')
+                    ->label('Brand')
+                    ->relationship('brand', 'name')
+                    ->searchable()
+                    ->preload(),
+
+                SelectFilter::make('type_id')
+                    ->label('Tipe')
+                    ->relationship('type', 'name')
+                    ->searchable()
+                    ->preload(),
+
+                SelectFilter::make('category_id')
+                    ->label('Kategori')
+                    ->relationship('category', 'name')
+                    ->searchable()
+                    ->preload(),
+
+                SelectFilter::make('size_id')
+                    ->label('Ukuran')
+                    ->relationship('size', 'name')
+                    ->searchable()
+                    ->preload(),
+            ], layout: FiltersLayout::Modal)
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make(),

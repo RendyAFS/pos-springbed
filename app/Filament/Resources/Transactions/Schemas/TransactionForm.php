@@ -260,6 +260,12 @@ class TransactionForm
                                                             self::recalculateItemSubtotal($get, $set);
                                                         }),
 
+                                                    Textarea::make('note_product')
+                                                        ->label('Catatan Produk')
+                                                        ->placeholder('Contoh: Warna krem, ukuran custom, kirim sore, dll.')
+                                                        ->rows(3)
+                                                        ->columnSpanFull(),
+
                                                     TextInput::make('qty')
                                                         ->label('Qty')
                                                         ->numeric()

@@ -30,11 +30,12 @@ use Wezlo\FilamentKanban\KanbanBoard;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Text;
+use Illuminate\Support\HtmlString;
 
-class ListTransactions extends ListRecords implements HasForms
+class ListTransactions extends ListRecords
 {
     use HasKanbanBoard;
-    use InteractsWithForms;
 
     protected static string $resource = TransactionResource::class;
 
@@ -43,8 +44,6 @@ class ListTransactions extends ListRecords implements HasForms
     public string $viewMode            = 'kanban';
     public ?string $date_from          = null;
     public ?string $date_until         = null;
-    public ?int $selectedTransactionId = null;
-    public ?array $downPaymentData     = [];
 
     public function mount(): void
     {
@@ -58,6 +57,129 @@ class ListTransactions extends ListRecords implements HasForms
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('addDownPayment')
+                ->label('')
+                ->color('gray')
+                ->extraAttributes([
+                    'class' => '!bg-transparent !shadow-none !ring-0 hover:!bg-transparent !px-0 text-success-600 dark:text-success-400 cursor-default pointer-events-none',
+                ])
+                ->record(fn(array $arguments) => Transaction::find($arguments['record'] ?? null))
+                ->visible(function (array $arguments) {
+                    $record = Transaction::find($arguments['record'] ?? null);
+                    return $record?->is_down_payment ?? false;
+                })
+                ->modalHeading(fn($record) => "Tambah Down Payment - {$record->transaction_code}")
+                ->modalWidth(Width::ExtraLarge)
+                ->schema([
+                    Text::make(function ($record) {
+                        $grandTotal  = (float) $record->grand_total;
+                        $totalPaid   = (float) $record->transactionDownPayments->sum('amount')
+                            + (float) ($record->transactionPayment?->amount ?? 0);
+                        $remaining   = max($grandTotal - $totalPaid, 0);
+                        $isPaid      = $remaining <= 0;
+                        $statusLabel = $isPaid ? 'Lunas' : 'Belum Lunas';
+                        $statusColor = $isPaid ? 'success' : 'danger';
+
+                        $rows = '
+                                    <tr>
+                                        <td class="py-1 pr-4 text-gray-600 dark:text-gray-400">Grand Total</td>
+                                        <td class="py-1 text-right font-medium">' . e(RupiahHelper::format($grandTotal)) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-1 pr-4 text-gray-600 dark:text-gray-400">Total Sudah Dibayar</td>
+                                        <td class="py-1 text-right font-medium">' . e(RupiahHelper::format($totalPaid)) . '</td>
+                                    </tr>
+                                    <tr class="border-t border-gray-200 dark:border-gray-700">
+                                        <td class="py-1 pr-4 font-semibold">Sisa Pembayaran</td>
+                                        <td class="py-1 text-right font-semibold ' . ($isPaid ? 'text-success-600' : 'text-danger-600') . '">'
+                            . e(RupiahHelper::format($remaining)) . '
+                                        </td>
+                                    </tr>
+                                ';
+
+                        $html = '
+                                    <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                                        <table class="w-full text-sm">' . $rows . '</table>
+                                        <div class="mt-2">
+                                            <span class="inline-flex items-center fi-badge fi-size-sm font-medium text-' . $statusColor . '-600 ring-1 ring-inset ring-' . $statusColor . '-600/20">
+                                                ' . $statusLabel . '
+                                            </span>
+                                        </div>
+                                    </div>
+                                ';
+
+                        return new HtmlString($html);
+                    })->columnSpanFull(),
+
+                    Grid::make(2)->schema([
+                        TextInput::make('amount')
+                            ->label('Jumlah')
+                            ->columnSpanFull()
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                            ->default(function ($record) {
+                                $grandTotal = (float) $record->grand_total;
+                                $totalPaid  = (float) $record->transactionDownPayments->sum('amount')
+                                    + (float) ($record->transactionPayment?->amount ?? 0);
+                                $remaining  = max($grandTotal - $totalPaid, 0);
+
+                                return $remaining > 0 ? $remaining : null;
+                            })
+                            ->required()
+                            ->prefix('Rp.')
+                            ->rules([
+                                fn($record) => function (string $attribute, $value, \Closure $fail) use ($record) {
+                                    $grandTotal = (float) $record->grand_total;
+                                    $totalPaid  = (float) $record->transactionDownPayments->sum('amount')
+                                        + (float) ($record->transactionPayment?->amount ?? 0);
+                                    $remaining  = $grandTotal - $totalPaid;
+
+                                    if ((float) $value > $remaining) {
+                                        $fail('Jumlah melebihi sisa pembayaran (' . RupiahHelper::format($remaining) . ').');
+                                    }
+                                },
+                            ]),
+
+                        Select::make('method_payment')
+                            ->label('Metode Pembayaran')
+                            ->options(
+                                collect(PaymentMethodDpEnum::cases())
+                                    ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                    ->toArray()
+                            )
+                            ->searchable()
+                            ->required()
+                            ->native(false),
+
+                        DatePicker::make('paid_at')
+                            ->label('Tanggal Bayar')
+                            ->native(false)
+                            ->suffixIcon(Heroicon::Calendar)
+                            ->closeOnDateSelection()
+                            ->default(now())
+                            ->required(),
+
+                        Textarea::make('notes')
+                            ->label('Notes')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ]),
+                ])
+                ->action(function (array $data, $record) {
+                    $record->transactionDownPayments()->create([
+                        'amount'         => $data['amount'],
+                        'method_payment' => $data['method_payment'],
+                        'paid_at'        => $data['paid_at'],
+                        'notes'          => $data['notes'],
+                    ]);
+
+                    Notification::make()
+                        ->title('Down Payment berhasil ditambahkan')
+                        ->success()
+                        ->send();
+                })
+                ->modalSubmitActionLabel('Simpan'),
             Action::make('filterDate')
                 ->label('Filter')
                 ->icon(Heroicon::Funnel)
@@ -329,78 +451,6 @@ class ListTransactions extends ListRecords implements HasForms
         }
 
         return $badges;
-    }
-
-    public function getForms(): array
-    {
-        return [
-            'downPaymentForm',
-        ];
-    }
-
-    public function downPaymentForm(Schema $schema): Schema
-    {
-        return $schema
-            ->statePath('downPaymentData')
-            ->components([
-                Grid::make(2)
-                    ->schema([
-                        TextInput::make('amount')
-                            ->label('Jumlah')
-                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
-                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
-                            ->required()
-                            ->prefix('Rp.')
-                            ->columnSpanFull(),
-                        Select::make('method_payment')
-                            ->label('Metode Pembayaran')
-                            ->native()
-                            ->options(
-                                collect(PaymentMethodDpEnum::cases())
-                                    ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                                    ->toArray()
-                            )
-                            ->columns(1),
-                        DatePicker::make('paid_at')
-                            ->label('Tanggal Bayar')
-                            ->closeOnDateSelection()
-                            ->required()
-                            ->default(now())
-                            ->columns(1),
-                        Textarea::make('notes')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                    ]),
-            ]);
-    }
-
-    public function openDownPaymentModal(int $transactionId): void
-    {
-        $this->selectedTransactionId = $transactionId;
-        $this->reset('downPaymentData');
-
-        $this->downPaymentForm->fill();
-
-        $this->dispatch('open-modal', id: 'down-payment-modal');
-    }
-
-    public function saveDownPayment(): void
-    {
-        $transaction = Transaction::findOrFail($this->selectedTransactionId);
-
-        $data = $this->downPaymentForm->getState();
-
-        $transaction->transactionDownPayments()->create($data);
-
-        Notification::make()
-            ->title('Down Payment berhasil ditambahkan')
-            ->success()
-            ->send();
-
-        $this->dispatch('close-modal', id: 'down-payment-modal');
-
-        $this->reset('downPaymentData', 'selectedTransactionId');
     }
 
     public function table(Table $table): Table

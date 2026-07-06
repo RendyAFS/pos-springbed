@@ -73,7 +73,7 @@ class TransactionInfolist
                             ->schema([
                                 TextEntry::make('grand_total')
                                     ->label('Grand Total')
-                                     ->formatStateUsing(fn($state) => RupiahHelper::format($state))
+                                    ->formatStateUsing(fn($state) => RupiahHelper::format($state))
                                     ->weight(FontWeight::Bold)
                                     ->color('success')
                                     ->columnSpanFull(),
@@ -99,16 +99,16 @@ class TransactionInfolist
                                     }),
                                 TextEntry::make('transactionPayment.amount')
                                     ->label('Jumlah Dibayar')
-                                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                                    ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                                 TextEntry::make('subtotal')
                                     ->label('Subtotal')
-                                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                                    ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                                 TextEntry::make('promo_total')
                                     ->label('Diskon Promo')
-                                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                                    ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                                 TextEntry::make('shiping_cost')
                                     ->label('Biaya Pengiriman')
-                                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                                    ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                                 TextEntry::make('is_down_payment')
                                     ->label('Down Payment')
                                     ->badge()
@@ -119,6 +119,22 @@ class TransactionInfolist
                                     ->formatStateUsing(fn($state) => $state
                                         ? Carbon::parse($state)->format('d M Y H:i')
                                         : '—'),
+                                TextEntry::make('sisa_pembayaran')
+                                    ->label('Sisa Pembayaran')
+                                    ->getStateUsing(function ($record) {
+                                        $totalDibayar = $record->is_down_payment
+                                            ? $record->transactionDownPayments->sum('amount')
+                                            : ($record->transactionPayment->amount ?? 0);
+
+                                        $sisa = $record->grand_total - $totalDibayar;
+
+                                        return max($sisa, 0);
+                                    })
+                                    ->formatStateUsing(fn($state) => RupiahHelper::format($state))
+                                    ->weight(FontWeight::Bold)
+                                    ->badge()
+                                    ->color(fn($state) => $state > 0 ? 'danger' : 'success')
+                                    ->columnSpanFull(),
                             ]),
                     ]),
 
@@ -146,13 +162,13 @@ class TransactionInfolist
                                             ->suffix(' pcs'),
                                         TextEntry::make('selling_price')
                                             ->label('Harga Jual')
-                                             ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                                            ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                                         TextEntry::make('discount')
                                             ->label('Diskon')
-                                             ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                                            ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                                         TextEntry::make('subtotal')
                                             ->label('Subtotal')
-                                             ->formatStateUsing(fn($state) => RupiahHelper::format($state))
+                                            ->formatStateUsing(fn($state) => RupiahHelper::format($state))
                                             ->weight(FontWeight::Bold)
                                             ->color('primary'),
                                     ]),
@@ -175,7 +191,7 @@ class TransactionInfolist
                                     ->placeholder('—'),
                                 TextEntry::make('shiping_cost')
                                     ->label('Biaya Pengiriman')
-                                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                                    ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                             ]),
                     ]),
 

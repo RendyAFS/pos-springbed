@@ -6,6 +6,7 @@ enum TransactionPaymentMethodEnum: string
 {
     case TRANSFER         = 'transfer';
     case QRIS             = 'qris';
+    case CASH             = 'cash';
     case COD              = 'cod';
     case EDC              = 'edc';
     case TRANSFER_BCA     = 'transfer_bca';
@@ -17,6 +18,7 @@ enum TransactionPaymentMethodEnum: string
         return match ($this) {
             self::TRANSFER         => 'Transfer',
             self::QRIS             => 'QRIS',
+            self::CASH             => 'Cash / Tunai',
             self::COD              => 'COD',
             self::EDC              => 'EDC',
             self::TRANSFER_BCA     => 'Transfer BCA',
