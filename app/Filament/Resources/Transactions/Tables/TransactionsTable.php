@@ -212,45 +212,6 @@ class TransactionsTable
                             })
                         );
                     }),
-                Filter::make('created_at')
-                    ->label('Tanggal Transaksi')
-                    ->columns(2)
-                    ->schema([
-                        DatePicker::make('from')
-                            ->label('Dari Tanggal')
-                            ->default(Carbon::now()->startOfMonth())
-                            ->native(false)
-                            ->suffixIcon(Heroicon::Calendar)
-                            ->closeOnDateSelection(),
-
-                        DatePicker::make('until')
-                            ->label('Sampai Tanggal')
-                            ->default(Carbon::now()->endOfMonth())
-                            ->native(false)
-                            ->suffixIcon(Heroicon::Calendar)
-                            ->closeOnDateSelection(),
-                    ])
-                    ->query(function ($query, array $data) {
-                        return $query
-                            ->when(
-                                $data['from'] ?? null,
-                                fn($query, $date) => $query->whereDate('created_at', '>=', $date)
-                            )
-                            ->when(
-                                $data['until'] ?? null,
-                                fn($query, $date) => $query->whereDate('created_at', '<=', $date)
-                            );
-                    })
-                    ->indicateUsing(function (array $data): array {
-                        $indicators = [];
-                        if ($data['from'] ?? null) {
-                            $indicators[] = 'Dari: ' . Carbon::parse($data['from'])->translatedFormat('d F Y');
-                        }
-                        if ($data['until'] ?? null) {
-                            $indicators[] = 'Sampai: ' . Carbon::parse($data['until'])->translatedFormat('d F Y');
-                        }
-                        return $indicators;
-                    })->columnSpanFull(),
             ], layout: FiltersLayout::Modal)
             ->filtersFormWidth(Width::ExtraLarge)
             ->filtersFormColumns(2)

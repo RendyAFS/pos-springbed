@@ -32,6 +32,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Text;
 use Illuminate\Support\HtmlString;
+use Livewire\Attributes\Url;
 
 class ListTransactions extends ListRecords
 {
@@ -41,17 +42,32 @@ class ListTransactions extends ListRecords
 
     protected string $view = 'filament.pages.transactions.list-transactions';
 
-    public string $viewMode            = 'kanban';
-    public ?string $date_from          = null;
-    public ?string $date_until         = null;
+    #[Url]
+    public string $viewMode = 'kanban';
+    #[Url]
+    public ?string $date_from = null;
+    #[Url]
+    public ?string $date_until = null;
 
     public function mount(): void
     {
         parent::mount();
 
-        $this->viewMode = (string) session('transactions_view_mode', 'kanban');
-        $this->date_from = Carbon::now()->startOfMonth()->toDateString();
-        $this->date_until = Carbon::now()->endOfMonth()->toDateString();
+        $this->viewMode = session('transactions_view_mode', 'kanban');
+
+        if (! request()->has('date_from') || ! request()->has('date_until')) {
+
+            $this->redirect(
+                static::getResource()::getUrl('index', [
+                    'viewMode'   => $this->viewMode,
+                    'date_from'  => Carbon::now()->startOfMonth()->toDateString(),
+                    'date_until' => Carbon::now()->endOfMonth()->toDateString(),
+                ]),
+                navigate: true,
+            );
+
+            return;
+        }
     }
 
     protected function getHeaderActions(): array
@@ -181,10 +197,9 @@ class ListTransactions extends ListRecords
                 })
                 ->modalSubmitActionLabel('Simpan'),
             Action::make('filterDate')
-                ->label('Filter')
-                ->icon(Heroicon::Funnel)
+                ->label('Date Range')
+                ->icon(Heroicon::Calendar)
                 ->color('gray')
-                ->visible(fn() => $this->viewMode === 'kanban')
                 ->fillForm([
                     'date_from' => $this->date_from,
                     'date_until' => $this->date_until,
@@ -455,6 +470,18 @@ class ListTransactions extends ListRecords
 
     public function table(Table $table): Table
     {
-        return TransactionsTable::configure($table);
+        return TransactionsTable::configure($table)
+            ->modifyQueryUsing(function ($query) {
+
+                if ($this->date_from) {
+                    $query->whereDate('created_at', '>=', $this->date_from);
+                }
+
+                if ($this->date_until) {
+                    $query->whereDate('created_at', '<=', $this->date_until);
+                }
+
+                return $query;
+            });
     }
 }
