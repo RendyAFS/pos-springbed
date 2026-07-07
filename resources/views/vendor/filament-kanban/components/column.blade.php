@@ -13,7 +13,7 @@
 @endphp
 
 <div @class([
-    'fi-kanban-column flex-shrink-0 rounded-xl',
+    'fi-kanban-column relative  flex-shrink-0 rounded-xl overflow-visible',
     $themeClass,
     'ring-2 ring-danger-500/40' => $isOverWip,
 ]) style="width: {{ $board->getColumnWidth() }};"
@@ -68,7 +68,8 @@
         </div>
     @endif
 
-    <div data-kanban-column data-column-value="{{ $column->value }}" class="fi-kanban-cards space-y-2 p-2 min-h-15"
+    <div data-kanban-column data-column-value="{{ $column->value }}"
+        class="fi-kanban-cards space-y-2 p-2 min-h-15 overflow-visible"
         @if ($isCollapsible) x-show="!collapsed" @endif role="list">
         @forelse($column->records as $record)
             @include($board->getCardView(), [
