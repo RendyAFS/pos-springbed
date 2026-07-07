@@ -33,6 +33,7 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Text;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
+use App\Filament\Resources\Transactions\Support\TransactionActions;
 
 class ListTransactions extends ListRecords
 {
@@ -73,6 +74,72 @@ class ListTransactions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('updateAllStatus')
+                ->label('')
+                ->color('gray')
+                ->extraAttributes([
+                    'class' => '!bg-transparent !shadow-none !ring-0 hover:!bg-transparent !px-0 cursor-default pointer-events-none',
+                ])
+                ->record(fn(array $arguments) => Transaction::find($arguments['record'] ?? null))
+                ->visible(function (array $arguments) {
+                    $record = Transaction::find($arguments['record'] ?? null);
+                    return $record !== null;
+                })
+                ->modalHeading(fn($record) => "Update Status Transaction - {$record->transaction_code}")
+                ->modalWidth('sm')
+                ->schema([
+                    Select::make('status')
+                        ->label('Status Transaction')
+                        ->options(
+                            collect(TransactionStatusEnum::cases())
+                                ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                ->toArray()
+                        )
+                        ->default(fn($record) => $record->status?->value)
+                        ->native(false),
+
+                    Select::make('payment_status')
+                        ->label('Status Payment')
+                        ->options(
+                            collect(TransactionPaymentStatusEnum::cases())
+                                ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                ->toArray()
+                        )
+                        ->default(fn($record) => $record->transactionPayment?->status?->value)
+                        ->visible(fn($record) => $record->transactionPayment !== null)
+                        ->native(false),
+
+                    TextInput::make('tracking_number')
+                        ->label('No. Resi')
+                        ->default(fn($record) => $record->transactionShipment?->tracking_number)
+                        ->visible(fn($record) => $record->transactionShipment !== null),
+                ])
+                ->action(function ($record, array $data): void {
+                    if (!empty($data['status'])) {
+                        $record->update([
+                            'status' => $data['status'],
+                        ]);
+                    }
+
+                    if (!empty($data['payment_status']) && $record->transactionPayment) {
+                        $record->transactionPayment->update([
+                            'status' => $data['payment_status'],
+                        ]);
+                    }
+
+                    if (!empty($data['tracking_number']) && $record->transactionShipment) {
+                        $record->transactionShipment->update([
+                            'tracking_number' => $data['tracking_number'],
+                        ]);
+                    }
+
+                    Notification::make()
+                        ->title('Update status transaction successfully')
+                        ->body('Status transaction successfully updated.')
+                        ->success()
+                        ->send();
+                })
+                ->modalSubmitActionLabel('Simpan'),
             Action::make('addDownPayment')
                 ->label('')
                 ->color('gray')
@@ -298,13 +365,8 @@ class ListTransactions extends ListRecords
                 default                                 => 'gray',
             })
             ->cardFooterActions([
-                Action::make('view')
-                    ->icon(Heroicon::Eye)
-                    ->url(fn($record) => TransactionResource::getUrl('view', ['record' => $record])),
-
-                Action::make('edit')
-                    ->icon(Heroicon::PencilSquare)
-                    ->url(fn($record) => TransactionResource::getUrl('edit', ['record' => $record])),
+                ...TransactionActions::kanbanIcons(),
+                ...TransactionActions::kanbanDropdown(),
             ])
             ->modifyQueryUsing(function ($query) {
                 $filters = $this->kanbanFilters ?? [];
