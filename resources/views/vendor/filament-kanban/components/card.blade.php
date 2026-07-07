@@ -97,7 +97,7 @@
     @endphp
 
     @if ($hasFooterActions)
-        <div x-data="{ open: false }"
+        <div x-data="{ open: false, dropdownStyle: '' }"
             class="mt-3 flex items-center justify-end gap-1 border-t border-gray-100 pt-2 dark:border-white/5 overflow-visible">
 
             {{-- View & Edit --}}
@@ -121,14 +121,16 @@
                 @if ($actionUrl)
                     <a href="{{ $actionUrl }}" @if ($action->shouldOpenUrlInNewTab()) target="_blank" @endif
                         title="{{ $action->getLabel() }}"
-                        class="rounded-md p-1.5 transition hover:bg-gray-100 dark:hover:bg-white/10" wire:key="kanban-icon-{{ $recordId }}-{{ $action->getName() }}">
+                        class="rounded-md p-1.5 transition hover:bg-gray-100 dark:hover:bg-white/10"
+                        wire:key="kanban-icon-{{ $recordId }}-{{ $action->getName() }}">
 
                         <x-filament::icon :icon="$action->getIcon()" class="h-5 w-5 {{ $iconColor }}" />
                     </a>
                 @else
                     <button type="button" title="{{ $action->getLabel() }}"
                         wire:click.stop="mountAction('{{ $action->getName() }}', { record: {{ $record->getKey() }} })"
-                        class="rounded-md p-1.5 transition hover:bg-gray-100 dark:hover:bg-white/10" wire:key="kanban-icon-{{ $recordId }}-{{ $action->getName() }}">
+                        class="rounded-md p-1.5 transition hover:bg-gray-100 dark:hover:bg-white/10"
+                        wire:key="kanban-icon-{{ $recordId }}-{{ $action->getName() }}">
 
                         <x-filament::icon :icon="$action->getIcon()" class="h-5 w-5 {{ $iconColor }}" />
                     </button>
@@ -139,52 +141,66 @@
             @if ($dropdownActions->isNotEmpty())
                 <div class="relative">
 
-                    <button type="button" @click.stop="open = !open"
+                    <button type="button" x-ref="dropdownTrigger_{{ $recordId }}"
+                        @click.stop="
+                if (!open) {
+                    const rect = $el.getBoundingClientRect();
+                    dropdownStyle = `top:${rect.bottom + 8}px; left:${rect.right - 224}px;`;
+                }
+                open = !open;
+            "
+                        @scroll.window="open = false" @resize.window="open = false"
                         class="rounded-md p-1.5 text-gray-500 transition hover:bg-gray-100 dark:hover:bg-white/10">
 
                         <x-filament::icon icon="heroicon-o-ellipsis-horizontal" class="h-5 w-5" />
                     </button>
 
-                    <div x-show="open" x-transition @click.outside="open = false" x-cloak
-                        class="absolute right-0 top-full z-[9999] mt-2 w-56 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
+                    <template x-teleport="body">
+                        <div x-show="open" x-transition @click.outside="open = false" x-cloak
+                            :style="`position: fixed; z-index: 9999; ${dropdownStyle}`"
+                            class="w-56 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
 
-                        @foreach ($dropdownActions as $footerAction)
-                            @php
-                                $action = clone $footerAction;
-                                $action->record($record);
+                            @foreach ($dropdownActions as $footerAction)
+                                @php
+                                    $action = clone $footerAction;
+                                    $action->record($record);
 
-                                $actionUrl = method_exists($action, 'getUrl') ? $action->getUrl() : null;
+                                    $actionUrl = method_exists($action, 'getUrl') ? $action->getUrl() : null;
 
-                                $iconColor = match ($action->getColor()) {
-                                    'primary' => 'text-primary-600 dark:text-primary-400',
-                                    'success' => 'text-success-600 dark:text-success-400',
-                                    'warning' => 'text-warning-600 dark:text-warning-400',
-                                    'danger' => 'text-danger-600 dark:text-danger-400',
-                                    'info' => 'text-info-600 dark:text-info-400',
-                                    default => 'text-gray-600 dark:text-gray-400',
-                                };
-                            @endphp
+                                    $iconColor = match ($action->getColor()) {
+                                        'primary' => 'text-primary-600 dark:text-primary-400',
+                                        'success' => 'text-success-600 dark:text-success-400',
+                                        'warning' => 'text-warning-600 dark:text-warning-400',
+                                        'danger' => 'text-danger-600 dark:text-danger-400',
+                                        'info' => 'text-info-600 dark:text-info-400',
+                                        default => 'text-gray-600 dark:text-gray-400',
+                                    };
+                                @endphp
 
-                            @if ($actionUrl)
-                                <a href="{{ $actionUrl }}" @if ($action->shouldOpenUrlInNewTab()) target="_blank" @endif
-                                    class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800" wire:key="kanban-dropdown-{{ $recordId }}-{{ $action->getName() }}">
+                                @if ($actionUrl)
+                                    <a href="{{ $actionUrl }}"
+                                        @if ($action->shouldOpenUrlInNewTab()) target="_blank" @endif
+                                        class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                                        wire:key="kanban-dropdown-{{ $recordId }}-{{ $action->getName() }}">
 
-                                    <x-filament::icon :icon="$action->getIcon()" class="h-4 w-4 {{ $iconColor }}" />
+                                        <x-filament::icon :icon="$action->getIcon()" class="h-4 w-4 {{ $iconColor }}" />
 
-                                    {{ $action->getLabel() }}
-                                </a>
-                            @else
-                                <button type="button" @click="open = false"
-                                    wire:click.stop="mountAction('{{ $action->getName() }}', { record: {{ $record->getKey() }} })"
-                                    class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800" wire:key="kanban-dropdown-{{ $recordId }}-{{ $action->getName() }}">
+                                        {{ $action->getLabel() }}
+                                    </a>
+                                @else
+                                    <button type="button" @click="open = false"
+                                        wire:click.stop="mountAction('{{ $action->getName() }}', { record: {{ $record->getKey() }} })"
+                                        class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                                        wire:key="kanban-dropdown-{{ $recordId }}-{{ $action->getName() }}">
 
-                                    <x-filament::icon :icon="$action->getIcon()" class="h-4 w-4 {{ $iconColor }}" />
+                                        <x-filament::icon :icon="$action->getIcon()" class="h-4 w-4 {{ $iconColor }}" />
 
-                                    {{ $action->getLabel() }}
-                                </button>
-                            @endif
-                        @endforeach
-                    </div>
+                                        {{ $action->getLabel() }}
+                                    </button>
+                                @endif
+                            @endforeach
+                        </div>
+                    </template>
                 </div>
             @endif
         </div>
