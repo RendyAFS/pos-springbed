@@ -30,6 +30,7 @@ class TransactionActions
     public static function table(): ActionGroup
     {
         return ActionGroup::make([
+            static::sendWhatsapp(),
             static::updateStatus(),
             static::print(),
             static::invoiceA5(),
@@ -67,6 +68,7 @@ class TransactionActions
     public static function kanbanDropdown(): array
     {
         return [
+            static::sendWhatsapp(),
             static::updateStatus(),
             static::print(),
             static::invoiceA5(),
@@ -303,6 +305,88 @@ class TransactionActions
                     ->send();
             })
             ->modalSubmitActionLabel('Simpan');
+    }
+
+    public static function sendWhatsapp(): Action
+    {
+        return Action::make('sendWhatsapp')
+            ->label('Kirim WA')
+            ->icon(Heroicon::ChatBubbleLeftRight)
+            ->color('success')
+            ->url(fn(Transaction $record) => static::buildWhatsappUrl($record))
+            ->openUrlInNewTab();
+    }
+
+    protected static function buildWhatsappUrl(Transaction $record): string
+    {
+        $customer = $record->customer;
+        $phone    = static::formatPhoneNumber($customer?->phone);
+
+        $orderLines = $record->transactionItems
+            ->map(function ($item) {
+                // Produk biasa
+                if (!$item->bundle_id) {
+                    $note = $item->note_product
+                        ? " ({$item->note_product})"
+                        : '';
+                    return "{$item->qty}x {$item->product?->name}{$note}";
+                }
+
+                // Bundle
+                $lines = [];
+                $lines[] = "{$item->qty}x {$item->bundle?->name}";
+                foreach ($item->bundle->bundleItems as $bundleItem) {
+                    $qty = $bundleItem->qty * $item->qty;
+                    $lines[] = "   • {$qty}x {$bundleItem->product?->name}";
+                }
+
+                if ($item->note_product) {
+                    $lines[] = "   Catatan: {$item->note_product}";
+                }
+                return implode("\n", $lines);
+            })
+            ->implode("\n\n");
+
+        $itemTotals = $record->transactionItems
+            ->map(fn($item) => RupiahHelper::format($item->subtotal))
+            ->implode(' + ');
+
+        $totalPaid = (float) $record->transactionDownPayments->sum('amount')
+            + (float) ($record->transactionPayment?->amount ?? 0);
+
+        $remaining = max((float) $record->grand_total - $totalPaid, 0);
+
+        $lastDp = $record->transactionDownPayments->sortByDesc('paid_at')->first();
+
+        $message  = "Thank you for your order\n\n";
+        $message .= "Nama : {$customer?->name}\n";
+        $message .= "Alamat : {$customer?->address}\n";
+        $message .= "No Hp : {$customer?->phone}\n\n";
+        $message .= "Order :\n{$orderLines}\n\n";
+        $message .= "Total: {$itemTotals} = " . RupiahHelper::format($record->grand_total) . "\n\n";
+        $message .= "Ongkir: " . ($record->shiping_cost > 0 ? RupiahHelper::format($record->shiping_cost) : '-') . "\n\n";
+        $message .= "Pembayaran :\n";
+        $message .= "DP transfer: " . RupiahHelper::format($lastDp->amount ?? $totalPaid) . "\n";
+        $message .= "Sisa: " . RupiahHelper::format($remaining) . "\n";
+
+        return 'https://wa.me/' . $phone . '?text=' . rawurlencode($message);
+    }
+
+    protected static function formatPhoneNumber(?string $phone): string
+    {
+        if (!$phone) {
+            return '';
+        }
+
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        if (str_starts_with($phone, '0')) {
+            $phone = '62' . substr($phone, 1);
+        } elseif (!str_starts_with($phone, '62')) {
+            $phone = '62' . $phone;
+        }
+
+        return $phone;
     }
 
     public static function edit(): Action
