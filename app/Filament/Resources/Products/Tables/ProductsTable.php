@@ -3,6 +3,11 @@
 namespace App\Filament\Resources\Products\Tables;
 
 use App\Helpers\RupiahHelper;
+use Filament\Actions\Action;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -134,6 +139,36 @@ class ProductsTable
             ], layout: FiltersLayout::Modal)
             ->recordActions([
                 ActionGroup::make([
+                    Action::make('barcode')
+                        ->label('Barcode')
+                        ->icon(Heroicon::QrCode)
+                        ->color('gray')
+                        ->modalHeading(fn($record) => "Barcode Produk — {$record->name}")
+                        ->modalWidth('sm')
+                        ->modalSubmitAction(false)
+                        ->modalCancelActionLabel('Tutup')
+                        ->modalContent(function ($record) {
+
+                            $record->loadMissing([
+                                'brand',
+                                'size',
+                                'type',
+                            ]);
+
+                            $result = (new Builder(
+                                writer: new PngWriter(),
+                                data: (string) $record->id,
+                                encoding: new Encoding('UTF-8'),
+                                errorCorrectionLevel: ErrorCorrectionLevel::High,
+                                size: 300,
+                                margin: 10,
+                            ))->build();
+
+                            return view('filament.components.products.barcode-modal', [
+                                'record'  => $record,
+                                'dataUri' => $result->getDataUri(),
+                            ]);
+                        }),
                     EditAction::make(),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),
