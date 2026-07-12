@@ -6,6 +6,7 @@ use App\Enums\PaymentMethodDpEnum;
 use App\Enums\TransactionPaymentStatusEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Helpers\RupiahHelper;
+use App\Models\StoreSetting;
 use App\Models\Transaction;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -14,6 +15,9 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Schemas\Components\Text;
@@ -83,63 +87,137 @@ class TransactionActions
             ->label('Update Status')
             ->icon(Heroicon::ArrowPath)
             ->color('warning')
-            ->modalHeading('Update Status Transaction')
-            ->modalDescription(fn($record) => "Transaction: {$record->transaction_code}")
-            ->modalWidth('sm')
+            ->modalHeading(fn($record) => "Update Status Transaction - {$record->transaction_code}")
+            ->modalWidth(Width::ExtraLarge)
             ->schema([
-                Select::make('status')
-                    ->label('Status Transaction')
-                    ->options(
-                        collect(TransactionStatusEnum::cases())
-                            ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                            ->toArray()
-                    )
-                    ->default(fn($record) => $record->status?->value)
-                    ->native(false),
+                Wizard::make([
+                    Step::make('update_status')
+                        ->label('Update Status')
+                        ->icon(Heroicon::ArrowPath)
+                        ->schema([
+                            Select::make('status')
+                                ->label('Status Transaction')
+                                ->options(
+                                    collect(TransactionStatusEnum::cases())
+                                        ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                        ->toArray()
+                                )
+                                ->default(fn($record) => $record->status?->value)
+                                ->native(false)
+                                ->live(),
 
-                Select::make('payment_status')
-                    ->label('Status Payment')
-                    ->options(
-                        collect(TransactionPaymentStatusEnum::cases())
-                            ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                            ->toArray()
-                    )
-                    ->default(fn($record) => $record->transactionPayment?->status?->value)
-                    ->visible(fn($record) => $record->transactionPayment !== null)
-                    ->native(false),
+                            Select::make('payment_status')
+                                ->label('Status Payment')
+                                ->options(
+                                    collect(TransactionPaymentStatusEnum::cases())
+                                        ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
+                                        ->toArray()
+                                )
+                                ->default(fn($record) => $record->transactionPayment?->status?->value)
+                                ->visible(fn($record) => $record->transactionPayment !== null)
+                                ->native(false),
 
-                TextInput::make('tracking_number')
-                    ->label('No. Resi')
-                    ->default(fn($record) => $record->transactionShipment?->tracking_number)
-                    ->visible(fn($record) => $record->transactionShipment !== null),
+                            TextInput::make('tracking_number')
+                                ->label('No. Resi')
+                                ->default(fn($record) => $record->transactionShipment?->tracking_number)
+                                ->visible(fn($record) => $record->transactionShipment !== null),
+                        ]),
+
+                    Step::make('confirm_pickup')
+                        ->label('Konfirmasi Pengambilan')
+                        ->icon(Heroicon::MapPin)
+                        ->visible(
+                            fn(Get $get) => in_array($get('status'), [
+                                TransactionStatusEnum::SHIPPED->value,
+                                TransactionStatusEnum::DELIVERED->value,
+                            ])
+                        )
+                        ->schema([
+                            Text::make(fn($record) => static::buildPickupSummary($record))
+                                ->columnSpanFull(),
+                        ]),
+                ])
+                    ->skippable(false)
+                    ->previousAction(fn($action) => $action->label('Kembali'))
+                    ->nextAction(fn($action) => $action->label('Lanjut')),
             ])
             ->action(function ($record, array $data): void {
-
                 if (!empty($data['status'])) {
-                    $record->update([
-                        'status' => $data['status'],
-                    ]);
+                    $record->update(['status' => $data['status']]);
                 }
 
                 if (!empty($data['payment_status']) && $record->transactionPayment) {
-                    $record->transactionPayment->update([
-                        'status' => $data['payment_status'],
-                    ]);
+                    $record->transactionPayment->update(['status' => $data['payment_status']]);
                 }
 
-                if (!empty($data['shipment_status']) && $record->transactionShipment) {
+                if (!empty($data['tracking_number']) && $record->transactionShipment) {
                     $record->transactionShipment->update([
-                        'status' => $data['shipment_status'],
                         'tracking_number' => $data['tracking_number'],
                     ]);
                 }
+
                 Notification::make()
                     ->title('Update status transaction successfully')
                     ->body('Status transaction successfully updated.')
                     ->success()
                     ->send();
             })
-            ->modalSubmitActionLabel('Simpan');
+            ->modalSubmitActionLabel('OK');
+    }
+
+    protected static function buildPickupSummary(Transaction $record): HtmlString
+    {
+        $defaultLocation = $record->storeSetting?->store_name ?? '-';
+
+        $rows = $record->transactionItems->map(function ($item) use ($defaultLocation) {
+            $isBundle = $item->bundle_id && $item->bundle;
+            $name = $isBundle
+                ? $item->bundle?->name
+                : ($item->product?->name ?? "Product #{$item->product_id}");
+
+            if ($item->is_multi_store && $item->source_stores) {
+                $sources = is_string($item->source_stores)
+                    ? json_decode($item->source_stores, true)
+                    : $item->source_stores;
+
+                $location = collect($sources ?? [])
+                    ->map(function ($src) {
+                        $storeName = StoreSetting::find($src['store_setting_id'] ?? null)?->store_name
+                            ?? ($src['store_name'] ?? '-');
+                        $qty = $src['qty'] ?? '-';
+                        return e("{$storeName} ({$qty})");
+                    })
+                    ->implode(', ');
+            } else {
+                $location = e($defaultLocation);
+            }
+
+            return '
+                <tr class="border-b border-gray-100 dark:border-gray-800">
+                    <td class="py-1.5 pr-4">' . e($name) . '</td>
+                    <td class="py-1.5 pr-4 text-center font-medium">' . e($item->qty) . '</td>
+                    <td class="py-1.5">' . $location . '</td>
+                </tr>
+            ';
+        })->implode('');
+
+        return new HtmlString('
+            <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400">
+                            <th class="py-1.5 pr-4">Produk</th>
+                            <th class="py-1.5 pr-4 text-center">Qty</th>
+                            <th class="py-1.5">Lokasi Pengambilan</th>
+                        </tr>
+                    </thead>
+                    <tbody>' . $rows . '</tbody>
+                </table>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Pastikan produk yang diambil sudah sesuai qty dan lokasi di atas sebelum melanjutkan.
+                </p>
+            </div>
+        ');
     }
 
     public static function print(): Action

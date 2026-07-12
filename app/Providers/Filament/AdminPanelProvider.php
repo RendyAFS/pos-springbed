@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Filament\Pages\SelectStore;
 use App\Http\Middleware\EnsureStoreSelected;
+use App\Http\Middleware\RestrictRoleAccessHour;
 use App\Models\StoreSetting;
 use Awcodes\LightSwitch\Enums\Alignment;
 use Awcodes\LightSwitch\LightSwitchPlugin;
@@ -85,6 +86,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 EnsureStoreSelected::class,
+                RestrictRoleAccessHour::class,
             ])
             ->userMenuItems([
                 Action::make('select_store')
