@@ -36,6 +36,7 @@ use Illuminate\Support\HtmlString;
 use Jacobtims\FilamentLogger\FilamentLoggerPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 use Wezlo\FilamentKanban\FilamentKanbanPlugin;
+use Filament\View\PanelsRenderHook;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -114,6 +115,10 @@ class AdminPanelProvider extends PanelProvider
                     ->icon(Heroicon::OutlinedShieldCheck)
                     ->collapsed(),
             ])
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn(): string => view('filament.components.transaction.barcode-scanner-scripts')->render(),
+            )
             ->plugins([
                 FilamentKanbanPlugin::make(),
                 GlobalSearchModalPlugin::make(),

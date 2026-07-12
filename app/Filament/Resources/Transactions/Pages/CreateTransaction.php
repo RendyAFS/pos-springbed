@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
+use App\Filament\Resources\Transactions\Concerns\HasBarcodeScanner;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\TransactionPayment;
 use App\Models\TransactionShipment;
@@ -12,11 +13,14 @@ use Illuminate\Support\Facades\Auth;
 
 class CreateTransaction extends CreateRecord
 {
+    use HasBarcodeScanner;
+
     protected static string $resource = TransactionResource::class;
 
     protected static ?string $title = 'Buat Transaksi';
 
     protected array $extraData = [];
+
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
@@ -84,6 +88,13 @@ class CreateTransaction extends CreateRecord
         /** @var ReferalService $referalService */
         $referalService = app(ReferalService::class);
         $referalService->processReferal($this->record, $extra);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            $this->getScanBarcodeAction(),
+        ];
     }
 
     protected function getRedirectUrl(): string
