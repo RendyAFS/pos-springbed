@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
+use App\Filament\Resources\Transactions\Concerns\HasBarcodeScanner;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\TransactionPayment;
 use App\Models\TransactionShipment;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class EditTransaction extends EditRecord
 {
+    use HasBarcodeScanner;
+
     protected static string $resource = TransactionResource::class;
 
     protected static ?string $title = 'Buat Transaksi';
@@ -129,6 +132,7 @@ class EditTransaction extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            $this->getScanBarcodeAction(),
             DeleteAction::make(),
             ForceDeleteAction::make(),
             RestoreAction::make(),
