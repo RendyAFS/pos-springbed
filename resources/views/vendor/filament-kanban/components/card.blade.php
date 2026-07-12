@@ -180,7 +180,8 @@
                                 @if ($actionUrl)
                                     <a href="{{ $actionUrl }}"
                                         @if ($action->shouldOpenUrlInNewTab()) target="_blank" @endif
-                                        class="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                                        class="flex items-center gap-3 px-4 py-2 text-sm
+                                        text-gray-700 dark:text-gray-200"
                                         wire:key="kanban-dropdown-{{ $recordId }}-{{ $action->getName() }}">
 
                                         <x-filament::icon :icon="$action->getIcon()" class="h-4 w-4 {{ $iconColor }}" />
@@ -190,7 +191,8 @@
                                 @else
                                     <button type="button" @click="open = false"
                                         wire:click.stop="mountAction('{{ $action->getName() }}', { record: {{ $record->getKey() }} })"
-                                        class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                                        class="flex w-full items-center gap-3 px-4 py-2 text-left text-sm
+                                        text-gray-700 dark:text-gray-200"
                                         wire:key="kanban-dropdown-{{ $recordId }}-{{ $action->getName() }}">
 
                                         <x-filament::icon :icon="$action->getIcon()" class="h-4 w-4 {{ $iconColor }}" />
