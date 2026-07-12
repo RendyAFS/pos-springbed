@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Transactions\Tables;
 
-use App\Enums\PaymentMethodDpEnum;
 use App\Enums\TransactionPaymentStatusEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Filament\Resources\Transactions\Support\TransactionActions;

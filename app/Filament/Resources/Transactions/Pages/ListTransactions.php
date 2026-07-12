@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
-use App\Enums\PaymentMethodDpEnum;
 use App\Enums\TransactionPaymentStatusEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Exports\TransactionsExport;
@@ -14,24 +13,14 @@ use App\Models\Transaction;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
-use Filament\Support\RawJs;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Facades\Excel;
 use Wezlo\FilamentKanban\Concerns\HasKanbanBoard;
 use Wezlo\FilamentKanban\KanbanBoard;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Text;
-use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
 use App\Filament\Resources\Transactions\Support\TransactionActions;
 
@@ -74,7 +63,7 @@ class ListTransactions extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('updateAllStatus')
+            TransactionActions::updateStatus()
                 ->label('')
                 ->color('gray')
                 ->extraAttributes([
@@ -84,63 +73,9 @@ class ListTransactions extends ListRecords
                 ->visible(function (array $arguments) {
                     $record = Transaction::find($arguments['record'] ?? null);
                     return $record !== null;
-                })
-                ->modalHeading(fn($record) => "Update Status Transaction - {$record->transaction_code}")
-                ->modalWidth('sm')
-                ->schema([
-                    Select::make('status')
-                        ->label('Status Transaction')
-                        ->options(
-                            collect(TransactionStatusEnum::cases())
-                                ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                                ->toArray()
-                        )
-                        ->default(fn($record) => $record->status?->value)
-                        ->native(false),
+                }),
 
-                    Select::make('payment_status')
-                        ->label('Status Payment')
-                        ->options(
-                            collect(TransactionPaymentStatusEnum::cases())
-                                ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                                ->toArray()
-                        )
-                        ->default(fn($record) => $record->transactionPayment?->status?->value)
-                        ->visible(fn($record) => $record->transactionPayment !== null)
-                        ->native(false),
-
-                    TextInput::make('tracking_number')
-                        ->label('No. Resi')
-                        ->default(fn($record) => $record->transactionShipment?->tracking_number)
-                        ->visible(fn($record) => $record->transactionShipment !== null),
-                ])
-                ->action(function ($record, array $data): void {
-                    if (!empty($data['status'])) {
-                        $record->update([
-                            'status' => $data['status'],
-                        ]);
-                    }
-
-                    if (!empty($data['payment_status']) && $record->transactionPayment) {
-                        $record->transactionPayment->update([
-                            'status' => $data['payment_status'],
-                        ]);
-                    }
-
-                    if (!empty($data['tracking_number']) && $record->transactionShipment) {
-                        $record->transactionShipment->update([
-                            'tracking_number' => $data['tracking_number'],
-                        ]);
-                    }
-
-                    Notification::make()
-                        ->title('Update status transaction successfully')
-                        ->body('Status transaction successfully updated.')
-                        ->success()
-                        ->send();
-                })
-                ->modalSubmitActionLabel('Simpan'),
-            Action::make('addDownPayment')
+            TransactionActions::addDownPayment()
                 ->label('')
                 ->color('gray')
                 ->extraAttributes([
@@ -150,119 +85,8 @@ class ListTransactions extends ListRecords
                 ->visible(function (array $arguments) {
                     $record = Transaction::find($arguments['record'] ?? null);
                     return $record?->is_down_payment ?? false;
-                })
-                ->modalHeading(fn($record) => "Tambah Down Payment - {$record->transaction_code}")
-                ->modalWidth(Width::ExtraLarge)
-                ->schema([
-                    Text::make(function ($record) {
-                        $grandTotal  = (float) $record->grand_total;
-                        $totalPaid   = (float) $record->transactionDownPayments->sum('amount')
-                            + (float) ($record->transactionPayment?->amount ?? 0);
-                        $remaining   = max($grandTotal - $totalPaid, 0);
-                        $isPaid      = $remaining <= 0;
-                        $statusLabel = $isPaid ? 'Lunas' : 'Belum Lunas';
-                        $statusColor = $isPaid ? 'success' : 'danger';
+                }),
 
-                        $rows = '
-                                    <tr>
-                                        <td class="py-1 pr-4 text-gray-600 dark:text-gray-400">Grand Total</td>
-                                        <td class="py-1 text-right font-medium">' . e(RupiahHelper::format($grandTotal)) . '</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-1 pr-4 text-gray-600 dark:text-gray-400">Total Sudah Dibayar</td>
-                                        <td class="py-1 text-right font-medium">' . e(RupiahHelper::format($totalPaid)) . '</td>
-                                    </tr>
-                                    <tr class="border-t border-gray-200 dark:border-gray-700">
-                                        <td class="py-1 pr-4 font-semibold">Sisa Pembayaran</td>
-                                        <td class="py-1 text-right font-semibold ' . ($isPaid ? 'text-success-600' : 'text-danger-600') . '">'
-                            . e(RupiahHelper::format($remaining)) . '
-                                        </td>
-                                    </tr>
-                                ';
-
-                        $html = '
-                                    <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
-                                        <table class="w-full text-sm">' . $rows . '</table>
-                                        <div class="mt-2">
-                                            <span class="inline-flex items-center fi-badge fi-size-sm font-medium text-' . $statusColor . '-600 ring-1 ring-inset ring-' . $statusColor . '-600/20">
-                                                ' . $statusLabel . '
-                                            </span>
-                                        </div>
-                                    </div>
-                                ';
-
-                        return new HtmlString($html);
-                    })->columnSpanFull(),
-
-                    Grid::make(2)->schema([
-                        TextInput::make('amount')
-                            ->label('Jumlah')
-                            ->columnSpanFull()
-                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
-                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
-                            ->default(function ($record) {
-                                $grandTotal = (float) $record->grand_total;
-                                $totalPaid  = (float) $record->transactionDownPayments->sum('amount')
-                                    + (float) ($record->transactionPayment?->amount ?? 0);
-                                $remaining  = max($grandTotal - $totalPaid, 0);
-
-                                return $remaining > 0 ? $remaining : null;
-                            })
-                            ->required()
-                            ->prefix('Rp.')
-                            ->rules([
-                                fn($record) => function (string $attribute, $value, \Closure $fail) use ($record) {
-                                    $grandTotal = (float) $record->grand_total;
-                                    $totalPaid  = (float) $record->transactionDownPayments->sum('amount')
-                                        + (float) ($record->transactionPayment?->amount ?? 0);
-                                    $remaining  = $grandTotal - $totalPaid;
-
-                                    if ((float) $value > $remaining) {
-                                        $fail('Jumlah melebihi sisa pembayaran (' . RupiahHelper::format($remaining) . ').');
-                                    }
-                                },
-                            ]),
-
-                        Select::make('method_payment')
-                            ->label('Metode Pembayaran')
-                            ->options(
-                                collect(PaymentMethodDpEnum::cases())
-                                    ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
-                                    ->toArray()
-                            )
-                            ->searchable()
-                            ->required()
-                            ->native(false),
-
-                        DatePicker::make('paid_at')
-                            ->label('Tanggal Bayar')
-                            ->native(false)
-                            ->suffixIcon(Heroicon::Calendar)
-                            ->closeOnDateSelection()
-                            ->default(now())
-                            ->required(),
-
-                        Textarea::make('notes')
-                            ->label('Notes')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                    ]),
-                ])
-                ->action(function (array $data, $record) {
-                    $record->transactionDownPayments()->create([
-                        'amount'         => $data['amount'],
-                        'method_payment' => $data['method_payment'],
-                        'paid_at'        => $data['paid_at'],
-                        'notes'          => $data['notes'],
-                    ]);
-
-                    Notification::make()
-                        ->title('Down Payment berhasil ditambahkan')
-                        ->success()
-                        ->send();
-                })
-                ->modalSubmitActionLabel('Simpan'),
             Action::make('filterDate')
                 ->label('Date Range')
                 ->icon(Heroicon::Calendar)
@@ -291,21 +115,16 @@ class ListTransactions extends ListRecords
                     $this->date_until = $data['date_until'];
                 })
                 ->modalWidth(Width::ExtraLarge),
+
             Action::make('toggleView')
-                ->label(fn() => $this->viewMode === 'kanban'
-                    ? 'Table View'
-                    : 'Kanban View')
-                ->icon(fn() => $this->viewMode === 'kanban'
-                    ? Heroicon::Bars3BottomLeft
-                    : Heroicon::ViewColumns)
+                ->label(fn() => $this->viewMode === 'kanban' ? 'Table View' : 'Kanban View')
+                ->icon(fn() => $this->viewMode === 'kanban' ? Heroicon::Bars3BottomLeft : Heroicon::ViewColumns)
                 ->color('gray')
                 ->action(function () {
-                    $this->viewMode = $this->viewMode === 'kanban'
-                        ? 'table'
-                        : 'kanban';
-
+                    $this->viewMode = $this->viewMode === 'kanban' ? 'table' : 'kanban';
                     session(['transactions_view_mode' => $this->viewMode]);
                 }),
+
             Action::make('exportExcel')
                 ->label('Export Excel')
                 ->icon(Heroicon::ArrowDownTray)
@@ -341,6 +160,7 @@ class ListTransactions extends ListRecords
                 ->modalWidth(Width::Large)
                 ->modalHeading('Export Transaksi')
                 ->modalSubmitActionLabel('Export'),
+
             CreateAction::make()
                 ->label('Tambah Transaksi'),
         ];
