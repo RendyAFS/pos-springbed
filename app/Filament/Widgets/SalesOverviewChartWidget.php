@@ -112,7 +112,7 @@ class SalesOverviewChartWidget extends ChartWidget
             $current = $startDate->copy()->startOfMonth();
             $end     = $endDate->copy()->startOfMonth();
             while ($current->lte($end)) {
-                $key      = $current->format('Y-F');
+                $key      = $current->format('Y-m');
                 $labels[] = $current->translatedFormat('F Y');
                 $data[]   = (float) ($rows[$key] ?? 0);
                 $current->addMonth();
