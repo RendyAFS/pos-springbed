@@ -72,7 +72,7 @@ class TransactionForm
                                         ->label('Customer')
                                         ->required()
                                         ->relationship('customer', 'name')
-                                        ->searchable(['name', 'phone', 'email'])
+                                        ->searchable(['name', 'phone'])
                                         ->preload()
                                         ->live()
                                         ->createOptionForm([
@@ -84,10 +84,6 @@ class TransactionForm
                                                 ->label('Telepone')
                                                 ->tel()
                                                 ->maxLength(20),
-                                            TextInput::make('email')
-                                                ->label('Email')
-                                                ->email()
-                                                ->maxLength(255),
                                             Textarea::make('address')
                                                 ->label('Alamat')
                                                 ->rows(3),
@@ -101,16 +97,13 @@ class TransactionForm
                                                 ->required(),
                                             TextInput::make('phone')
                                                 ->label('Telepone'),
-                                            TextInput::make('email')
-                                                ->label('Email')
-                                                ->email(),
                                             Textarea::make('address')
                                                 ->label('Alamat'),
                                         ])
                                         ->updateOptionUsing(function (array $data, $record) {
                                             $record->update($data);
                                         })
-                                        ->placeholder('Search by name, phone, or email...')
+                                        ->placeholder('Search by name')
                                         ->columnSpanFull(),
 
                                     Select::make('status')

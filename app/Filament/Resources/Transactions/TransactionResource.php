@@ -49,7 +49,6 @@ class TransactionResource extends Resource
             'Kurir'             => $record->transactionShipment?->courier?->name,
             'Metode Pembayaran' => $record->transactionPayment?->method->getLabel(),
             'Status Pembayaran' => $record->transactionPayment?->status->getLabel(),
-            'Status Pengiriman' => $record->transactionShipment?->status->getLabel(),
         ];
     }
 
