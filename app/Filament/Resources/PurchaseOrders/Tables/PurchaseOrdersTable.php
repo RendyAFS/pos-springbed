@@ -47,6 +47,19 @@ class PurchaseOrdersTable
                     ->label('Tanggal Pesanan')
                     ->date()
                     ->sortable(),
+                TextColumn::make('delivery_order_number')
+                    ->label('No. Surat Jalan')
+                    ->searchable()
+                    ->badge()
+                    ->color('primary')
+                    ->icon(Heroicon::Document)
+                    ->iconPosition(IconPosition::After)
+                    ->copyable()
+                    ->copyMessage('Nomor Surat Jalan copied')
+                    ->copyMessageDuration(1500)
+                    ->description(
+                        fn($record) => $record->taxpayer_name
+                    ),
                 TextColumn::make('total_amount')
                     ->label('Total')
                     ->numeric()

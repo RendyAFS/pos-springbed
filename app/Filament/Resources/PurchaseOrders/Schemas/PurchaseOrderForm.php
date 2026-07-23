@@ -78,6 +78,12 @@ class PurchaseOrderForm
                             ->closeOnDateSelection()
                             ->required()
                             ->default(now()),
+                        TextInput::make('delivery_order_number')
+                            ->label('Nomor Surat Jalan')
+                            ->required(),
+                        TextInput::make('taxpayer_name')
+                            ->label('Nama Wajib Pajak')
+                            ->required(),
                     ])
                     ->columns(2),
                 Section::make('Summary')
