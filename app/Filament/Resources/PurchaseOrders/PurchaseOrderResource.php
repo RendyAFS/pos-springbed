@@ -29,7 +29,7 @@ class PurchaseOrderResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['supplier_name', 'invoice_number'];
+        return ['supplier_name', 'invoice_number', 'delivery_order_number'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
@@ -41,6 +41,7 @@ class PurchaseOrderResource extends Resource
     {
         return [
             'Invoice Number' => $record->invoice_number,
+            'No Surat Jalan' => $record->delivery_order_number,
             'Tanggal Pembelian' => $record->purchase_date,
             'Total' => RupiahHelper::format($record->total_amount),
         ];
