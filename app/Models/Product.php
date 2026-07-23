@@ -16,6 +16,7 @@ class Product extends Model
         'name',
         'type_id',
         'selling_price',
+        'cost_price',
         'sku',
         'size_id',
         'weight',

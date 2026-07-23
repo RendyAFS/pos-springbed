@@ -116,25 +116,34 @@ class PurchaseOrderForm
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(function ($state, Get $get, Set $set) {
 
-                                        $storeId = $get('../../store_setting_id');
-
-                                        if (!$state || !$storeId) {
+                                        if (!$state) {
                                             $set('qty_remaining', 0);
                                             $set('selling_price', 0);
+                                            $set('cost_price', number_format(0, 0, ',', '.'));
                                             return;
                                         }
 
-                                        $stock = InventoryStock::query()
+                                        $product = Product::query()->find($state);
+                                        $storeId = $get('../../store_setting_id');
+
+                                        $stock = $storeId
+                                            ? InventoryStock::query()
                                             ->where('product_id', $state)
                                             ->where('store_setting_id', $storeId)
-                                            ->value('quantity');
-
-                                        $sellingPrice = Product::query()
-                                            ->where('id', $state)
-                                            ->value('selling_price');
+                                            ->value('quantity')
+                                            : null;
 
                                         $set('qty_remaining', number_format($stock ?? 0, 0, ',', '.'));
-                                        $set('selling_price', number_format($sellingPrice ?? 0, 0, ',', '.'));
+                                        $set('selling_price', number_format($product->selling_price ?? 0, 0, ',', '.'));
+                                        $set('cost_price', number_format($product->cost_price ?? 0, 0, ',', '.'));
+
+                                        $items = $get('../../purchaseOrderItems') ?? [];
+                                        $total = collect($items)->sum(function ($item) {
+                                            $qty   = (float) ($item['qty_purchased'] ?? 0);
+                                            $price = (float) str_replace('.', '', $item['cost_price'] ?? 0);
+                                            return $qty * $price;
+                                        });
+                                        $set('../../total_amount', number_format($total, 0, ',', '.'));
                                     })
                                     ->columnSpanFull(),
                                 TextInput::make('qty_purchased')

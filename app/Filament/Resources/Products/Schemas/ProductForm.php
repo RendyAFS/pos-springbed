@@ -9,12 +9,10 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-// use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ViewField;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -68,6 +66,13 @@ class ProductForm
                     ->schema([
                         TextInput::make('selling_price')
                             ->label('Harga Jual')
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                            ->required()
+                            ->prefix('Rp.'),
+                        TextInput::make('cost_price')
+                            ->label('Harga Beli')
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                             ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                             ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)

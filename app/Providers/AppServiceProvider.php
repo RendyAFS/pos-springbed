@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\PurchaseOrderItem;
 use App\Models\User;
+use App\Observers\PurchaseOrderItemObserver;
 use App\Policies\ActivityPolicy;
 use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
@@ -32,5 +34,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewPulse', function (User $user) {
             return $user->hasRole('Super Admin');
         });
+
+        // Observers
+        PurchaseOrderItem::observe(PurchaseOrderItemObserver::class);
     }
 }
