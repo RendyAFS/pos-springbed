@@ -15,6 +15,11 @@
     $courierName = $transaction->transactionShipment?->courier?->name ?? '';
     $trackingNo = $transaction->transactionShipment?->tracking_number ?? '';
 
+    // Menambahkan variabel untuk Tanggal Kirim
+    $shippingDate = $transaction->transactionShipment?->created_at
+        ? \Carbon\Carbon::parse($transaction->transactionShipment->created_at)->format('d/m/Y')
+        : '';
+
     $itemCount = $transaction->transactionItems->count();
     $minRows = $isA4 ? 18 : 12;
     $emptyRows = max(0, $minRows - $itemCount);
@@ -62,6 +67,12 @@
                         <div class="meta-item">
                             <div class="meta-label">Metode Pengiriman</div>
                             <div class="meta-value">{{ $courierName }}</div>
+                        </div>
+                    @endif
+                    @if ($shippingDate)
+                        <div class="meta-item">
+                            <div class="meta-label">Tanggal Kirim</div>
+                            <div class="meta-value">{{ $shippingDate }}</div>
                         </div>
                     @endif
                     @if ($trackingNo)
