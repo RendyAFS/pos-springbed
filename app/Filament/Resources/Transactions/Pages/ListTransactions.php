@@ -24,6 +24,7 @@ use Wezlo\FilamentKanban\KanbanBoard;
 use Livewire\Attributes\Url;
 use App\Filament\Resources\Transactions\Support\TransactionActions;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 
 
@@ -155,8 +156,17 @@ class ListTransactions extends ListRecords
                         ])
                 ])
                 ->action(function (array $data) {
+                    /** @var \App\Models\User|null $user */
+                    $user = Auth::user();
+
+                    $canViewHargaNetto = $user?->can('ViewHargaNettoTransaction') ?? false;
+
                     return Excel::download(
-                        new TransactionsExport($data['export_date_from'], $data['export_date_until']),
+                        new TransactionsExport(
+                            $data['export_date_from'],
+                            $data['export_date_until'],
+                            $canViewHargaNetto
+                        ),
                         'transaksi-' . $data['export_date_from'] . '-sd-' . $data['export_date_until'] . '.xlsx'
                     );
                 })
