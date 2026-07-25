@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Customers;
 
 use App\Filament\Resources\Customers\Pages\ManageCustomers;
 use App\Helpers\RupiahHelper;
+use App\Helpers\WilayahHelper;
 use App\Models\Customer;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -13,6 +14,8 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
@@ -64,14 +67,55 @@ class CustomerResource extends Resource
                         TextInput::make('name')
                             ->label('Nama')
                             ->required(),
+
                         TextInput::make('phone')
                             ->label('Telepon')
                             ->tel()
                             ->required(),
+
+                        Select::make('city_code')
+                            ->label('Kota/Kabupaten')
+                            ->options(fn() => WilayahHelper::getAllRegencies())
+                            ->searchable()
+                            ->live()
+                            ->native(false)
+                            ->afterStateUpdated(function (?string $state, callable $set) {
+                                $regencies = WilayahHelper::getAllRegencies();
+                                $provinceCode = WilayahHelper::provinceCodeFromRegencyCode($state);
+
+                                $set('city_name', $regencies[$state] ?? null);
+                                $set('province_code', $provinceCode);
+                                $set('province_name', $provinceCode ? (WilayahHelper::getProvinces()[$provinceCode] ?? null) : null);
+
+                                $set('district_name', null);
+                            }),
+
+                        Select::make('district_code')
+                            ->label('Kecamatan')
+                            ->options(fn(callable $get) => WilayahHelper::getDistricts($get('city_code')))
+                            ->searchable()
+                            ->live()
+                            ->native(false)
+                            ->placeholder(fn(callable $get) => blank($get('city_code'))
+                                ? 'Pilih Kota terlebih dahulu'
+                                : 'Pilih Kecamatan')
+                            ->disabled(fn(callable $get) => blank($get('city_code')))
+                            ->afterStateUpdated(fn(?string $state, callable $get, callable $set) => $set(
+                                'district_name',
+                                WilayahHelper::getDistricts($get('city_code'))[$state] ?? null
+                            )),
+
+
                         Textarea::make('address')
                             ->label('Alamat')
+                            ->helperText('Detail alamat (jalan, No. rumah, RT/RW, patokan, dll) yang tidak tercakup di data Kecamatan/Kota di atas.')
                             ->rows(3)
                             ->default(null),
+
+                        Hidden::make('province_code'),
+                        Hidden::make('province_name'),
+                        Hidden::make('city_name'),
+                        Hidden::make('district_name'),
                     ])->columnSpan(fn($record) => $record === null ? 'full' : 1),
                 Section::make('Referal')
                     ->visible(fn($record) => $record !== null)
@@ -102,6 +146,14 @@ class CustomerResource extends Resource
                 TextColumn::make('phone')
                     ->label('Telepon')
                     ->searchable(),
+                TextColumn::make('district_name')
+                    ->label('Kecamatan')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('city_name')
+                    ->label('Kota/Kabupaten')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('address')
                     ->label('Alamat')
                     ->searchable()
@@ -113,7 +165,6 @@ class CustomerResource extends Resource
             ])
             ->recordActions([
                 EditAction::make()
-
                     ->modalHeading('Edit Customer'),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),

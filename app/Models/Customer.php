@@ -14,6 +14,10 @@ class Customer extends Model
         'name',
         'phone',
         'address',
+        'city_code',
+        'city_name',
+        'district_code',
+        'district_name',
     ];
 
     public function referal()
@@ -21,4 +25,3 @@ class Customer extends Model
         return $this->hasOne(Referal::class);
     }
 }
-
