@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Transactions\Schemas\Steps;
 
 use App\Enums\TransactionStatusEnum;
+use App\Helpers\WilayahHelper;
 use App\Models\Customer;
 use App\Models\StoreSetting;
 use Filament\Forms\Components\DatePicker;
@@ -62,6 +63,38 @@ class CustomerStep
                                 Textarea::make('address')
                                     ->label('Alamat')
                                     ->rows(3),
+                                Select::make('city_code')
+                                    ->label('Kota/Kabupaten')
+                                    ->options(fn() => WilayahHelper::getAllRegencies())
+                                    ->searchable()
+                                    ->live()
+                                    ->native(false)
+                                    ->afterStateUpdated(function (?string $state, callable $set) {
+                                        $regencies = WilayahHelper::getAllRegencies();
+                                        $provinceCode = WilayahHelper::provinceCodeFromRegencyCode($state);
+
+                                        $set('city_name', $regencies[$state] ?? null);
+                                        $set('province_code', $provinceCode);
+                                        $set('province_name', $provinceCode ? (WilayahHelper::getProvinces()[$provinceCode] ?? null) : null);
+
+                                        $set('district_code', null);
+                                        $set('district_name', null);
+                                    }),
+
+                                Select::make('district_code')
+                                    ->label('Kecamatan')
+                                    ->options(fn(callable $get) => WilayahHelper::getDistricts($get('city_code')))
+                                    ->searchable()
+                                    ->live()
+                                    ->native(false)
+                                    ->placeholder(fn(callable $get) => blank($get('city_code'))
+                                        ? 'Pilih Kota terlebih dahulu'
+                                        : 'Pilih Kecamatan')
+                                    ->disabled(fn(callable $get) => blank($get('city_code')))
+                                    ->afterStateUpdated(fn(?string $state, callable $get, callable $set) => $set(
+                                        'district_name',
+                                        WilayahHelper::getDistricts($get('city_code'))[$state] ?? null
+                                    )),
                             ])
                             ->createOptionUsing(fn(array $data): int => Customer::create($data)->getKey())
                             ->editOptionForm([
@@ -72,6 +105,38 @@ class CustomerStep
                                     ->label('Telepone'),
                                 Textarea::make('address')
                                     ->label('Alamat'),
+                                Select::make('city_code')
+                                    ->label('Kota/Kabupaten')
+                                    ->options(fn() => WilayahHelper::getAllRegencies())
+                                    ->searchable()
+                                    ->live()
+                                    ->native(false)
+                                    ->afterStateUpdated(function (?string $state, callable $set) {
+                                        $regencies = WilayahHelper::getAllRegencies();
+                                        $provinceCode = WilayahHelper::provinceCodeFromRegencyCode($state);
+
+                                        $set('city_name', $regencies[$state] ?? null);
+                                        $set('province_code', $provinceCode);
+                                        $set('province_name', $provinceCode ? (WilayahHelper::getProvinces()[$provinceCode] ?? null) : null);
+
+                                        $set('district_code', null);
+                                        $set('district_name', null);
+                                    }),
+
+                                Select::make('district_code')
+                                    ->label('Kecamatan')
+                                    ->options(fn(callable $get) => WilayahHelper::getDistricts($get('city_code')))
+                                    ->searchable()
+                                    ->live()
+                                    ->native(false)
+                                    ->placeholder(fn(callable $get) => blank($get('city_code'))
+                                        ? 'Pilih Kota terlebih dahulu'
+                                        : 'Pilih Kecamatan')
+                                    ->disabled(fn(callable $get) => blank($get('city_code')))
+                                    ->afterStateUpdated(fn(?string $state, callable $get, callable $set) => $set(
+                                        'district_name',
+                                        WilayahHelper::getDistricts($get('city_code'))[$state] ?? null
+                                    )),
                             ])
                             ->updateOptionUsing(function (array $data, $record) {
                                 $record->update($data);

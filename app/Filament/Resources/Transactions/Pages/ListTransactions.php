@@ -23,6 +23,10 @@ use Wezlo\FilamentKanban\Concerns\HasKanbanBoard;
 use Wezlo\FilamentKanban\KanbanBoard;
 use Livewire\Attributes\Url;
 use App\Filament\Resources\Transactions\Support\TransactionActions;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
+
 
 class ListTransactions extends ListRecords
 {
@@ -67,7 +71,7 @@ class ListTransactions extends ListRecords
                 ->label('')
                 ->color('gray')
                 ->extraAttributes([
-                    'class' => '!bg-transparent !shadow-none !ring-0 hover:!bg-transparent !px-0 cursor-default pointer-events-none',
+                    'class' => 'hidden',
                 ])
                 ->record(fn(array $arguments) => Transaction::find($arguments['record'] ?? null))
                 ->visible(function (array $arguments) {
@@ -79,7 +83,7 @@ class ListTransactions extends ListRecords
                 ->label('')
                 ->color('gray')
                 ->extraAttributes([
-                    'class' => '!bg-transparent !shadow-none !ring-0 hover:!bg-transparent !px-0 text-success-600 dark:text-success-400 cursor-default pointer-events-none',
+                    'class' => 'hidden',
                 ])
                 ->record(fn(array $arguments) => Transaction::find($arguments['record'] ?? null))
                 ->visible(function (array $arguments) {
@@ -152,8 +156,17 @@ class ListTransactions extends ListRecords
                         ])
                 ])
                 ->action(function (array $data) {
+                    /** @var \App\Models\User|null $user */
+                    $user = Auth::user();
+
+                    $canViewHargaNetto = $user?->can('ViewHargaNettoTransaction') ?? false;
+
                     return Excel::download(
-                        new TransactionsExport($data['export_date_from'], $data['export_date_until']),
+                        new TransactionsExport(
+                            $data['export_date_from'],
+                            $data['export_date_until'],
+                            $canViewHargaNetto
+                        ),
                         'transaksi-' . $data['export_date_from'] . '-sd-' . $data['export_date_until'] . '.xlsx'
                     );
                 })
@@ -164,6 +177,25 @@ class ListTransactions extends ListRecords
             CreateAction::make()
                 ->label('Tambah Transaksi'),
         ];
+    }
+
+    public function getSubheading(): string|Htmlable|null
+    {
+        if (! $this->date_from || ! $this->date_until) {
+            return null;
+        }
+
+        $from  = Carbon::parse($this->date_from)->translatedFormat('d F Y');
+        $until = Carbon::parse($this->date_until)->translatedFormat('d F Y');
+
+        return new HtmlString(
+            '<span class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                </svg>
+                Menampilkan transaksi: <span class="font-medium text-gray-700 dark:text-gray-300">' . e($from) . ' &ndash; ' . e($until) . '</span>
+            </span>'
+        );
     }
 
     public function kanban(KanbanBoard $kanban): KanbanBoard
