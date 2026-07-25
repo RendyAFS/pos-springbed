@@ -97,7 +97,52 @@
     @endphp
 
     @if ($hasFooterActions)
-        <div x-data="{ open: false, dropdownStyle: '' }"
+        <div x-data="{
+                open: false,
+                dropdownStyle: 'top:-9999px; left:-9999px;',
+                toggleDropdown(el) {
+                    if (this.open) {
+                        this.open = false;
+                        return;
+                    }
+                    this.open = true;
+                    this.$nextTick(() => this.positionDropdown(el));
+                },
+                positionDropdown(el) {
+                    const rect = el.getBoundingClientRect();
+                    const menu = this.$refs.dropdownMenu;
+                    if (!menu) return;
+
+                    const menuRect = menu.getBoundingClientRect();
+                    const margin = 8;
+
+                    let top = rect.bottom + margin;
+                    let left = rect.right - menuRect.width;
+
+                    // Flip ke atas kalau tidak cukup ruang di bawah
+                    if (top + menuRect.height > window.innerHeight - margin) {
+                        const flippedTop = rect.top - menuRect.height - margin;
+                        // Pakai posisi atas hanya jika benar-benar lebih muat
+                        if (flippedTop > margin) {
+                            top = flippedTop;
+                        } else {
+                            // Kalau dua-duanya kurang, clamp ke bawah viewport
+                            top = window.innerHeight - menuRect.height - margin;
+                        }
+                    }
+
+                    // Jangan sampai keluar dari batas atas viewport
+                    if (top < margin) top = margin;
+
+                    // Clamp horizontal
+                    if (left < margin) left = margin;
+                    if (left + menuRect.width > window.innerWidth - margin) {
+                        left = window.innerWidth - menuRect.width - margin;
+                    }
+
+                    this.dropdownStyle = `top:${top}px; left:${left}px;`;
+                },
+            }"
             class="mt-3 flex items-center justify-end gap-1 border-t border-gray-100 pt-2 dark:border-white/5 overflow-visible">
 
             {{-- View & Edit --}}
@@ -139,16 +184,11 @@
 
             {{-- Dropdown --}}
             @if ($dropdownActions->isNotEmpty())
-                <div class="relative">
+                <div class="relative" wire:key="dropdown-wrap-{{ $recordId }}">
 
                     <button type="button" x-ref="dropdownTrigger_{{ $recordId }}"
-                        @click.stop="
-                if (!open) {
-                    const rect = $el.getBoundingClientRect();
-                    dropdownStyle = `top:${rect.bottom + 8}px; left:${rect.right - 224}px;`;
-                }
-                open = !open;
-            "
+                        wire:key="dropdown-trigger-{{ $recordId }}"
+                        @click.stop="toggleDropdown($el)"
                         @scroll.window="open = false" @resize.window="open = false"
                         class="rounded-md p-1.5 text-gray-500 transition hover:bg-gray-100 dark:hover:bg-white/10">
 
@@ -156,7 +196,8 @@
                     </button>
 
                     <template x-teleport="body">
-                        <div x-show="open" x-transition @click.outside="open = false" x-cloak
+                        <div x-ref="dropdownMenu" x-show="open" x-transition @click.outside="open = false" x-cloak
+                            wire:key="dropdown-menu-{{ $recordId }}"
                             :style="`position: fixed; z-index: 9999; ${dropdownStyle}`"
                             class="w-56 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
 

@@ -425,26 +425,35 @@ class TransactionActions
             })
             ->implode("\n\n");
 
-        $itemTotals = $record->transactionItems
-            ->map(fn($item) => RupiahHelper::format($item->subtotal))
-            ->implode(' + ');
+        $itemsSubtotal = $record->transactionItems->sum('subtotal');
+        $shippingCost  = (float) $record->shiping_cost;
 
         $totalPaid = (float) $record->transactionDownPayments->sum('amount')
             + (float) ($record->transactionPayment?->amount ?? 0);
 
         $remaining = max((float) $record->grand_total - $totalPaid, 0);
 
-        $lastDp = $record->transactionDownPayments->sortByDesc('paid_at')->first();
+        $orderDate = $record->created_at?->translatedFormat('d F Y');
 
-        $message  = "Thank you for your order\n\n";
+        $orderSource = $record->order_source ?? '-';
+
+        $paymentMethod = $record->transactionPayment?->method?->getLabel() ?? 'Transfer';
+
+        $formatPlain = fn($amount) => number_format($amount, 0, ',', '.');
+
+        $message  = "Thank you for your order\n";
+        $message .= "{$orderDate}\n";
+        $message .= "order by: {$orderSource}\n\n";
         $message .= "Nama : {$customer?->name}\n";
         $message .= "Alamat : {$customer?->address}\n";
         $message .= "No Hp : {$customer?->phone}\n\n";
         $message .= "Order :\n{$orderLines}\n\n";
-        $message .= "Total: {$itemTotals} = " . RupiahHelper::format($record->grand_total) . "\n\n";
-        $message .= "Ongkir: " . ($record->shiping_cost > 0 ? RupiahHelper::format($record->shiping_cost) : '-') . "\n\n";
+        $message .= "Harga: " . RupiahHelper::format($itemsSubtotal) . "\n";
+        $message .= "Ongkir: " . ($shippingCost > 0 ? RupiahHelper::format($shippingCost) : '-') . "\n";
+        $message .= "Total: Rp. " . $formatPlain($itemsSubtotal) . "+" . $formatPlain($shippingCost)
+            . "=" . $formatPlain($record->grand_total) . "\n\n";
         $message .= "Pembayaran :\n";
-        $message .= "DP transfer: " . RupiahHelper::format($lastDp->amount ?? $totalPaid) . "\n";
+        $message .= "Payment by {$paymentMethod}: " . $formatPlain($totalPaid) . "\n";
         $message .= "Sisa: " . RupiahHelper::format($remaining) . "\n";
 
         return 'https://wa.me/' . $phone . '?text=' . rawurlencode($message);
