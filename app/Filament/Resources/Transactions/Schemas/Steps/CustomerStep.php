@@ -70,10 +70,17 @@ class CustomerStep
                                     ->live()
                                     ->native(false)
                                     ->afterStateUpdated(function (?string $state, callable $set) {
-                                        $set('city_name', WilayahHelper::getAllRegencies()[$state] ?? null);
+                                        $regencies = WilayahHelper::getAllRegencies();
+                                        $provinceCode = WilayahHelper::provinceCodeFromRegencyCode($state);
+
+                                        $set('city_name', $regencies[$state] ?? null);
+                                        $set('province_code', $provinceCode);
+                                        $set('province_name', $provinceCode ? (WilayahHelper::getProvinces()[$provinceCode] ?? null) : null);
+
                                         $set('district_code', null);
                                         $set('district_name', null);
                                     }),
+
                                 Select::make('district_code')
                                     ->label('Kecamatan')
                                     ->options(fn(callable $get) => WilayahHelper::getDistricts($get('city_code')))
@@ -112,6 +119,7 @@ class CustomerStep
                                         $set('province_code', $provinceCode);
                                         $set('province_name', $provinceCode ? (WilayahHelper::getProvinces()[$provinceCode] ?? null) : null);
 
+                                        $set('district_code', null);
                                         $set('district_name', null);
                                     }),
 

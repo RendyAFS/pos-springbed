@@ -87,6 +87,7 @@ class CustomerResource extends Resource
                                 $set('province_code', $provinceCode);
                                 $set('province_name', $provinceCode ? (WilayahHelper::getProvinces()[$provinceCode] ?? null) : null);
 
+                                $set('district_code', null);
                                 $set('district_name', null);
                             }),
 
@@ -104,7 +105,6 @@ class CustomerResource extends Resource
                                 'district_name',
                                 WilayahHelper::getDistricts($get('city_code'))[$state] ?? null
                             )),
-
 
                         Textarea::make('address')
                             ->label('Alamat')
