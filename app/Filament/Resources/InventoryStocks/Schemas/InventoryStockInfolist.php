@@ -7,7 +7,6 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\FontFamily;
-use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\HtmlString;
 
@@ -21,7 +20,10 @@ class InventoryStockInfolist
                 Section::make('Informasi Produk')
                     ->icon(Heroicon::ShoppingBag)
                     ->schema([
-
+                        TextEntry::make('storeSetting.store_name')
+                            ->label('Toko')
+                            ->badge()
+                            ->color('gray'),
                         TextEntry::make('product.name')
                             ->label('Produk')
                             ->html()
