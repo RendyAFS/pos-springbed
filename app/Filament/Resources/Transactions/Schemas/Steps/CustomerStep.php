@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Transactions\Schemas\Steps;
 use App\Enums\TransactionStatusEnum;
 use App\Helpers\WilayahHelper;
 use App\Models\Customer;
+use App\Models\ChannelSale;
 use App\Models\StoreSetting;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -43,6 +44,18 @@ class CustomerStep
                             ->default(now())
                             ->native(false)
                             ->closeOnDateSelection()
+                            ->columnSpan(1),
+                        Select::make('channel_sale_id')
+                            ->label('Channel Sales')
+                            ->options(
+                                fn() => ChannelSale::query()
+                                    ->get()
+                                    ->mapWithKeys(fn($items) => [$items->id => "{$items->name} ({$items->channel})"])
+                            )
+                            ->searchable(['name'])
+                            ->preload()
+                            ->live()
+                            ->native(false)
                             ->columnSpan(1),
                         Select::make('customer_id')
                             ->label('Customer')
@@ -142,7 +155,7 @@ class CustomerStep
                                 $record->update($data);
                             })
                             ->placeholder('Search by name')
-                            ->columnSpanFull(),
+                            ->columnSpan(1),
 
                         Select::make('status')
                             ->label('Status Transaksi')
