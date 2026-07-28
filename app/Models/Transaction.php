@@ -13,6 +13,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'store_setting_id',
+        'channel_sale_id',
         'customer_id',
         'transaction_code',
         'subtotal',
@@ -94,5 +95,10 @@ class Transaction extends Model
     public function transactionDownPayments()
     {
         return $this->hasMany(TransactionDownPayment::class, 'transaction_id');
+    }
+
+    public function channelSale()
+    {
+        return $this->belongsTo(ChannelSale::class, 'channel_sale_id');
     }
 }

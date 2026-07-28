@@ -63,19 +63,28 @@ class TransactionsTable
                         return new \Illuminate\Support\HtmlString($content);
                     })
                     ->description(function ($record): ?\Illuminate\Support\HtmlString {
+                        $badges = [];
+
                         $preOrderItems = $record->transactionItems
                             ->where('is_pre_order', true);
 
-                        if ($preOrderItems->isEmpty()) {
-                            return null;
+                        if ($preOrderItems->isNotEmpty()) {
+                            $badges[] = '
+                            <span class="inline-flex items-center gap-x-1 px-1.5 py-0.5 text-xs font-medium text-warning-600 ring-1 ring-inset ring-warning-600/20 rounded-md">
+                                Pre-Order
+                            </span>';
                         }
 
-                        $badge = '
-                        <span class="inline-flex items-center gap-x-1 px-1.5 py-0.5 text-xs font-medium text-warning-600 ring-1 ring-inset ring-warning-600/20 rounded-md">
-                            Pre-Order
-                        </span>';
+                        if ($record->channelSale) {
+                            $badges[] = '
+                            <span class="inline-flex items-center gap-x-1 px-1.5 py-0.5 text-xs font-medium text-info-600 ring-1 ring-inset ring-info-600/20 rounded-md">
+                                ' . e($record->channelSale->channel) . '
+                            </span>';
+                        }
 
-                        return new \Illuminate\Support\HtmlString($badge);
+                        return empty($badges)
+                            ? null
+                            : new \Illuminate\Support\HtmlString(implode(' ', $badges));
                     }),
                 TextColumn::make('transaction_date')
                     ->label('Date')
