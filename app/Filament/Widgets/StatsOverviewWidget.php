@@ -20,6 +20,11 @@ class StatsOverviewWidget extends BaseWidget
 
     protected static ?int $sort = 1;
 
+    protected function getColumns(): int
+    {
+        return 2;
+    }
+
     /**
      * Base query with store + channel filter applied (not yet scoped by date).
      */
@@ -90,6 +95,12 @@ class StatsOverviewWidget extends BaseWidget
                 ->icon('heroicon-o-currency-dollar')
                 ->color('success'),
 
+            Stat::make('Net Profit', RupiahHelper::format($netProfit))
+                ->description('Margin ' . round($netProfitMargin) . '%')
+                ->descriptionColor($netProfit >= 0 ? 'success' : 'danger')
+                ->icon('heroicon-o-banknotes')
+                ->color($netProfit >= 0 ? 'success' : 'danger'),
+
             Stat::make('Total Transaksi', number_format($currentRow->total_transactions, 0, ',', '.'))
                 ->description($desc($transactionChange))
                 ->descriptionColor($transactionChange >= 0 ? 'success' : 'danger')
@@ -101,12 +112,6 @@ class StatsOverviewWidget extends BaseWidget
                 ->descriptionColor('warning')
                 ->icon('heroicon-o-clock')
                 ->color('warning'),
-
-            Stat::make('Net Profit', RupiahHelper::format($netProfit))
-                ->description('Margin ' . round($netProfitMargin) . '%')
-                ->descriptionColor($netProfit >= 0 ? 'success' : 'danger')
-                ->icon('heroicon-o-banknotes')
-                ->color($netProfit >= 0 ? 'success' : 'danger'),
         ];
     }
 }
