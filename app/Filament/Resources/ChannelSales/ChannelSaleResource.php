@@ -35,7 +35,7 @@ class ChannelSaleResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['name'];
+        return ['name', 'channel'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
