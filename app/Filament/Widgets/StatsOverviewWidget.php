@@ -76,16 +76,15 @@ class StatsOverviewWidget extends BaseWidget
 
         $revenue = $currentRow->total_sales;
 
-        $cogs = TransactionItem::query()
+        $netProfit = TransactionItem::query()
             ->join('products', 'products.id', '=', 'transaction_items.product_id')
             ->whereIn(
                 'transaction_items.transaction_id',
                 $this->filteredQuery()->whereBetween('transaction_date', [$startDate, $endDate])->select('transactions.id')
             )
-            ->selectRaw('COALESCE(SUM(transaction_items.qty * products.cost_price), 0) AS total_cogs')
-            ->value('total_cogs');
+            ->selectRaw('COALESCE(SUM((products.selling_price - products.cost_price) * transaction_items.qty), 0) AS net_profit')
+            ->value('net_profit');
 
-        $netProfit       = $revenue - $cogs;
         $netProfitMargin = $revenue > 0 ? ($netProfit / $revenue) * 100 : 0;
 
         return [
