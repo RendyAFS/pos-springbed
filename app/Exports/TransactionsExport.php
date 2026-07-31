@@ -19,6 +19,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
         protected ?string $dateFrom = null,
         protected ?string $dateUntil = null,
         protected bool $canViewHargaNetto = false,
+        protected array $createdBy = [],
     ) {}
 
     public function collection(): Collection
@@ -26,6 +27,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
         $transactions = Transaction::query()
             ->with([
                 'customer',
+                'creator',
                 'transactionItems.product',
                 'transactionItems.bundle.bundleItems.product',
                 'transactionDownPayments',
@@ -34,6 +36,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
             ])
             ->when($this->dateFrom, fn($q) => $q->whereDate('transaction_date', '>=', $this->dateFrom))
             ->when($this->dateUntil, fn($q) => $q->whereDate('transaction_date', '<=', $this->dateUntil))
+            ->when(!empty($this->createdBy), fn($q) => $q->whereIn('created_by', $this->createdBy))
             ->get();
 
         $flattened = collect();
@@ -110,6 +113,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
                     'pembayaran_pelunasan' => $isFirstRow ? $pembayaranPelunasan : null,
                     'tanggal_pelunasan'    => $isFirstRow ? $tanggalPelunasan : null,
                     'sisa_pembayaran'      => $isFirstRow ? $sisa : null,
+                    'created_by_name'      => $isFirstRow ? $transaction->creator?->name : null,
                 ]);
                 $isFirstRow = false;
             };
@@ -194,6 +198,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
             'PEMBAYARAN PELUNASAN',
             'TANGGAL PELUNASAN',
             'SISA',
+            'CREATED BY',
         ]);
 
         return $headings;
@@ -225,6 +230,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
             $row->pembayaran_pelunasan,
             $row->tanggal_pelunasan ? Carbon::parse($row->tanggal_pelunasan)->format('d/m/Y') : null,
             $row->sisa_pembayaran !== null ? (int) $row->sisa_pembayaran : null,
+            $row->created_by_name,
         ]);
 
         return $map;
@@ -257,8 +263,9 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
                 $cols['pembayaran_pelunasan'] = chr(65 + $currentIdx++);
                 $cols['tanggal_pelunasan']    = chr(65 + $currentIdx++);
                 $cols['sisa_pembayaran']      = chr(65 + $currentIdx++);
+                $cols['created_by_name']      = chr(65 + $currentIdx++);
 
-                $lastCol = $cols['sisa_pembayaran'];
+                $lastCol = $cols['created_by_name'];
 
                 $centerColumns = [
                     $cols['telpon'],
@@ -273,6 +280,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
                     $cols['pembayaran_pelunasan'],
                     $cols['tanggal_pelunasan'],
                     $cols['sisa_pembayaran'],
+                    $cols['created_by_name'],
                 ];
 
                 foreach ($centerColumns as $column) {

@@ -9,6 +9,7 @@ use App\Models\ProductSize;
 use App\Models\ProductType;
 use App\Models\StoreSetting;
 use Filament\Tables\Table;
+use Filament\Support\Enums\Width;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
@@ -96,6 +97,21 @@ class InventoryStocksTable
                 SelectFilter::make('store_setting_id')
                     ->label('Store/Gudang')
                     ->relationship('storeSetting', 'store_name')
+                    ->columnSpanFull()
+                    ->searchable()
+                    ->preload()
+                    ->visible(function () {
+                        /** @var User $user */
+                        $user = Auth::user();
+
+                        return $user?->hasAnyRole(['Super Admin', 'Owner'])
+                            || $user?->store_setting_id === null;
+                    }),
+
+                SelectFilter::make('product_id')
+                    ->label('Product')
+                    ->relationship('product', 'name')
+                    ->columnSpanFull()
                     ->searchable()
                     ->preload()
                     ->visible(function () {
@@ -162,6 +178,8 @@ class InventoryStocksTable
                         );
                     }),
             ], layout: FiltersLayout::Modal)
+            ->filtersFormColumns(2)
+            ->filtersFormWidth(Width::TwoExtraLarge)
             ->defaultSort('quantity', 'desc');
     }
 }
