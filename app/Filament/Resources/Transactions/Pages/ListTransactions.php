@@ -23,6 +23,8 @@ use Wezlo\FilamentKanban\Concerns\HasKanbanBoard;
 use Wezlo\FilamentKanban\KanbanBoard;
 use Livewire\Attributes\Url;
 use App\Filament\Resources\Transactions\Support\TransactionActions;
+use App\Models\User;
+use Filament\Forms\Components\Select;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
@@ -153,6 +155,14 @@ class ListTransactions extends ListRecords
                                 ->closeOnDateSelection()
                                 ->required()
                                 ->afterOrEqual('export_date_from'),
+                            Select::make('created_by')
+                                ->label('Created By')
+                                ->columnSpanFull()
+                                ->multiple()
+                                ->searchable()
+                                ->preload()
+                                ->options(fn() => User::whereDoesntHave('roles', fn($q) => $q->where('name', 'Super Admin'))
+                                    ->pluck('name', 'id'))
                         ])
                 ])
                 ->action(function (array $data) {
@@ -165,7 +175,8 @@ class ListTransactions extends ListRecords
                         new TransactionsExport(
                             $data['export_date_from'],
                             $data['export_date_until'],
-                            $canViewHargaNetto
+                            $canViewHargaNetto,
+                            $data['created_by'] ?? []
                         ),
                         'transaksi-' . $data['export_date_from'] . '-sd-' . $data['export_date_until'] . '.xlsx'
                     );
