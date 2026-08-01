@@ -59,19 +59,22 @@ class InventoryStockResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery()
+        $storeId = Auth::user()?->store_setting_id;
+
+        $sub = parent::getEloquentQuery()
+            ->selectRaw('MIN(id) as id, product_id, SUM(quantity) as quantity')
+            ->groupBy('product_id');
+
+        if ($storeId) {
+            $sub->where('store_setting_id', $storeId);
+        }
+
+        return static::getModel()::query()
+            ->fromSub($sub, 'inventory_stocks')
             ->with([
                 'product.brand',
                 'product.category',
             ]);
-
-        $storeId = Auth::user()?->store_setting_id;
-
-        if ($storeId) {
-            $query->where('store_setting_id', $storeId);
-        }
-
-        return $query;
     }
 
     public static function form(Schema $schema): Schema
