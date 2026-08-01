@@ -7,7 +7,6 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\ProductSize;
 use App\Models\ProductType;
-use App\Models\StoreSetting;
 use Filament\Tables\Table;
 use Filament\Support\Enums\Width;
 use Filament\Support\Enums\FontFamily;
@@ -16,7 +15,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 
 class InventoryStocksTable
@@ -25,13 +23,6 @@ class InventoryStocksTable
     {
         return $table
             ->columns([
-                TextColumn::make('storeSetting.store_name')
-                    ->label('Toko')
-                    ->badge()
-                    ->color('gray')
-                    ->sortable()
-                    ->visible(fn() => Auth::user()?->store_setting_id === null),
-
                 TextColumn::make('product.sku')
                     ->label('SKU')
                     ->fontFamily(FontFamily::Mono)
@@ -94,34 +85,6 @@ class InventoryStocksTable
                     ]),
             ])
             ->filters([
-                SelectFilter::make('store_setting_id')
-                    ->label('Store/Gudang')
-                    ->relationship('storeSetting', 'store_name')
-                    ->columnSpanFull()
-                    ->searchable()
-                    ->preload()
-                    ->visible(function () {
-                        /** @var User $user */
-                        $user = Auth::user();
-
-                        return $user?->hasAnyRole(['Super Admin', 'Owner'])
-                            || $user?->store_setting_id === null;
-                    }),
-
-                SelectFilter::make('product_id')
-                    ->label('Product')
-                    ->relationship('product', 'name')
-                    ->columnSpanFull()
-                    ->searchable()
-                    ->preload()
-                    ->visible(function () {
-                        /** @var User $user */
-                        $user = Auth::user();
-
-                        return $user?->hasAnyRole(['Super Admin', 'Owner'])
-                            || $user?->store_setting_id === null;
-                    }),
-
                 SelectFilter::make('brand_id')
                     ->label('Brand')
                     ->options(fn() => Brand::query()->orderBy('name')->pluck('name', 'id'))
