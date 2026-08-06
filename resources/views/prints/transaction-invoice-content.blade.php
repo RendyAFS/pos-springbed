@@ -15,8 +15,7 @@
     $courierName = $transaction->transactionShipment?->courier?->name ?? '';
     $trackingNo = $transaction->transactionShipment?->tracking_number ?? '';
 
-    // Menambahkan variabel untuk Tanggal Kirim
-    $shippingDate = \Carbon\Carbon::parse($transaction->transactionShipment->created_at)->format('d/m/Y') ?? '';
+    $shippingDate = $transaction->transactionShipment?->created_at?->format('d/m/Y') ?? '';
 
     $itemCount = $transaction->transactionItems->count();
     $minRows = $isA4 ? 18 : 12;
