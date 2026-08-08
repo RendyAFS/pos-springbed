@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PurchaseOrders\Tables;
 
 use App\Helpers\RupiahHelper;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -71,6 +72,7 @@ class PurchaseOrdersTable
             ])
             ->recordActions([
                 EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
