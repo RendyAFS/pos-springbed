@@ -92,8 +92,12 @@ class PurchaseOrderForm
                         TextInput::make('total_amount')
                             ->label('Total')
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
-                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                            ->dehydrateStateUsing(fn($state) => $state !== null && $state !== ''
+                                ? (float) str_replace('.', '', $state)
+                                : 0)
+                            ->formatStateUsing(fn($state) => $state !== null && $state !== ''
+                                ? number_format((float) $state, 0, ',', '.')
+                                : '0')
                             ->prefix('Rp')
                             ->readOnly()
                             ->default(0),
@@ -174,26 +178,23 @@ class PurchaseOrderForm
                                 TextInput::make('cost_price')
                                     ->label('Harga Beli')
                                     ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
-                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                                    ->dehydrateStateUsing(fn($state) => $state !== null && $state !== ''
+                                        ? (float) str_replace('.', '', $state)
+                                        : 0)
+                                    ->formatStateUsing(fn($state) => $state !== null && $state !== ''
+                                        ? number_format((float) $state, 0, ',', '.')
+                                        : '0')
                                     ->minValue(0)
                                     ->default(0)
                                     ->prefix('Rp')
                                     ->required()
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(function (Get $get, Set $set) {
-
                                         $items = $get('../../purchaseOrderItems') ?? [];
 
                                         $total = collect($items)->sum(function ($item) {
                                             $qty = (float) ($item['qty_purchased'] ?? 0);
-
-                                            $price = (float) str_replace(
-                                                '.',
-                                                '',
-                                                $item['cost_price'] ?? 0
-                                            );
-
+                                            $price = (float) str_replace('.', '', $item['cost_price'] ?? 0);
                                             return $qty * $price;
                                         });
 
@@ -214,14 +215,17 @@ class PurchaseOrderForm
                                     ->label('Harga Jual saat ini')
                                     ->prefix('Rp')
                                     ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                                    ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
-                                    ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                                    ->dehydrateStateUsing(fn($state) => $state !== null && $state !== ''
+                                        ? (float) str_replace('.', '', $state)
+                                        : null)
+                                    ->formatStateUsing(fn($state) => $state !== null && $state !== ''
+                                        ? number_format((float) $state, 0, ',', '.')
+                                        : '0')
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->default(0)
                                     ->helperText('Current selling price in selected store')
                                     ->afterStateHydrated(function (Get $get, Set $set, $state) {
-                                        // Jika state sudah ada (dari DB), format langsung dari $state
                                         if ($state) {
                                             $set('selling_price', number_format((float) $state, 0, ',', '.'));
                                             return;
