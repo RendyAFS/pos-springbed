@@ -32,7 +32,8 @@ class PurchaseOrderForm
                             ->relationship('storeSetting', 'store_name')
                             ->searchable()
                             ->preload()
-                            ->default(fn() => Auth::user()?->store_setting_id)
+                            // ->default(fn() => Auth::user()?->store_setting_id)
+                            ->default(fn() => request()->query('store_setting_id') ?: Auth::user()?->store_setting_id)
                             ->disabled(fn() => Auth::user()?->store_setting_id !== null)
                             ->dehydrated(fn() => true)
                             ->live(onBlur: true)
@@ -86,8 +87,35 @@ class PurchaseOrderForm
                             ->required(),
                     ])
                     ->columns(2),
-                Section::make('Summary')
-                    ->icon(Heroicon::DocumentText)
+                Repeater::make('purchaseOrderItems')
+                    ->relationship()
+                    ->default(function () {
+                        $productId = request()->query('product_id');
+
+                        if (!$productId) {
+                            return [];
+                        }
+
+                        $storeId = request()->query('store_setting_id');
+                        $product = Product::find($productId);
+
+                        $stock = $storeId
+                            ? InventoryStock::query()
+                            ->where('product_id', $productId)
+                            ->where('store_setting_id', $storeId)
+                            ->value('quantity')
+                            : null;
+
+                        return [
+                            [
+                                'product_id' => (int) $productId,
+                                'qty_remaining' => number_format($stock ?? 0, 0, ',', '.'),
+                                'selling_price' => number_format($product->selling_price ?? 0, 0, ',', '.'),
+                                'cost_price' => number_format($product->cost_price ?? 0, 0, ',', '.'),
+                                'date_product_order' => now(),
+                            ],
+                        ];
+                    })
                     ->schema([
                         TextInput::make('total_amount')
                             ->label('Total')
@@ -156,7 +184,6 @@ class PurchaseOrderForm
                                     ->required()
                                     ->live(onBlur: true)
                                     ->minValue(0)
-                                    ->default(0)
                                     ->afterStateUpdated(function (Get $get, Set $set) {
 
                                         $items = $get('../../purchaseOrderItems') ?? [];

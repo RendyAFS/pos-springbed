@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\InventoryStocks\Schemas;
 
+use App\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\InventoryStock;
+use Filament\Actions\Action;
 use Filament\Schemas\Schema;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\FontFamily;
@@ -102,7 +105,7 @@ class InventoryStockInfolist
                             )
                             ->schema([
 
-                                Grid::make(3)
+                                Grid::make(4)
                                     ->schema([
 
                                         TextEntry::make('storeSetting.store_name')
@@ -124,8 +127,22 @@ class InventoryStockInfolist
                                                 'warning' => 'Low Stock',
                                             ]),
 
-                                    ]),
+                                        Actions::make([
+                                            Action::make('createPurchaseOrder')
+                                                ->label('Buat PO')
+                                                ->icon(Heroicon::ShoppingCart)
+                                                ->color('gray')
+                                                ->outlined()
+                                                ->url(fn($record) => PurchaseOrderResource::getUrl('create', [
+                                                    'product_id' => $record->product_id,
+                                                    'store_setting_id' => $record->store_setting_id,
+                                                ]))
+                                                ->openUrlInNewTab(),
+                                        ])
+                                            ->alignEnd()
+                                            ->extraAttributes(['class' => 'flex items-center h-full']),
 
+                                    ]),
                             ]),
 
                     ]),
