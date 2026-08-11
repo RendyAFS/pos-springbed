@@ -126,38 +126,38 @@ class InventoryService
         int $difference,
         Model $reference
     ): void {
+        if ($difference === 0) {
+            return;
+        }
+
         DB::transaction(function () use ($productId, $difference, $reference) {
             $storeId = $this->getStoreId($reference);
 
-            $stock = InventoryStock::where([
-                'product_id'       => $productId,
-                'store_setting_id' => $storeId,
-            ])
-                ->lockForUpdate()
-                ->first();
+            $stock = $this->getStock($productId, $storeId);
 
-            $qtyBefore = $stock?->quantity ?? 0;
+            $qtyBefore = $stock->quantity;
             $qtyAfter  = $qtyBefore + $difference;
 
             if ($qtyAfter < 0) {
-                throw new Exception('Stock tidak boleh minus');
+                Log::channel('daily')->warning('[Inventory] Adjustment membuat stock negatif, di-clamp ke 0', [
+                    'product_id' => $productId,
+                    'store_id'   => $storeId,
+                    'qty_before' => $qtyBefore,
+                    'difference' => $difference,
+                    'reference'  => $reference::class,
+                    'reference_id' => $reference->id,
+                ]);
+                $qtyAfter = 0;
             }
 
-            if ($stock) {
-                $stock->delete();
-            }
-
-            InventoryStock::create([
-                'product_id'       => $productId,
-                'store_setting_id' => $storeId,
-                'quantity'         => $qtyAfter,
-            ]);
+            $stock->quantity = $qtyAfter;
+            $stock->save();
 
             StockMovement::create([
                 'product_id'       => $productId,
                 'store_setting_id' => $storeId,
                 'type'             => TypeStockMovementEnum::ADJUSTMENT,
-                'qty'              => $difference,
+                'qty'              => $qtyAfter - $qtyBefore,
                 'reference_type'   => $reference::class,
                 'reference_id'     => $reference->id,
             ]);

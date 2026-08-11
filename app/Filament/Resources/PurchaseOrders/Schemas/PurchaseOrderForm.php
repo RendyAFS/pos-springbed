@@ -32,7 +32,6 @@ class PurchaseOrderForm
                             ->relationship('storeSetting', 'store_name')
                             ->searchable()
                             ->preload()
-                            // ->default(fn() => Auth::user()?->store_setting_id)
                             ->default(fn() => request()->query('store_setting_id') ?: Auth::user()?->store_setting_id)
                             ->disabled(fn() => Auth::user()?->store_setting_id !== null)
                             ->dehydrated(fn() => true)
@@ -87,6 +86,25 @@ class PurchaseOrderForm
                             ->required(),
                     ])
                     ->columns(2),
+
+                Section::make('Summary')
+                    ->icon(Heroicon::DocumentText)
+                    ->schema([
+                        TextInput::make('total_amount')
+                            ->label('Total')
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state !== null && $state !== ''
+                                ? (float) str_replace('.', '', $state)
+                                : 0)
+                            ->formatStateUsing(fn($state) => $state !== null && $state !== ''
+                                ? number_format((float) $state, 0, ',', '.')
+                                : '0')
+                            ->prefix('Rp')
+                            ->readOnly()
+                            ->default(0),
+                    ])
+                    ->columns(1),
+
                 Repeater::make('purchaseOrderItems')
                     ->relationship()
                     ->default(function () {
@@ -109,30 +127,13 @@ class PurchaseOrderForm
                         return [
                             [
                                 'product_id' => (int) $productId,
-                                'qty_remaining' => number_format($stock ?? 0, 0, ',', '.'),
-                                'selling_price' => number_format($product->selling_price ?? 0, 0, ',', '.'),
-                                'cost_price' => number_format($product->cost_price ?? 0, 0, ',', '.'),
+                                'qty_remaining' => (float) ($stock ?? 0),
+                                'selling_price' => (float) ($product->selling_price ?? 0),
+                                'cost_price' => (float) ($product->cost_price ?? 0),
                                 'date_product_order' => now(),
                             ],
                         ];
                     })
-                    ->schema([
-                        TextInput::make('total_amount')
-                            ->label('Total')
-                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                            ->dehydrateStateUsing(fn($state) => $state !== null && $state !== ''
-                                ? (float) str_replace('.', '', $state)
-                                : 0)
-                            ->formatStateUsing(fn($state) => $state !== null && $state !== ''
-                                ? number_format((float) $state, 0, ',', '.')
-                                : '0')
-                            ->prefix('Rp')
-                            ->readOnly()
-                            ->default(0),
-                    ])
-                    ->columns(1),
-                Repeater::make('purchaseOrderItems')
-                    ->relationship()
                     ->schema([
                         Section::make()
                             ->schema([
@@ -286,7 +287,7 @@ class PurchaseOrderForm
                     ->reorderableWithDragAndDrop()
                     ->collapsible()
                     ->grid(2)
-                    ->columnSpanFull()
+                    ->columnSpanFull(),
             ])
             ->columns(2);
     }
