@@ -24,6 +24,21 @@ class PurchaseOrder extends Model
         'purchase_date' => 'datetime'
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (PurchaseOrder $purchaseOrder) {
+            if ($purchaseOrder->trashed()) {
+                return;
+            }
+
+            app(\App\Services\PurchaseOrderService::class)->revertStock($purchaseOrder);
+        });
+
+        static::restoring(function (PurchaseOrder $purchaseOrder) {
+            app(\App\Services\PurchaseOrderService::class)->receiveStock($purchaseOrder);
+        });
+    }
+
     public function purchaseOrderItems()
     {
         return $this->hasMany(PurchaseOrderItem::class, 'purchase_order_id');
