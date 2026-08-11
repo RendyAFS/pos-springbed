@@ -67,15 +67,23 @@ class ProductForm
                         TextInput::make('selling_price')
                             ->label('Harga Jual')
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
-                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                            ->dehydrateStateUsing(fn($state) => $state !== null && $state !== ''
+                                ? (float) str_replace('.', '', $state)
+                                : 0)
+                            ->formatStateUsing(fn($state) => $state !== null && $state !== ''
+                                ? number_format((float) $state, 0, ',', '.')
+                                : null)
                             ->required()
                             ->prefix('Rp.'),
                         TextInput::make('cost_price')
                             ->label('Harga Beli')
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
-                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                            ->dehydrateStateUsing(fn($state) => $state !== null && $state !== ''
+                                ? (float) str_replace('.', '', $state)
+                                : 0)
+                            ->formatStateUsing(fn($state) => $state !== null && $state !== ''
+                                ? number_format((float) $state, 0, ',', '.')
+                                : null)
                             ->required()
                             ->prefix('Rp.'),
                         TextInput::make('sku')
