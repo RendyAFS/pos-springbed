@@ -39,8 +39,8 @@ class EditUser extends EditRecord
         $selected = $data['selected_store'] ?? [];
 
         if (count($selected) === 1) {
-            $store = StoreSetting::where('store_name', reset($selected))->first();
-            $data['store_setting_id'] = $store?->id;
+            $storeId = reset($selected);
+            $data['store_setting_id'] = $storeId;
         }
 
         return $data;

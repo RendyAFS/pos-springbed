@@ -3,14 +3,18 @@
 namespace App\Filament\Resources\InventoryStocks\Tables;
 
 use App\Helpers\RupiahHelper;
-use App\Models\StoreSetting;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\ProductSize;
+use App\Models\ProductType;
 use Filament\Tables\Table;
+use Filament\Support\Enums\Width;
 use Filament\Support\Enums\FontFamily;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\HtmlString;
 
 class InventoryStocksTable
@@ -19,13 +23,6 @@ class InventoryStocksTable
     {
         return $table
             ->columns([
-                TextColumn::make('storeSetting.store_name')
-                    ->label('Store')
-                    ->badge()
-                    ->color('gray')
-                    ->sortable()
-                    ->visible(fn() => Auth::user()?->store_setting_id === null),
-
                 TextColumn::make('product.sku')
                     ->label('SKU')
                     ->fontFamily(FontFamily::Mono)
@@ -37,7 +34,7 @@ class InventoryStocksTable
                     ->copyMessageDuration(1500),
 
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label('Produk')
                     ->html()
                     ->searchable()
                     ->formatStateUsing(function ($state, $record) {
@@ -54,24 +51,24 @@ class InventoryStocksTable
                         ");
                     }),
                 TextColumn::make('product.category.name')
-                    ->label('Category')
+                    ->label('Kategori')
                     ->badge()
                     ->color('primary')
                     ->sortable(),
 
                 TextColumn::make('quantity')
-                    ->label('Stock')
+                    ->label('Stok')
                     ->default(0)
                     ->alignCenter()
                     ->weight('bold'),
 
                 TextColumn::make('product.selling_price')
-                    ->label('Unit Price')
+                    ->label('Harga Jual')
                     ->sortable()
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
 
                 TextColumn::make('total_value')
-                    ->label('Total Value')
+                    ->label('Total Nilai')
                     ->state(function ($record) {
                         return $record->quantity * ($record->product->selling_price ?? 0);
                     })
@@ -87,6 +84,65 @@ class InventoryStocksTable
                         'warning' => 'Low',
                     ]),
             ])
+            ->filters([
+                SelectFilter::make('brand_id')
+                    ->label('Brand')
+                    ->options(fn() => Brand::query()->orderBy('name')->pluck('name', 'id'))
+                    ->searchable()
+                    ->query(function ($query, array $data) {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn($q, $value) => $q->whereHas(
+                                'product',
+                                fn($q2) => $q2->where('brand_id', $value)
+                            )
+                        );
+                    }),
+
+                SelectFilter::make('type_id')
+                    ->label('Tipe')
+                    ->options(fn() => ProductType::query()->orderBy('name')->pluck('name', 'id'))
+                    ->searchable()
+                    ->query(function ($query, array $data) {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn($q, $value) => $q->whereHas(
+                                'product',
+                                fn($q2) => $q2->where('type_id', $value)
+                            )
+                        );
+                    }),
+
+                SelectFilter::make('category_id')
+                    ->label('Kategori')
+                    ->options(fn() => Category::query()->orderBy('name')->pluck('name', 'id'))
+                    ->searchable()
+                    ->query(function ($query, array $data) {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn($q, $value) => $q->whereHas(
+                                'product',
+                                fn($q2) => $q2->where('category_id', $value)
+                            )
+                        );
+                    }),
+
+                SelectFilter::make('size_id')
+                    ->label('Ukuran')
+                    ->options(fn() => ProductSize::query()->orderBy('name')->pluck('name', 'id'))
+                    ->searchable()
+                    ->query(function ($query, array $data) {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn($q, $value) => $q->whereHas(
+                                'product',
+                                fn($q2) => $q2->where('size_id', $value)
+                            )
+                        );
+                    }),
+            ], layout: FiltersLayout::Modal)
+            ->filtersFormColumns(2)
+            ->filtersFormWidth(Width::TwoExtraLarge)
             ->defaultSort('quantity', 'desc');
     }
 }

@@ -15,6 +15,8 @@ class PurchaseOrder extends Model
         'supplier_name',
         'invoice_number',
         'purchase_date',
+        'delivery_order_number',
+        'taxpayer_name',
         'total_amount'
     ];
 

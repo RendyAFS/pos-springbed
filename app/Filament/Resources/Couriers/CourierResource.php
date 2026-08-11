@@ -35,8 +35,8 @@ class CourierResource extends Resource
 {
     protected static ?string $model = Courier::class;
     protected static ?string $slug = 'couriers';
-    protected static ?string $navigationLabel = 'Courier';
-    protected static ?string $pluralLabel = 'Courier';
+    protected static ?string $navigationLabel = 'Kurir';
+    protected static ?string $pluralLabel = 'Kurir';
     protected static string | UnitEnum | null $navigationGroup = 'Master Data';
 
     public static function getGloballySearchableAttributes(): array
@@ -74,7 +74,7 @@ class CourierResource extends Resource
                     ->searchable()
                     ->required(),
                 TextInput::make('shipping_cost')
-                ->label('Shipping Cost')
+                    ->label('Biaya Pengiriman')
                     ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                     ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                     ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
@@ -94,18 +94,18 @@ class CourierResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('Courier')
+            ->recordTitleAttribute('Kurir')
             ->columns([
                 TextColumn::make('name')
-                    ->label('Courier')
+                    ->label('Kurir')
                     ->searchable(),
                 TextColumn::make('type')
-                    ->label('Type')
+                    ->label('Tipe')
                     ->formatStateUsing(fn($state) => $state?->getLabel())
                     ->badge()
                     ->color('primary'),
                 TextColumn::make('shipping_cost')
-                    ->label('Shipping Cost')
+                    ->label('Biaya Pengiriman')
                     ->sortable()
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
                 ToggleColumn::make('is_active')
@@ -116,10 +116,12 @@ class CourierResource extends Resource
                     ->onColor('success'),
             ])
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+
+                    ->modalHeading('Edit Kurir'),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),

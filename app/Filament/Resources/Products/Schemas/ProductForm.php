@@ -9,12 +9,10 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-// use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ViewField;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -30,7 +28,7 @@ class ProductForm
     {
         return $schema
             ->components([
-                Section::make('Product Information')
+                Section::make('Informasi Produk')
                     ->icon(Heroicon::ArchiveBox)
                     ->schema([
                         Select::make('brand_id')
@@ -40,25 +38,25 @@ class ProductForm
                             ->preload()
                             ->required(),
                         Select::make('categoriy_id')
-                            ->label('Category')
+                            ->label('Kategori')
                             ->relationship('category', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         Select::make('size_id')
-                            ->label('Size')
+                            ->label('Ukuran')
                             ->relationship('size', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         Select::make('type_id')
-                            ->label('Type')
+                            ->label('Tipe')
                             ->relationship('type', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         TextInput::make('name')
-                            ->label('Name')
+                            ->label('Nama')
                             ->required()
                             ->columnSpanFull(),
                     ])->columns(2),
@@ -67,7 +65,14 @@ class ProductForm
                     ->icon(Heroicon::DocumentText)
                     ->schema([
                         TextInput::make('selling_price')
-                            ->label('Selling Price')
+                            ->label('Harga Jual')
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
+                            ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
+                            ->required()
+                            ->prefix('Rp.'),
+                        TextInput::make('cost_price')
+                            ->label('Harga Beli')
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                             ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                             ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
@@ -77,11 +82,11 @@ class ProductForm
                             ->label('SKU')
                             ->default(null),
                         TextInput::make('weight')
-                            ->label('Weight')
+                            ->label('Berat')
                             ->numeric()
                             ->default(null),
                         Select::make('color')
-                            ->label('Color')
+                            ->label('Warna')
                             ->options([
                                 'merah' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #ef4444"></span>Merah</span>',
                                 'pink' => '<span class="flex items-center gap-2"><span class="h-4 w-4 rounded-full border border-gray-300" style="background-color: #ec4899"></span>Pink</span>',
@@ -110,7 +115,7 @@ class ProductForm
                     ])->columns(2),
                 Section::make('Inventory')
                     ->icon(Heroicon::ArchiveBox)
-                    ->description('Manage stock per store location')
+                    ->description('Kelola stok per lokasi toko')
                     ->schema([
                         ViewField::make('stock_summary')
                             ->view('filament.components.products.stock-summary')
@@ -163,109 +168,110 @@ class ProductForm
                             ->dehydrated(true),
                     ])
                     ->headerActions([
-                        Action::make('adjustStock')
-                            ->label('Edit Stock')
-                            ->color('primary')
-                            ->icon('heroicon-o-adjustments-horizontal')
-                            ->modalHeading('Stock Adjustment')
-                            ->modalWidth('2xl')
-                            ->fillForm(function ($livewire) {
-                                $state = $livewire->form->getState();
-                                $temp  = $state['stock_adjustment_temp'] ?? null;
+                        // Action::make('adjustStock')
+                        //     ->label('Edit Stock')
+                        //     ->color('primary')
+                        //     ->icon('heroicon-o-adjustments-horizontal')
+                        //     ->modalHeading('Perubahan Stok')
+                        //     ->modalWidth('2xl')
+                        //     ->fillForm(function ($livewire) {
+                        //         $state = $livewire->form->getState();
+                        //         $temp  = $state['stock_adjustment_temp'] ?? null;
 
-                                if ($temp) {
-                                    return ['stocks' => $temp];
-                                }
+                        //         if ($temp) {
+                        //             return ['stocks' => $temp];
+                        //         }
 
-                                $userStoreId = Auth::user()?->store_setting_id;
-                                $record      = $livewire->record;
+                        //         $userStoreId = Auth::user()?->store_setting_id;
+                        //         $record      = $livewire->record;
 
-                                if ($userStoreId) {
-                                    $qty = $record
-                                        ? InventoryStock::where('product_id', $record->id)
-                                        ->where('store_setting_id', $userStoreId)
-                                        ->value('quantity') ?? 0
-                                        : 0;
+                        //         if ($userStoreId) {
+                        //             $qty = $record
+                        //                 ? InventoryStock::where('product_id', $record->id)
+                        //                 ->where('store_setting_id', $userStoreId)
+                        //                 ->value('quantity') ?? 0
+                        //                 : 0;
 
-                                    return [
-                                        'stocks' => [[
-                                            'store_setting_id' => $userStoreId,
-                                            'quantity'         => $qty,
-                                            'reason'           => '',
-                                        ]],
-                                    ];
-                                }
+                        //             return [
+                        //                 'stocks' => [[
+                        //                     'store_setting_id' => $userStoreId,
+                        //                     'quantity'         => $qty,
+                        //                     'reason'           => '',
+                        //                 ]],
+                        //             ];
+                        //         }
 
-                                $stores = StoreSetting::all();
+                        //         $stores = StoreSetting::all();
 
-                                return [
-                                    'stocks' => $stores->map(function ($store) use ($record) {
-                                        $qty = $record
-                                            ? InventoryStock::where('product_id', $record->id)
-                                            ->where('store_setting_id', $store->id)
-                                            ->value('quantity') ?? 0
-                                            : 0;
+                        //         return [
+                        //             'stocks' => $stores->map(function ($store) use ($record) {
+                        //                 $qty = $record
+                        //                     ? InventoryStock::where('product_id', $record->id)
+                        //                     ->where('store_setting_id', $store->id)
+                        //                     ->value('quantity') ?? 0
+                        //                     : 0;
 
-                                        return [
-                                            'store_setting_id' => $store->id,
-                                            'quantity'         => $qty,
-                                            'reason'           => '',
-                                        ];
-                                    })->toArray(),
-                                ];
-                            })
-                            ->schema([
-                                Repeater::make('stocks')
-                                    ->label('')
-                                    ->schema([
-                                        Select::make('store_setting_id')
-                                            ->label('Store')
-                                            ->options(StoreSetting::pluck('store_name', 'id'))
-                                            ->disabled()
-                                            ->dehydrated(true)
-                                            ->columnSpan(2),
+                        //                 return [
+                        //                     'store_setting_id' => $store->id,
+                        //                     'quantity'         => $qty,
+                        //                     'reason'           => '',
+                        //                 ];
+                        //             })->toArray(),
+                        //         ];
+                        //     })
+                        //     ->schema([
+                        //         Repeater::make('stocks')
+                        //             ->label('Stok')
+                        //             ->schema([
+                        //                 Select::make('store_setting_id')
+                        //                     ->label('Toko')
+                        //                     ->options(StoreSetting::pluck('store_name', 'id'))
+                        //                     ->disabled()
+                        //                     ->dehydrated(true)
+                        //                     ->columnSpan(2),
 
-                                        TextInput::make('quantity')
-                                            ->label('New Stock Quantity')
-                                            ->numeric()
-                                            ->minValue(0)
-                                            ->required()
-                                            ->suffix('pcs')
-                                            ->columnSpan(1),
+                        //                 TextInput::make('quantity')
+                        //                     ->label('New Kuantitas Stok')
+                        //                     ->numeric()
+                        //                     ->minValue(0)
+                        //                     ->required()
+                        //                     ->suffix('pcs')
+                        //                     ->columnSpan(1),
 
-                                        Textarea::make('reason')
-                                            ->label('Reason')
-                                            ->nullable()
-                                            ->rows(2)
-                                            ->columnSpan(3),
-                                    ])
-                                    ->columns(3)
-                                    ->addable(false)
-                                    ->deletable(false)
-                                    ->reorderable(false)
-                                    ->itemLabel(
-                                        fn($state) =>
-                                        StoreSetting::find($state['store_setting_id'])?->store_name ?? 'Store'
-                                    )
-                                    ->collapsible()
-                            ])
-                            ->action(function ($data, $livewire) {
-                                $state = $livewire->form->getState();
-                                $state['stock_adjustment_temp'] = $data['stocks'];
-                                $livewire->form->fill($state);
+                        //                 Textarea::make('reason')
+                        //                     ->label('Notes')
+                        //                     ->nullable()
+                        //                     ->rows(2)
+                        //                     ->columnSpan(3),
+                        //             ])
+                        //             ->columns(3)
+                        //             ->addable(false)
+                        //             ->deletable(false)
+                        //             ->reorderable(false)
+                        //             ->itemLabel(
+                        //                 fn($state) =>
+                        //                 StoreSetting::find($state['store_setting_id'])?->store_name ?? 'Store'
+                        //             )
+                        //             ->collapsible()
+                        //     ])
+                        //     ->action(function ($data, $livewire) {
+                        //         $state = $livewire->form->getState();
+                        //         $state['stock_adjustment_temp'] = $data['stocks'];
+                        //         $livewire->form->fill($state);
 
-                                Notification::make()
-                                    ->title('Stock adjustment staged')
-                                    ->body('Stock data will be saved when product is submitted.')
-                                    ->success()
-                                    ->send();
-                            }),
+                        //         Notification::make()
+                        //             ->title('Stock adjustment staged')
+                        //             ->body('Stock data will be saved when product is submitted.')
+                        //             ->success()
+                        //             ->send();
+                        //     }),
                     ])->columnSpanFull(),
                 Repeater::make('productImages')
+                    ->label('Kelola Gambar Produk')
                     ->relationship()
                     ->schema([
                         FileUpload::make('image_product')
-                            ->label('Image Product')
+                            ->label('Gambar Produk')
                             ->nullable()
                             ->image()
                             ->imageEditor()

@@ -38,8 +38,9 @@ use UnitEnum;
 class StoreSettingResource extends Resource
 {
     protected static ?string $model = StoreSetting::class;
-    protected static ?string $navigationLabel = 'Store Settings';
-    protected static ?string $pluralLabel = 'Store Settings';
+    protected static ?string $navigationLabel = 'Pengaturan Toko';
+    protected static ?string $heading = 'Pengaturan Toko';
+    protected static ?string $pluralLabel = 'Pengaturan Toko';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     public static function getGloballySearchableAttributes(): array
@@ -55,9 +56,9 @@ class StoreSettingResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Phone'  => $record->phone,
+            'Telepone'  => $record->phone,
             'Email'  => $record->email,
-            'Address'  => $record->address,
+            'Alamat'  => $record->address,
         ];
     }
 
@@ -68,7 +69,7 @@ class StoreSettingResource extends Resource
                 Section::make('Store Identity')
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('store_logo')
-                            ->label('Store Logo')
+                            ->label('Logo')
                             ->nullable()
                             ->image()
                             ->imageEditor()
@@ -79,13 +80,13 @@ class StoreSettingResource extends Resource
                             ->maxSize(2048)
                             ->columnSpan(1),
                         TextInput::make('company_name')
-                            ->label('Company Name')
+                            ->label('Nama Perusahaan')
                             ->default('Serba Indah')
                             ->required()
                             ->maxLength(255)
                             ->columnSpan(1),
                         TextInput::make('store_name')
-                            ->label('Active Store Name')
+                            ->label('Toko Aktif Name')
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
@@ -95,12 +96,12 @@ class StoreSettingResource extends Resource
                 Grid::make(1)
                     ->schema([
                         TextInput::make('phone')
-                            ->label('Phone')
+                            ->label('Telepon')
                             ->tel()
                             ->nullable()
                             ->maxLength(255),
                         TextInput::make('email')
-                            ->label('Email Address')
+                            ->label('Email')
                             ->email()
                             ->nullable()
                             ->maxLength(255),
@@ -108,14 +109,14 @@ class StoreSettingResource extends Resource
                 Grid::make(1)
                     ->schema([
                         TextInput::make('set_max_reward')
-                            ->label('Set Max Reward')
+                            ->label('Set Maksimal Reward')
                             ->prefix('Rp')
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                             ->dehydrateStateUsing(fn($state) => $state ? (float) str_replace('.', '', $state) : null)
                             ->formatStateUsing(fn($state) => $state ? number_format((float) $state, 0, ',', '.') : null)
                             ->required(),
                         Textarea::make('address')
-                            ->label('Address')
+                            ->label('Alamat')
                             ->nullable()
                             ->required(),
                     ]),
@@ -149,13 +150,13 @@ class StoreSettingResource extends Resource
                     ->imageWidth(44)
                     ->imageHeight(44),
                 TextColumn::make('company_name')
-                    ->label('Company Name')
+                    ->label('Nama Perusahaan')
                     ->searchable(),
                 TextColumn::make('store_name')
-                    ->label('Active Store')
+                    ->label('Toko Aktif')
                     ->searchable(),
                 TextColumn::make('phone')
-                    ->label('Phone')
+                    ->label('Telepon')
                     ->searchable(),
                 TextColumn::make('email')
                     ->badge()
@@ -168,7 +169,7 @@ class StoreSettingResource extends Resource
                     ->copyMessage('Email copied')
                     ->copyMessageDuration(1500),
                 TextColumn::make('address')
-                    ->label('Address')
+                    ->label('Alamat')
                     ->limit(25)
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
@@ -180,7 +181,7 @@ class StoreSettingResource extends Resource
                     })
                     ->searchable(),
                 TextColumn::make('set_max_reward')
-                    ->label('Maximal Reward')
+                    ->label('Maksimal Reward')
                     ->alignCenter()
                     ->weight('medium')
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
@@ -196,11 +197,13 @@ class StoreSettingResource extends Resource
                     ->imageHeight(100),
             ])
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
             ])
             ->recordActions([
                 ActionGroup::make([
-                    EditAction::make(),
+                    EditAction::make()
+                        ->label('Edit Toko')
+                        ->modalHeading('Edit Toko'),
                     DeleteAction::make(),
                     ForceDeleteAction::make(),
                     RestoreAction::make(),

@@ -13,8 +13,11 @@ class Customer extends Model
     protected $fillable = [
         'name',
         'phone',
-        'email',
         'address',
+        'city_code',
+        'city_name',
+        'district_code',
+        'district_name',
     ];
 
     public function referal()
@@ -22,4 +25,3 @@ class Customer extends Model
         return $this->hasOne(Referal::class);
     }
 }
-

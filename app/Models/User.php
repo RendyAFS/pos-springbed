@@ -65,6 +65,18 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
+    public function getSelectedStoreNamesAttribute(): array
+    {
+        if (empty($this->selected_store)) {
+            return [];
+        }
+
+        return StoreSetting::query()
+            ->whereIn('id', $this->selected_store)
+            ->pluck('store_name')
+            ->toArray();
+    }
+
     public function storeSetting()
     {
         return $this->belongsTo(StoreSetting::class, 'store_setting_id');

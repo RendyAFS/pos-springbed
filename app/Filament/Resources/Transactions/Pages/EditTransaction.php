@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
+use App\Filament\Resources\Transactions\Concerns\HasBarcodeScanner;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\TransactionPayment;
 use App\Models\TransactionShipment;
-use App\Enums\StatusTransactionShipmentEnum;
 use App\Services\ReferalService;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
@@ -16,7 +16,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class EditTransaction extends EditRecord
 {
+    use HasBarcodeScanner;
+
     protected static string $resource = TransactionResource::class;
+
+    protected static ?string $title = 'Buat Transaksi';
 
     protected array $extraData = [];
 
@@ -80,6 +84,12 @@ class EditTransaction extends EditRecord
         if (isset($data['transactionItems'])) {
             foreach ($data['transactionItems'] as &$item) {
                 unset($item['item_type']);
+
+                if (!empty($item['is_multi_store']) && !empty($item['source_stores'])) {
+                    $totalQty = collect($item['source_stores'])
+                        ->sum(fn($s) => (int)($s['qty'] ?? 0));
+                    $item['qty'] = max(1, $totalQty);
+                }
             }
             unset($item);
         }
@@ -108,8 +118,6 @@ class EditTransaction extends EditRecord
                 ['transaction_id' => $this->record->id],
                 [
                     'courier_id' => $extra['courier_id'],
-                    'status'     => $this->record->transactionShipment?->status
-                        ?? StatusTransactionShipmentEnum::PENDING,
                 ]
             );
         } elseif ($this->record->transactionShipment) {
@@ -124,6 +132,7 @@ class EditTransaction extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            $this->getScanBarcodeAction(),
             DeleteAction::make(),
             ForceDeleteAction::make(),
             RestoreAction::make(),

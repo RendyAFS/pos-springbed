@@ -22,13 +22,14 @@ use Illuminate\Support\Facades\Auth;
 class PurchaseOrderResource extends Resource
 {
     protected static ?string $model = PurchaseOrder::class;
-    protected static ?string $navigationLabel = 'Purchase Orders';
-    protected static ?string $pluralLabel = 'Purchase Orders';
+    protected static ?string $navigationLabel = 'Pembelian Stok Produk';
+    protected static ?string $heading = 'Pembelian Stok Produk';
+    protected static ?string $pluralLabel = 'Pembelian Stok Produk';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['supplier_name', 'invoice_number'];
+        return ['supplier_name', 'invoice_number', 'delivery_order_number'];
     }
 
     public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
@@ -40,8 +41,9 @@ class PurchaseOrderResource extends Resource
     {
         return [
             'Invoice Number' => $record->invoice_number,
-            'Purchase Date' => $record->purchase_date,
-            'Total Amount' => RupiahHelper::format($record->total_amount),
+            'No Surat Jalan' => $record->delivery_order_number,
+            'Tanggal Pembelian' => $record->purchase_date,
+            'Total' => RupiahHelper::format($record->total_amount),
         ];
     }
 

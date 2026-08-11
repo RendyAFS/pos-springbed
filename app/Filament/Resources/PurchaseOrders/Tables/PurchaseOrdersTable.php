@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PurchaseOrders\Tables;
 
 use App\Helpers\RupiahHelper;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
@@ -23,10 +24,11 @@ class PurchaseOrdersTable
         return $table
             ->columns([
                 TextColumn::make('supplier_name')
+                    ->label('Nama Supplier')
                     ->searchable(),
                 // var
                 TextColumn::make('storeSetting.store_name')
-                    ->label('Store')
+                    ->label('Toko')
                     ->badge()
                     ->color('gray')
                     ->sortable()
@@ -43,18 +45,34 @@ class PurchaseOrdersTable
                     ->copyMessage('SKU copied')
                     ->copyMessageDuration(1500),
                 TextColumn::make('purchase_date')
+                    ->label('Tanggal Pesanan')
                     ->date()
                     ->sortable(),
+                TextColumn::make('delivery_order_number')
+                    ->label('No. Surat Jalan')
+                    ->searchable()
+                    ->badge()
+                    ->color('primary')
+                    ->icon(Heroicon::Document)
+                    ->iconPosition(IconPosition::After)
+                    ->copyable()
+                    ->copyMessage('Nomor Surat Jalan copied')
+                    ->copyMessageDuration(1500)
+                    ->description(
+                        fn($record) => $record->taxpayer_name
+                    ),
                 TextColumn::make('total_amount')
+                    ->label('Total')
                     ->numeric()
                     ->sortable()
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
             ])
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
             ])
             ->recordActions([
                 EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

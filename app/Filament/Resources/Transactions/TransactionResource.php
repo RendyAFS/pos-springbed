@@ -5,7 +5,9 @@ namespace App\Filament\Resources\Transactions;
 use App\Filament\Resources\Transactions\Pages\CreateTransaction;
 use App\Filament\Resources\Transactions\Pages\EditTransaction;
 use App\Filament\Resources\Transactions\Pages\ListTransactions;
+use App\Filament\Resources\Transactions\Pages\ViewTransaction;
 use App\Filament\Resources\Transactions\Schemas\TransactionForm;
+use App\Filament\Resources\Transactions\Schemas\TransactionInfolist;
 use App\Filament\Resources\Transactions\Tables\TransactionsTable;
 use App\Helpers\RupiahHelper;
 use App\Models\Transaction;
@@ -22,8 +24,9 @@ use Illuminate\Support\Facades\Auth;
 class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
-    protected static ?string $navigationLabel = 'Transactions';
-    protected static ?string $pluralLabel = 'Transactions';
+    protected static ?string $navigationLabel = 'Transaksi';
+    protected static ?string $heading = 'Transaksi';
+    protected static ?string $pluralLabel = 'Transaksi';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
     public static function getGloballySearchableAttributes(): array
@@ -39,14 +42,13 @@ class TransactionResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Customer'        => $record->customer?->name,
-            'Phone'           => $record->customer?->phone,
-            'Total'           => RupiahHelper::format($record->grand_total),
-            'Status'          => $record->status->getLabel(),
-            'Courier'         => $record->transactionShipment?->courier?->name,
-            'Payment Method'  => $record->transactionPayment?->method->getLabel(),
-            'Payment Status'  => $record->transactionPayment?->status->getLabel(),
-            'Shipment Status' => $record->transactionShipment?->status->getLabel(),
+            'Customer'          => $record->customer?->name,
+            'Telepone'          => $record->customer?->phone,
+            'Total'             => RupiahHelper::format($record->grand_total),
+            'Status'            => $record->status->getLabel(),
+            'Kurir'             => $record->transactionShipment?->courier?->name,
+            'Metode Pembayaran' => $record->transactionPayment?->method->getLabel(),
+            'Status Pembayaran' => $record->transactionPayment?->status->getLabel(),
         ];
     }
 
@@ -54,12 +56,26 @@ class TransactionResource extends Resource
     {
         $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([SoftDeletingScope::class])
-            ->with(['transactionDownPayments', 'transactionPayment', 'transactionShipment', 'customer', 'storeSetting']);
+            ->with([
+                'transactionDownPayments',
+                'transactionPayment',
+                'transactionShipment',
+                'customer',
+                'storeSetting',
+                'transactionItems',
+                'transactionItems.product',
+                'transactionItems.bundle'
+            ]);
 
-        $storeId = Auth::user()?->store_setting_id;
+        $user    = Auth::user();
+        $storeId = $user?->store_setting_id;
 
         if (! is_null($storeId)) {
             $query->where('store_setting_id', $storeId);
+        }
+
+        if ($user?->roles->contains('id', 4)) {
+            $query->where('created_by', $user->id);
         }
 
         return $query;
@@ -78,8 +94,13 @@ class TransactionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\transactionDownPaymentsRelationManager::class,
+            RelationManagers\TransactionDownPaymentsRelationManager::class,
         ];
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return TransactionInfolist::configure($schema);
     }
 
     public static function getPages(): array
@@ -87,6 +108,7 @@ class TransactionResource extends Resource
         return [
             'index' => ListTransactions::route('/'),
             'create' => CreateTransaction::route('/create'),
+            'view'   => ViewTransaction::route('/{record}'),
             'edit' => EditTransaction::route('/{record}/edit'),
         ];
     }

@@ -23,7 +23,8 @@ use Illuminate\Support\Facades\Auth;
 class InventoryStockResource extends Resource
 {
     protected static ?string $model = InventoryStock::class;
-    protected static ?string $navigationLabel = 'Inventory';
+    protected static ?string $navigationLabel = 'Inventori';
+    protected ?string $heading = 'Inventori';
     protected static ?string $pluralLabel = 'Inventory';
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-archive-box';
 
@@ -47,30 +48,33 @@ class InventoryStockResource extends Resource
         return [
             'Store'         => $product?->storeSetting?->store_name,
             'SKU'           => $product?->sku,
-            'Type'          => $product?->type?->name,
-            'Category'      => $product?->category?->name,
+            'Tipe'          => $product?->type?->name,
+            'Kategori'      => $product?->category?->name,
             'Brand'         => $product?->brand?->name,
             'Stock'         => ($record->quantity ?? 0) . ' pcs',
-            'Selling Price' => RupiahHelper::format($product?->selling_price ?? 0),
-            'Total Value'   => RupiahHelper::format(($record->quantity ?? 0) * ($product?->selling_price ?? 0)),
+            'Harga Jual'    => RupiahHelper::format($product?->selling_price ?? 0),
+            'Total Nilai'   => RupiahHelper::format(($record->quantity ?? 0) * ($product?->selling_price ?? 0)),
         ];
     }
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery()
+        $storeId = Auth::user()?->store_setting_id;
+
+        $sub = parent::getEloquentQuery()
+            ->selectRaw('MIN(id) as id, product_id, SUM(quantity) as quantity')
+            ->groupBy('product_id');
+
+        if ($storeId) {
+            $sub->where('store_setting_id', $storeId);
+        }
+
+        return static::getModel()::query()
+            ->fromSub($sub, 'inventory_stocks')
             ->with([
                 'product.brand',
                 'product.category',
             ]);
-
-        $storeId = Auth::user()?->store_setting_id;
-
-        if ($storeId) {
-            $query->where('store_setting_id', $storeId);
-        }
-
-        return $query;
     }
 
     public static function form(Schema $schema): Schema

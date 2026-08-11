@@ -25,6 +25,7 @@ class UserForm
                     ->icon('heroicon-o-user')
                     ->schema([
                         TextInput::make('name')
+                            ->label('Nama')
                             ->required()
                             ->maxLength(255),
 
@@ -71,9 +72,9 @@ class UserForm
                             ->required(),
 
                         Select::make('selected_store')
-                            ->label('Available Store')
+                            ->label('Toko Tersedia')
                             ->multiple()
-                            ->options(StoreSetting::query()->pluck('store_name', 'store_name'))
+                            ->options(StoreSetting::query()->pluck('store_name', 'id'))
                             ->preload()
                             ->searchable()
                             ->nullable()
@@ -89,22 +90,19 @@ class UserForm
                                 if ($activeStoreId) {
                                     $activeStore = StoreSetting::find($activeStoreId);
 
-                                    if (! $activeStore || ! in_array($activeStore->store_name, $state)) {
+                                    if (! $activeStore || ! in_array($activeStore->id, $state)) {
                                         $set('store_setting_id', null);
                                     }
                                 }
 
                                 if (count($state) === 1) {
-                                    $storeName = reset($state);
-
-                                    $store = StoreSetting::where('store_name', $storeName)->first();
-
-                                    $set('store_setting_id', $store?->id);
+                                    $storeId = reset($state);
+                                    $set('store_setting_id', $storeId);
                                 }
                             }),
 
                         Select::make('store_setting_id')
-                            ->label('Active Store')
+                            ->label('Toko Aktif')
                             ->options(function (Get $get) {
                                 $selectedStores = $get('selected_store');
 
@@ -113,7 +111,7 @@ class UserForm
                                 }
 
                                 return StoreSetting::query()
-                                    ->whereIn('store_name', $selectedStores)
+                                    ->whereIn('id', $selectedStores)
                                     ->pluck('store_name', 'id');
                             })
                             ->searchable()

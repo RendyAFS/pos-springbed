@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use Andreia\FilamentUiSwitcher\FilamentUiSwitcherPlugin;
 use App\Filament\Pages\SelectStore;
 use App\Http\Middleware\EnsureStoreSelected;
+use App\Http\Middleware\RestrictRoleAccessHour;
 use App\Models\StoreSetting;
 use Awcodes\LightSwitch\Enums\Alignment;
 use Awcodes\LightSwitch\LightSwitchPlugin;
@@ -34,6 +35,8 @@ use App\Models\User;
 use Illuminate\Support\HtmlString;
 use Jacobtims\FilamentLogger\FilamentLoggerPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
+use Wezlo\FilamentKanban\FilamentKanbanPlugin;
+use Filament\View\PanelsRenderHook;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -84,10 +87,11 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 EnsureStoreSelected::class,
+                RestrictRoleAccessHour::class,
             ])
             ->userMenuItems([
                 Action::make('select_store')
-                    ->label('Change Store')
+                    ->label('Ganti Toko')
                     ->icon('heroicon-o-building-storefront')
                     ->url(fn(): string => SelectStore::getUrl())
                     ->visible(function () {
@@ -111,7 +115,12 @@ class AdminPanelProvider extends PanelProvider
                     ->icon(Heroicon::OutlinedShieldCheck)
                     ->collapsed(),
             ])
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn(): string => view('filament.components.transaction.barcode-scanner-scripts')->render(),
+            )
             ->plugins([
+                FilamentKanbanPlugin::make(),
                 GlobalSearchModalPlugin::make(),
                 FilamentLoggerPlugin::make(),
                 FilamentShieldPlugin::make()

@@ -27,10 +27,9 @@ class BundleForm
                             ->label('Bundle Name')
                             ->required(),
                         TextInput::make('bundle_price')
-                            ->label('Bundle Price')
+                            ->label('Harga Bundle')
                             ->prefix('Rp.')
                             ->default(0)
-                            ->readOnly()
                             ->dehydrateStateUsing(fn($state) => (float) str_replace('.', '', $state ?? 0))
                             ->formatStateUsing(fn($state) => number_format((float) ($state ?? 0), 0, ',', '.'))
                             ->dehydrated(),
@@ -49,7 +48,7 @@ class BundleForm
                             ->label('Items')
                             ->schema([
                                 Select::make('product_id')
-                                    ->label('Product')
+                                    ->label('Produk')
                                     ->relationship('product', 'name')
                                     ->searchable()
                                     ->preload()
@@ -84,7 +83,7 @@ class BundleForm
                                     })
                                     ->columns(1),
                                 TextInput::make('qty')
-                                    ->label('Quantity')
+                                    ->label('Kuantitas')
                                     ->numeric()
                                     ->default(1)
                                     ->minValue(1)

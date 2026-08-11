@@ -20,8 +20,8 @@ use UnitEnum;
 class PromoResource extends Resource
 {
     protected static ?string $model = Promo::class;
-    protected static ?string $navigationLabel = 'Promos';
-    protected static ?string $pluralLabel = 'Promos';
+    protected static ?string $navigationLabel = 'Promo';
+    protected static ?string $pluralLabel = 'Promo';
     protected static string | UnitEnum | null $navigationGroup = 'Master Data';
 
     public static function getGloballySearchableAttributes(): array
@@ -37,10 +37,10 @@ class PromoResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Type'       => $record->type->getLabel(),
-            'Start Date' => $record->start_date,
-            'End Date'   => $record->end_date,
-            'Status'     => $record->is_active ? 'Active' : 'Inactive',
+            'Tipe'             => $record->type->getLabel(),
+            'Tanggal Mulai'    => $record->start_date,
+            'Tanggal Berakhir' => $record->end_date,
+            'Status'           => $record->is_active ? 'Active' : 'Inactive',
         ];
     }
 

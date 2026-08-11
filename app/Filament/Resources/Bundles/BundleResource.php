@@ -41,7 +41,7 @@ class BundleResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
-            'Bundle Price' => RupiahHelper::format($record->bundle_price),
+            'Harga Bundle' => RupiahHelper::format($record->bundle_price),
             'Status' => $record->is_active ? 'Active' : 'Inactive',
         ];
     }

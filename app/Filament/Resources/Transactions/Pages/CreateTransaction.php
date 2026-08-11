@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
-use App\Enums\StatusTransactionShipmentEnum;
+use App\Filament\Resources\Transactions\Concerns\HasBarcodeScanner;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\TransactionPayment;
 use App\Models\TransactionShipment;
@@ -13,13 +13,18 @@ use Illuminate\Support\Facades\Auth;
 
 class CreateTransaction extends CreateRecord
 {
+    use HasBarcodeScanner;
+
     protected static string $resource = TransactionResource::class;
+
+    protected static ?string $title = 'Buat Transaksi';
 
     protected array $extraData = [];
 
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['store_setting_id'] = Auth::user()?->store_setting_id;
+        $data['store_setting_id'] = Auth::user()?->store_setting_id ?? ($data['store_setting_id'] ?? null);
 
         $this->extraData = [
             'courier_id'           => $data['courier_id'] ?? null,
@@ -42,6 +47,12 @@ class CreateTransaction extends CreateRecord
         if (isset($data['transactionItems'])) {
             foreach ($data['transactionItems'] as &$item) {
                 unset($item['item_type']);
+
+                if (!empty($item['is_multi_store']) && !empty($item['source_stores'])) {
+                    $totalQty = collect($item['source_stores'])
+                        ->sum(fn($s) => (int)($s['qty'] ?? 0));
+                    $item['qty'] = max(1, $totalQty);
+                }
             }
             unset($item);
         }
@@ -67,7 +78,6 @@ class CreateTransaction extends CreateRecord
             TransactionShipment::create([
                 'transaction_id' => $this->record->id,
                 'courier_id'     => $extra['courier_id'],
-                'status'         => StatusTransactionShipmentEnum::PENDING,
             ]);
         }
 
@@ -78,6 +88,13 @@ class CreateTransaction extends CreateRecord
         /** @var ReferalService $referalService */
         $referalService = app(ReferalService::class);
         $referalService->processReferal($this->record, $extra);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            $this->getScanBarcodeAction(),
+        ];
     }
 
     protected function getRedirectUrl(): string

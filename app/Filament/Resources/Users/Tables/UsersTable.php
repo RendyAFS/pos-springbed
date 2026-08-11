@@ -32,18 +32,17 @@ class UsersTable
             })
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label('Nama')
                     ->searchable(),
 
-                TextColumn::make('selected_store')
-                    ->label('Available Store')
+                TextColumn::make('selected_store_names')
+                    ->label('Toko Tersedia')
                     ->badge()
                     ->separator(', ')
-                    ->color('gray')
-                    ->searchable(),
+                    ->color('gray'),
 
-                TextColumn::make('storeSetting.store_name')
-                    ->label('Active Store')
+                    TextColumn::make('storeSetting.store_name')
+                    ->label('Toko Aktif')
                     ->badge()
                     ->color('success')
                     ->searchable(),
@@ -66,7 +65,7 @@ class UsersTable
                     ->onColor('success'),
             ])
             ->filters([
-                TrashedFilter::make()->native(false),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan'),
             ])
             ->recordActions([
                 ActionGroup::make([

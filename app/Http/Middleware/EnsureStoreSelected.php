@@ -20,7 +20,11 @@ class EnsureStoreSelected
             return $next($request);
         }
 
-        if ($user->hasRole('Super Admin')) {
+        if ($user->hasAnyRole(['Super Admin', 'Owner'])) {
+            return $next($request);
+        }
+
+        if ($request->routeIs('filament.admin.auth.logout')) {
             return $next($request);
         }
 
@@ -31,12 +35,12 @@ class EnsureStoreSelected
         $selectedStores = $user->selected_store ?? [];
 
         if (count($selectedStores) === 1) {
-            $storeName = $selectedStores[0];
-            $store = StoreSetting::where('store_name', $storeName)->first();
+            $storeId = $selectedStores[0];
+            $store = StoreSetting::where('id', $storeId)->first();
 
             if ($store) {
                 $user->update(['store_setting_id' => $store->id]);
-                session()->put('selected_store', $storeName);
+                session()->put('selected_store', $store->id);
             }
 
             return $next($request);

@@ -13,6 +13,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'store_setting_id',
+        'channel_sale_id',
         'customer_id',
         'transaction_code',
         'subtotal',
@@ -31,16 +32,25 @@ class Transaction extends Model
     ];
 
     protected $casts = [
-        'status'           => TransactionStatusEnum::class,
-        'subtotal'         => 'decimal:2',
-        'discount_total'   => 'decimal:2',
-        'shiping_cost'     => 'decimal:2',
-        'grand_total'      => 'decimal:2',
-        'transaction_date' => 'date',
-        'is_referal'       => 'boolean',
+        'status'                => TransactionStatusEnum::class,
+        'subtotal'              => 'decimal:2',
+        'discount_total'        => 'decimal:2',
+        'shiping_cost'          => 'decimal:2',
+        'grand_total'           => 'decimal:2',
+        'transaction_date'      => 'date',
+        'is_referal'            => 'boolean',
         'is_down_payment'       => 'boolean',
         'due_date_down_payment' => 'date',
     ];
+
+    protected static function booted(): void
+    {
+        static::updating(function (Transaction $transaction) {
+            if ($transaction->isDirty('status') && $transaction->status === TransactionStatusEnum::DELIVERED) {
+                $transaction->updated_at = now();
+            }
+        });
+    }
 
     public function customer()
     {
@@ -85,5 +95,10 @@ class Transaction extends Model
     public function transactionDownPayments()
     {
         return $this->hasMany(TransactionDownPayment::class, 'transaction_id');
+    }
+
+    public function channelSale()
+    {
+        return $this->belongsTo(ChannelSale::class, 'channel_sale_id');
     }
 }

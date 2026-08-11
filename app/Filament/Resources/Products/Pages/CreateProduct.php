@@ -12,6 +12,8 @@ class CreateProduct extends CreateRecord
 {
     protected static string $resource = ProductResource::class;
 
+    protected static ?string $title = 'Buat Produk';
+
     protected function afterCreate(): void
     {
         $data = $this->form->getState()['stock_adjustment_temp'] ?? null;

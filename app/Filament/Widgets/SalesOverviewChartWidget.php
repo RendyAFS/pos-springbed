@@ -3,109 +3,91 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\TransactionStatusEnum;
+use App\Filament\Widgets\Concerns\HasDashboardFilters;
 use App\Filament\Widgets\Concerns\HasStoreFilter;
 use App\Models\Transaction;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
-use Filament\Widgets\ChartWidget\Concerns\HasFiltersSchema;
-use Illuminate\Support\Carbon;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Illuminate\Database\Eloquent\Builder;
 
 class SalesOverviewChartWidget extends ChartWidget
 {
-    use HasFiltersSchema;
     use HasStoreFilter;
+    use HasDashboardFilters;
+    use InteractsWithPageFilters;
 
     protected static ?int $sort            = 2;
-    protected ?string $heading             = 'Sales Overview';
+    protected ?string $heading             = 'Ringkasan Penjualan';
     protected string $color                = 'primary';
     protected int|string|array $columnSpan = 2;
     protected ?string $pollingInterval     = '30s';
 
-    public function filtersSchema(Schema $schema): Schema
+    private function baseQuery(): Builder
     {
-        return $schema->components([
-            Select::make('period')
-                ->label('Period')
-                ->native(false)
-                ->options([
-                    'daily'   => 'Daily',
-                    'monthly' => 'Monthly',
-                ])
-                ->default('daily')
-                ->live()
-                ->afterStateUpdated(function ($state) {
-                    if ($state === 'daily') {
-                        $this->filters['startDate'] = now()->subDays(6)->format('Y-m-d');
-                        $this->filters['endDate']   = now()->format('Y-m-d');
-                    } else {
-                        $this->filters['startDate'] = now()->subMonths(11)->startOfMonth()->format('Y-m-d');
-                        $this->filters['endDate']   = now()->format('Y-m-d');
-                    }
-                }),
-
-            DatePicker::make('startDate')
-                ->label('Start Date')
-                ->default(now()->subDays(6))
-                ->maxDate(now())
-                ->native(false)
-                ->suffixIcon(Heroicon::Calendar)
-                ->closeOnDateSelection(),
-
-            DatePicker::make('endDate')
-                ->label('End Date')
-                ->default(now())
-                ->maxDate(now())
-                ->native(false)
-                ->suffixIcon(Heroicon::Calendar)
-                ->closeOnDateSelection(),
-        ]);
+        return $this->applyDateRangeFilter(
+            $this->applyChannelFilter(
+                $this->applyStoreFilter(
+                    Transaction::query()->whereNotIn('status', [TransactionStatusEnum::CANCELLED]),
+                    'store_setting_id',
+                    true
+                )
+            )
+        );
     }
 
-    private function baseQuery(): \Illuminate\Database\Eloquent\Builder
+    /**
+     * Resolve daily/weekly/monthly grouping from the "chart_period" filter.
+     */
+    private function resolvePeriod(): string
     {
-        return $this->applyStoreFilter(
-            Transaction::query()->whereNotIn('status', [TransactionStatusEnum::CANCELLED])
-        );
+        $period = $this->filters['chart_period'] ?? 'daily';
+
+        return in_array($period, ['daily', 'weekly', 'monthly'], true) ? $period : 'daily';
     }
 
     protected function getData(): array
     {
-        $period = $this->filters['period'] ?? 'daily';
+        [$startDate, $endDate] = $this->getFilterDateRange();
 
-        $startDate = isset($this->filters['startDate'])
-            ? Carbon::parse($this->filters['startDate'])->startOfDay()
-            : ($period === 'daily'
-                ? Carbon::now()->subDays(6)->startOfDay()
-                : Carbon::now()->subMonths(11)->startOfMonth()->startOfDay());
-
-        $endDate = isset($this->filters['endDate'])
-            ? Carbon::parse($this->filters['endDate'])->endOfDay()
-            : Carbon::now()->endOfDay();
+        $period = $this->resolvePeriod();
 
         if ($period === 'daily') {
             $rows = $this->baseQuery()
                 ->selectRaw('DATE(transaction_date) AS period_key, SUM(grand_total) AS total')
-                ->whereBetween('transaction_date', [$startDate, $endDate])
                 ->groupByRaw('DATE(transaction_date)')
                 ->pluck('total', 'period_key');
 
-            $labels = [];
-            $data   = [];
+            $labels  = [];
+            $data    = [];
             $current = $startDate->copy();
             while ($current->lte($endDate)) {
                 $key      = $current->toDateString();
-                $labels[] = $current->format('d M');
+                $labels[] = $current->translatedFormat('d F');
                 $data[]   = (float) ($rows[$key] ?? 0);
                 $current->addDay();
+            }
+        } elseif ($period === 'weekly') {
+            $rows = $this->baseQuery()
+                ->selectRaw('YEARWEEK(transaction_date, 1) AS period_key, SUM(grand_total) AS total')
+                ->groupByRaw('YEARWEEK(transaction_date, 1)')
+                ->pluck('total', 'period_key');
+
+            $labels     = [];
+            $data       = [];
+            $current    = $startDate->copy()->startOfWeek(\Illuminate\Support\Carbon::MONDAY);
+            $end        = $endDate->copy()->startOfWeek(\Illuminate\Support\Carbon::MONDAY);
+            $weekNumber = 1;
+            while ($current->lte($end)) {
+                $key      = (int) $current->format('oW');
+                $labels[] = 'W-' . $weekNumber;
+                $data[]   = (float) ($rows[$key] ?? 0);
+                $current->addWeek();
+                $weekNumber++;
             }
         } else {
             $rows = $this->baseQuery()
                 ->selectRaw("DATE_FORMAT(transaction_date, '%Y-%m') AS period_key, SUM(grand_total) AS total")
-                ->whereBetween('transaction_date', [$startDate, $endDate])
                 ->groupByRaw("DATE_FORMAT(transaction_date, '%Y-%m')")
                 ->pluck('total', 'period_key');
 
@@ -115,7 +97,7 @@ class SalesOverviewChartWidget extends ChartWidget
             $end     = $endDate->copy()->startOfMonth();
             while ($current->lte($end)) {
                 $key      = $current->format('Y-m');
-                $labels[] = $current->format('M Y');
+                $labels[] = $current->translatedFormat('F Y');
                 $data[]   = (float) ($rows[$key] ?? 0);
                 $current->addMonth();
             }
@@ -123,7 +105,7 @@ class SalesOverviewChartWidget extends ChartWidget
 
         return [
             'datasets' => [[
-                'label'                     => 'Sales (Rp)',
+                'label'                     => 'Penjualan (Rp)',
                 'data'                      => $data,
                 'fill'                      => true,
                 'tension'                   => 0.4,
@@ -154,8 +136,8 @@ class SalesOverviewChartWidget extends ChartWidget
                         grid: { borderDash: [4, 4] },
                         ticks: {
                             callback: (value) => {
-                                if (value >= 1000000000) return (value / 1000000000) + 'B';
-                                if (value >= 1000000)    return (value / 1000000) + 'M';
+                                if (value >= 1000000000) return (value / 1000000000) + 'M';
+                                if (value >= 1000000)    return (value / 1000000) + 'JT';
                                 if (value >= 1000)       return (value / 1000) + 'K';
                                 return value;
                             },
