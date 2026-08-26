@@ -25,6 +25,7 @@ use Filament\Support\RawJs;
 use Illuminate\Support\HtmlString;
 use Filament\Actions\ActionGroup;
 use App\Filament\Resources\Transactions\TransactionResource;
+use Illuminate\Support\Facades\Auth;
 
 class TransactionActions
 {
@@ -34,6 +35,7 @@ class TransactionActions
     public static function table(): ActionGroup
     {
         return ActionGroup::make([
+            static::verifyTransaction(),
             static::sendWhatsapp(),
             static::updateStatus(),
             static::print(),
@@ -72,6 +74,7 @@ class TransactionActions
     public static function kanbanDropdown(): array
     {
         return [
+            static::verifyTransaction(),
             static::sendWhatsapp(),
             static::updateStatus(),
             static::print(),
@@ -494,5 +497,48 @@ class TransactionActions
     public static function forceDelete(): Action
     {
         return \Filament\Actions\ForceDeleteAction::make();
+    }
+
+    public static function verifyTransaction(): Action
+    {
+        return Action::make('verifyTransaction')
+            ->label(fn(Transaction $record): string => $record->is_verified ? 'Batal Verifikasi' : 'Verifikasi (Owner)')
+            ->icon(fn(Transaction $record) => $record->is_verified ? Heroicon::XMark : Heroicon::CheckBadge)
+            ->color(fn(Transaction $record): string => $record->is_verified ? 'danger' : 'success')
+            ->requiresConfirmation()
+            ->modalHeading(fn(Transaction $record): string => $record->is_verified ? 'Batalkan Verifikasi Transaksi' : 'Verifikasi Transaksi (Owner)')
+            ->modalDescription(fn(Transaction $record): string => $record->is_verified
+                ? "Apakah Anda yakin ingin membatalkan verifikasi untuk transaksi {$record->transaction_code}?"
+                : "Apakah Anda yakin ingin memverifikasi transaksi {$record->transaction_code}?")
+            ->action(function (Transaction $record) {
+                /** @var \App\Models\User|null $user */
+                $user = Auth::user();
+
+                if ($record->is_verified) {
+                    $record->update([
+                        'is_verified' => false,
+                        'verified_at' => null,
+                        'verified_by' => null,
+                    ]);
+
+                    Notification::make()
+                        ->title('Verifikasi Dibatalkan')
+                        ->body("Transaksi {$record->transaction_code} telah dibatalkan verifikasinya.")
+                        ->warning()
+                        ->send();
+                } else {
+                    $record->update([
+                        'is_verified' => true,
+                        'verified_at' => now(),
+                        'verified_by' => $user?->id,
+                    ]);
+
+                    Notification::make()
+                        ->title('Transaksi Diverifikasi')
+                        ->body("Transaksi {$record->transaction_code} telah berhasil diverifikasi oleh Owner.")
+                        ->success()
+                        ->send();
+                }
+            });
     }
 }

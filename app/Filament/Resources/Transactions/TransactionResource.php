@@ -64,7 +64,8 @@ class TransactionResource extends Resource
                 'storeSetting',
                 'transactionItems',
                 'transactionItems.product',
-                'transactionItems.bundle'
+                'transactionItems.bundle',
+                'verifiedBy'
             ]);
 
         $user    = Auth::user();

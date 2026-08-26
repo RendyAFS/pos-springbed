@@ -29,6 +29,9 @@ class Transaction extends Model
         'use_discount_referal',
         'is_down_payment',
         'due_date_down_payment',
+        'is_verified',
+        'verified_at',
+        'verified_by',
     ];
 
     protected $casts = [
@@ -41,6 +44,8 @@ class Transaction extends Model
         'is_referal'            => 'boolean',
         'is_down_payment'       => 'boolean',
         'due_date_down_payment' => 'date',
+        'is_verified'           => 'boolean',
+        'verified_at'           => 'datetime',
     ];
 
     protected static function booted(): void
@@ -100,5 +105,10 @@ class Transaction extends Model
     public function channelSale()
     {
         return $this->belongsTo(ChannelSale::class, 'channel_sale_id');
+    }
+
+    public function verifiedBy()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 }

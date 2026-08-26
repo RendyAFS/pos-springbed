@@ -109,6 +109,23 @@ class TransactionInfolist
                                 TextEntry::make('shiping_cost')
                                     ->label('Biaya Pengiriman')
                                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
+                                TextEntry::make('storeSetting.store_name')
+                                    ->label('Toko')
+                                    ->badge()
+                                    ->color('gray'),
+                                TextEntry::make('is_verified')
+                                    ->label('Verifikasi Owner')
+                                    ->badge()
+                                    ->formatStateUsing(function ($state, $record) {
+                                        if (!$state) {
+                                            return 'Belum Diverifikasi';
+                                        }
+                                        $verifier = $record->verifiedBy?->name ?? 'Owner';
+                                        $date = $record->verified_at ? $record->verified_at->format('d M Y H:i') : '';
+                                        return "Diverifikasi ({$verifier}" . ($date ? " • {$date}" : '') . ")";
+                                    })
+                                    ->color(fn($state) => $state ? 'success' : 'gray')
+                                    ->icon(fn($state) => $state ? Heroicon::CheckBadge : null),
                                 TextEntry::make('is_down_payment')
                                     ->label('Down Payment')
                                     ->badge()

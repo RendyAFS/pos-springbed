@@ -378,7 +378,6 @@ class ListTransactions extends ListRecords
 
         // Badge Dikirim / Belum Dikirim
         if ($record->status === TransactionStatusEnum::DELIVERED) {
-
             $deliveredAt = $record->updated_at;
 
             $badges[] = [
@@ -387,6 +386,29 @@ class ListTransactions extends ListRecords
                         ? "\n" . Carbon::parse($deliveredAt)->translatedFormat('d F Y')
                         : ''),
                 'color' => 'success',
+            ];
+        }
+
+        // Badge Verifikasi Owner
+        if ($record->is_verified) {
+            $verifier = $record->verifiedBy?->name ?? 'Owner';
+            $verifiedDate = $record->verified_at
+                ? Carbon::parse($record->verified_at)->translatedFormat('d M Y')
+                : '';
+
+            $label = "Verified by {$verifier}";
+            if ($verifiedDate) {
+                $label .= "\n{$verifiedDate}";
+            }
+
+            $badges[] = [
+                'label' => $label,
+                'color' => 'success',
+            ];
+        } else {
+            $badges[] = [
+                'label' => 'Unverified',
+                'color' => 'gray',
             ];
         }
 

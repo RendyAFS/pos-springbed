@@ -164,6 +164,21 @@ class TransactionsTable
                     ->label('Kurir')
                     ->default('')
                     ->limit(20),
+                TextColumn::make('is_verified')
+                    ->label('Verifikasi')
+                    ->badge()
+                    ->formatStateUsing(fn($state) => $state ? 'Verified' : 'Unverified')
+                    ->color(fn($state) => $state ? 'success' : 'gray')
+                    ->icon(fn($state) => $state ? Heroicon::CheckBadge : null)
+                    ->tooltip(function ($record): ?string {
+                        if (!$record->is_verified) {
+                            return 'Belum diverifikasi oleh Owner';
+                        }
+                        $verifier = $record->verifiedBy?->name ?? 'Owner';
+                        $date = $record->verified_at ? $record->verified_at->format('d M Y H:i') : '-';
+                        return "Diverifikasi oleh {$verifier} pada {$date}";
+                    })
+                    ->sortable(),
             ])
             ->defaultSort('transaction_date', 'desc')
             ->filters([
@@ -175,6 +190,13 @@ class TransactionsTable
                     ->placeholder('All')
                     ->trueLabel('Down Payment')
                     ->falseLabel('Non-Down Payment')
+                    ->columnSpanFull(),
+                TernaryFilter::make('is_verified')
+                    ->label('Verifikasi Owner')
+                    ->native(false)
+                    ->placeholder('Semua Transaksi')
+                    ->trueLabel('Sudah Diverifikasi')
+                    ->falseLabel('Belum Diverifikasi')
                     ->columnSpanFull(),
                 SelectFilter::make('status'),
                 SelectFilter::make('status')
