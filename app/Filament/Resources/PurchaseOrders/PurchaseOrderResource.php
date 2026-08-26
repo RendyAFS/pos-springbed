@@ -39,12 +39,20 @@ class PurchaseOrderResource extends Resource
 
     public static function getGlobalSearchResultDetails(Model $record): array
     {
-        return [
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        $details = [
             'Invoice Number' => $record->invoice_number,
             'No Surat Jalan' => $record->delivery_order_number,
             'Tanggal Pembelian' => $record->purchase_date,
-            'Total' => RupiahHelper::format($record->total_amount),
         ];
+
+        if (! $user?->hasRole('Staff')) {
+            $details['Total'] = RupiahHelper::format($record->total_amount);
+        }
+
+        return $details;
     }
 
     public static function getEloquentQuery(): Builder

@@ -66,6 +66,7 @@ class PurchaseOrdersTable
                     ->label('Total')
                     ->numeric()
                     ->sortable()
+                    ->visible(fn() => ! $user?->hasRole('Staff'))
                     ->formatStateUsing(fn($state) => RupiahHelper::format($state)),
             ])
             ->filters([

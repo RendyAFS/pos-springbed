@@ -85,7 +85,12 @@ class ProductForm
                                 ? number_format((float) $state, 0, ',', '.')
                                 : null)
                             ->required()
-                            ->prefix('Rp.'),
+                            ->prefix('Rp.')
+                            ->hidden(function () {
+                                /** @var \App\Models\User|null $user */
+                                $user = Auth::user();
+                                return $user?->hasRole('Staff');
+                            }),
                         TextInput::make('sku')
                             ->label('SKU')
                             ->default(null),

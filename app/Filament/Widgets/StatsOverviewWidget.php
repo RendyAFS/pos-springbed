@@ -11,6 +11,7 @@ use App\Models\TransactionItem;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Auth;
 
 class StatsOverviewWidget extends BaseWidget
 {
@@ -87,30 +88,37 @@ class StatsOverviewWidget extends BaseWidget
 
         $netProfitMargin = $revenue > 0 ? ($netProfit / $revenue) * 100 : 0;
 
-        return [
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        $stats = [
             Stat::make('Total Penjualan', RupiahHelper::format($currentRow->total_sales))
                 ->description($periodLabel . ' · ' . $desc($salesChange))
                 ->descriptionColor($salesChange >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-currency-dollar')
                 ->color('success'),
+        ];
 
-            Stat::make('Net Profit', RupiahHelper::format($netProfit))
+        if (! $user?->hasRole('Staff')) {
+            $stats[] = Stat::make('Net Profit', RupiahHelper::format($netProfit))
                 ->description('Margin ' . round($netProfitMargin) . '%')
                 ->descriptionColor($netProfit >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-banknotes')
-                ->color($netProfit >= 0 ? 'success' : 'danger'),
+                ->color($netProfit >= 0 ? 'success' : 'danger');
+        }
 
-            Stat::make('Total Transaksi', number_format($currentRow->total_transactions, 0, ',', '.'))
-                ->description($desc($transactionChange))
-                ->descriptionColor($transactionChange >= 0 ? 'success' : 'danger')
-                ->icon('heroicon-o-document-text')
-                ->color('info'),
+        $stats[] = Stat::make('Total Transaksi', number_format($currentRow->total_transactions, 0, ',', '.'))
+            ->description($desc($transactionChange))
+            ->descriptionColor($transactionChange >= 0 ? 'success' : 'danger')
+            ->icon('heroicon-o-document-text')
+            ->color('info');
 
-            Stat::make('Pesanan Pending', $pendingOrders)
-                ->description('Dalam periode terpilih')
-                ->descriptionColor('warning')
-                ->icon('heroicon-o-clock')
-                ->color('warning'),
-        ];
+        $stats[] = Stat::make('Pesanan Pending', $pendingOrders)
+            ->description('Dalam periode terpilih')
+            ->descriptionColor('warning')
+            ->icon('heroicon-o-clock')
+            ->color('warning');
+
+        return $stats;
     }
 }

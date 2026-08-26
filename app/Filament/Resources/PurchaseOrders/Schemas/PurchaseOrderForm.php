@@ -89,6 +89,11 @@ class PurchaseOrderForm
 
                 Section::make('Summary')
                     ->icon(Heroicon::DocumentText)
+                    ->hidden(function () {
+                        /** @var \App\Models\User|null $user */
+                        $user = Auth::user();
+                        return $user?->hasRole('Staff');
+                    })
                     ->schema([
                         TextInput::make('total_amount')
                             ->label('Total')
@@ -217,6 +222,11 @@ class PurchaseOrderForm
                                     ->prefix('Rp')
                                     ->required()
                                     ->live(onBlur: true)
+                                    ->hidden(function () {
+                                        /** @var \App\Models\User|null $user */
+                                        $user = Auth::user();
+                                        return $user?->hasRole('Staff');
+                                    })
                                     ->afterStateUpdated(function (Get $get, Set $set) {
                                         $items = $get('../../purchaseOrderItems') ?? [];
 
