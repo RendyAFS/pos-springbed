@@ -90,7 +90,8 @@ class TransactionActions
             ->label('Update Status')
             ->icon(Heroicon::ArrowPath)
             ->color('warning')
-            ->modalHeading(fn($record) => "Update Status Transaction - {$record->transaction_code}")
+            ->record(fn(array $arguments) => Transaction::find($arguments['record'] ?? null))
+            ->modalHeading(fn(?Transaction $record) => "Update Status Transaction - " . ($record?->transaction_code ?? ''))
             ->modalWidth(Width::ExtraLarge)
             ->schema([
                 Wizard::make([
@@ -105,7 +106,7 @@ class TransactionActions
                                         ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                                         ->toArray()
                                 )
-                                ->default(fn($record) => $record->status?->value)
+                                ->default(fn(?Transaction $record) => $record?->status?->value)
                                 ->native(false)
                                 ->live(),
 
@@ -116,14 +117,14 @@ class TransactionActions
                                         ->mapWithKeys(fn($case) => [$case->value => $case->getLabel()])
                                         ->toArray()
                                 )
-                                ->default(fn($record) => $record->transactionPayment?->status?->value)
-                                ->visible(fn($record) => $record->transactionPayment !== null)
+                                ->default(fn(?Transaction $record) => $record?->transactionPayment?->status?->value)
+                                ->visible(fn(?Transaction $record) => $record?->transactionPayment !== null)
                                 ->native(false),
 
                             TextInput::make('tracking_number')
                                 ->label('No. Resi')
-                                ->default(fn($record) => $record->transactionShipment?->tracking_number)
-                                ->visible(fn($record) => $record->transactionShipment !== null),
+                                ->default(fn(?Transaction $record) => $record?->transactionShipment?->tracking_number)
+                                ->visible(fn(?Transaction $record) => $record?->transactionShipment !== null),
                         ]),
 
                     Step::make('confirm_pickup')
@@ -136,7 +137,7 @@ class TransactionActions
                             ])
                         )
                         ->schema([
-                            Text::make(fn($record) => static::buildPickupSummary($record))
+                            Text::make(fn(?Transaction $record) => $record ? static::buildPickupSummary($record) : new HtmlString(''))
                                 ->columnSpanFull(),
                         ]),
                 ])
@@ -144,7 +145,7 @@ class TransactionActions
                     ->previousAction(fn($action) => $action->label('Kembali'))
                     ->nextAction(fn($action) => $action->label('Lanjut')),
             ])
-            ->action(function ($record, array $data): void {
+            ->action(function (Transaction $record, array $data): void {
                 if (!empty($data['status'])) {
                     $record->update(['status' => $data['status']]);
                 }
@@ -259,11 +260,18 @@ class TransactionActions
             ->label('Pelunasan/Penambahan DP')
             ->icon(Heroicon::Banknotes)
             ->color('warning')
-            ->visible(fn($record) => $record->is_down_payment)
-            ->modalHeading(fn($record) => "Tambah Down Payment - {$record->transaction_code}")
+            ->record(fn(array $arguments) => Transaction::find($arguments['record'] ?? null))
+            ->visible(function (array $arguments) {
+                $trx = Transaction::find($arguments['record'] ?? null);
+                return $trx ? $trx->is_down_payment : true;
+            })
+            ->modalHeading(fn(?Transaction $record) => "Tambah Down Payment - " . ($record?->transaction_code ?? ''))
             ->modalWidth(Width::ExtraLarge)
             ->schema([
-                Text::make(function ($record) {
+                Text::make(function (?Transaction $record) {
+                    if (!$record) {
+                        return new HtmlString('');
+                    }
                     $grandTotal   = (float) $record->grand_total;
                     $totalPaid    = (float) $record->transactionDownPayments->sum('amount')
                         + (float) ($record->transactionPayment?->amount ?? 0);
@@ -322,7 +330,8 @@ class TransactionActions
                                     ? number_format((float) $state, 0, ',', '.')
                                     : null
                             )
-                            ->default(function ($record) {
+                            ->default(function (?Transaction $record) {
+                                if (!$record) return null;
                                 $grandTotal = (float) $record->grand_total;
                                 $totalPaid  = (float) $record->transactionDownPayments->sum('amount')
                                     + (float) ($record->transactionPayment?->amount ?? 0);
@@ -333,7 +342,8 @@ class TransactionActions
                             ->required()
                             ->prefix('Rp.')
                             ->rules([
-                                fn($record) => function (string $attribute, $value, \Closure $fail) use ($record) {
+                                fn(?Transaction $record) => function (string $attribute, $value, \Closure $fail) use ($record) {
+                                    if (!$record) return;
                                     $grandTotal = (float) $record->grand_total;
                                     $totalPaid  = (float) $record->transactionDownPayments->sum('amount')
                                         + (float) ($record->transactionPayment?->amount ?? 0);
@@ -502,14 +512,15 @@ class TransactionActions
     public static function verifyTransaction(): Action
     {
         return Action::make('verifyTransaction')
-            ->label(fn(Transaction $record): string => $record->is_verified ? 'Batal Verifikasi' : 'Verifikasi (Owner)')
-            ->icon(fn(Transaction $record) => $record->is_verified ? Heroicon::XMark : Heroicon::CheckBadge)
-            ->color(fn(Transaction $record): string => $record->is_verified ? 'danger' : 'success')
+            ->label(fn(?Transaction $record): string => $record?->is_verified ? 'Batal Verifikasi' : 'Verifikasi (Owner)')
+            ->icon(fn(?Transaction $record) => $record?->is_verified ? Heroicon::XMark : Heroicon::CheckBadge)
+            ->color(fn(?Transaction $record): string => $record?->is_verified ? 'danger' : 'success')
+            ->record(fn(array $arguments) => Transaction::find($arguments['record'] ?? null))
             ->requiresConfirmation()
-            ->modalHeading(fn(Transaction $record): string => $record->is_verified ? 'Batalkan Verifikasi Transaksi' : 'Verifikasi Transaksi (Owner)')
-            ->modalDescription(fn(Transaction $record): string => $record->is_verified
-                ? "Apakah Anda yakin ingin membatalkan verifikasi untuk transaksi {$record->transaction_code}?"
-                : "Apakah Anda yakin ingin memverifikasi transaksi {$record->transaction_code}?")
+            ->modalHeading(fn(?Transaction $record): string => $record?->is_verified ? 'Batalkan Verifikasi Transaksi' : 'Verifikasi Transaksi (Owner)')
+            ->modalDescription(fn(?Transaction $record): string => $record?->is_verified
+                ? "Apakah Anda yakin ingin membatalkan verifikasi untuk transaksi {$record?->transaction_code}?"
+                : "Apakah Anda yakin ingin memverifikasi transaksi {$record?->transaction_code}?")
             ->action(function (Transaction $record) {
                 /** @var \App\Models\User|null $user */
                 $user = Auth::user();

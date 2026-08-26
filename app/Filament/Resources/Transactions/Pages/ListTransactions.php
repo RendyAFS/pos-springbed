@@ -74,24 +74,21 @@ class ListTransactions extends ListRecords
                 ->color('gray')
                 ->extraAttributes([
                     'class' => 'hidden',
-                ])
-                ->record(fn(array $arguments) => Transaction::find($arguments['record'] ?? null))
-                ->visible(function (array $arguments) {
-                    $record = Transaction::find($arguments['record'] ?? null);
-                    return $record !== null;
-                }),
+                ]),
 
             TransactionActions::addDownPayment()
                 ->label('')
                 ->color('gray')
                 ->extraAttributes([
                     'class' => 'hidden',
-                ])
-                ->record(fn(array $arguments) => Transaction::find($arguments['record'] ?? null))
-                ->visible(function (array $arguments) {
-                    $record = Transaction::find($arguments['record'] ?? null);
-                    return $record?->is_down_payment ?? false;
-                }),
+                ]),
+
+            TransactionActions::verifyTransaction()
+                ->label('')
+                ->color('gray')
+                ->extraAttributes([
+                    'class' => 'hidden',
+                ]),
 
             Action::make('filterDate')
                 ->label('Date Range')
