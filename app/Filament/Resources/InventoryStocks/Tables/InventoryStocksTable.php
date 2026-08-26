@@ -60,7 +60,8 @@ class InventoryStocksTable
                     ->label('Stok')
                     ->default(0)
                     ->alignCenter()
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->sortable(),
 
                 TextColumn::make('product.selling_price')
                     ->label('Harga Jual')

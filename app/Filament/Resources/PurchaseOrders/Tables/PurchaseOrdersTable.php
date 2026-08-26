@@ -32,7 +32,7 @@ class PurchaseOrdersTable
                     ->badge()
                     ->color('gray')
                     ->sortable()
-                    ->visible(fn() => Auth::user()?->store_setting_id === null)
+                    ->visible(fn() => Auth::user()?->hasAnyRole(['Super Admin', 'Owner']) || Auth::user()?->store_setting_id === null)
                     ->searchable(),
                 TextColumn::make('invoice_number')
                     ->fontFamily(FontFamily::Mono)

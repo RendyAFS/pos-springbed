@@ -59,14 +59,18 @@ class InventoryStockResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $storeId = Auth::user()?->store_setting_id;
+        $user = Auth::user();
 
         $sub = parent::getEloquentQuery()
+            ->whereHas('product')
             ->selectRaw('MIN(id) as id, product_id, SUM(quantity) as quantity')
             ->groupBy('product_id');
 
-        if ($storeId) {
-            $sub->where('store_setting_id', $storeId);
+        if ($user && ! $user->hasAnyRole(['Super Admin', 'Owner'])) {
+            $storeId = $user->store_setting_id;
+            if ($storeId) {
+                $sub->where('store_setting_id', $storeId);
+            }
         }
 
         return static::getModel()::query()

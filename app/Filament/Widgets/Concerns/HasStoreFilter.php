@@ -11,7 +11,7 @@ trait HasStoreFilter
     {
         /** @var User|null $user */
         $user = Auth::user();
-        return $user?->hasRole('Super Admin') ?? false;
+        return $user?->hasAnyRole(['Super Admin', 'Owner']) ?? false;
     }
 
     protected function isStaff(): bool
@@ -29,13 +29,15 @@ trait HasStoreFilter
         string $column = 'store_setting_id',
         bool $applyCreatedBy = false
     ): \Illuminate\Database\Eloquent\Builder {
-        $storeId = $this->getStoreSettingId();
-
-        if ($this->isSuperAdmin() && is_null($storeId)) {
+        if ($this->isSuperAdmin()) {
             return $query;
         }
 
-        $query = $query->where($column, $storeId);
+        $storeId = $this->getStoreSettingId();
+
+        if (! is_null($storeId)) {
+            $query = $query->where($column, $storeId);
+        }
 
         if ($applyCreatedBy && $this->isStaff()) {
             $query = $query->where('created_by', Auth::id());

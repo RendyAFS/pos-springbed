@@ -50,12 +50,17 @@ class PurchaseOrderResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
-        $storeId = Auth::user()?->store_setting_id;
-        if ($storeId) {
-            $query->whereHas('storeSetting', function ($q) use ($storeId) {
-                $q->where('id', $storeId);
-            });
+        $user = Auth::user();
+
+        if ($user && ! $user->hasAnyRole(['Super Admin', 'Owner'])) {
+            $storeId = $user->store_setting_id;
+            if ($storeId) {
+                $query->whereHas('storeSetting', function ($q) use ($storeId) {
+                    $q->where('id', $storeId);
+                });
+            }
         }
+
         return $query->orderByDesc('id');
     }
 

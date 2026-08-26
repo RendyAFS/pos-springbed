@@ -29,6 +29,7 @@ class RightPanelWidget extends Widget
 
         return $this->lowStockCache = $this->applyStoreFilter(
             InventoryStock::query()
+                ->whereHas('product')
                 ->select(['id', 'store_setting_id', 'product_id', 'quantity'])
                 ->with([
                     'product:id,name,sku',
