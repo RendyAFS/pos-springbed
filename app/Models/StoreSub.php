@@ -32,26 +32,31 @@ class StoreSub extends Model
     {
         static::creating(function (StoreSub $model) {
             if (empty($model->code)) {
-                $typeStr = $model->type instanceof StoreSubTypeEnum
-                    ? $model->type->value
-                    : ($model->type ?? 'Floor');
-
-                $prefix = strtoupper(substr($typeStr, 0, 3)); // FLR or RAC
-                $storeId = $model->store_id ?? 1;
-
-                $count = static::withTrashed()
-                    ->where('store_id', $storeId)
-                    ->where('type', $typeStr)
-                    ->count() + 1;
-
-                do {
-                    $code = sprintf('%s-%02d-%03d', $prefix, $storeId, $count);
-                    $count++;
-                } while (static::withTrashed()->where('code', $code)->exists());
-
-                $model->code = $code;
+                $model->code = static::generateCode($model->store_id, $model->type);
             }
         });
+    }
+
+    public static function generateCode(?int $storeId = null, string|StoreSubTypeEnum|null $type = null): string
+    {
+        $typeStr = $type instanceof StoreSubTypeEnum
+            ? $type->value
+            : ($type ?? 'Floor');
+
+        $prefix = strtoupper(substr($typeStr, 0, 3)); // FLO or RAC
+        $storeId = $storeId ?? 1;
+
+        $count = static::withTrashed()
+            ->where('store_id', $storeId)
+            ->where('type', $typeStr)
+            ->count() + 1;
+
+        do {
+            $code = sprintf('%s-%02d-%03d', $prefix, $storeId, $count);
+            $count++;
+        } while (static::withTrashed()->where('code', $code)->exists());
+
+        return $code;
     }
 
     public function store(): BelongsTo

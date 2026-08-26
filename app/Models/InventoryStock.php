@@ -9,6 +9,7 @@ class InventoryStock extends Model
     protected $fillable = [
         'product_id',
         'store_setting_id',
+        'store_sub_id',
         'quantity',
     ];
 
@@ -20,5 +21,10 @@ class InventoryStock extends Model
     public function storeSetting()
     {
         return $this->belongsTo(StoreSetting::class, 'store_setting_id');
+    }
+
+    public function storeSub()
+    {
+        return $this->belongsTo(StoreSub::class, 'store_sub_id');
     }
 }
