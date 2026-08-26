@@ -35,4 +35,9 @@ class StoreSetting extends Model implements HasMedia
     {
         return $this->hasMany(InventoryStock::class, 'store_setting_id');
     }
+
+    public function storeSubs()
+    {
+        return $this->hasMany(StoreSub::class, 'store_id');
+    }
 }

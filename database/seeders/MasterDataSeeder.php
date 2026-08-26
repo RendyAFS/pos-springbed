@@ -152,5 +152,7 @@ class MasterDataSeeder extends Seeder
         foreach ($store_settings as $store) {
             StoreSetting::create($store);
         }
+
+        $this->call(StoreSubSeeder::class);
     }
 }
