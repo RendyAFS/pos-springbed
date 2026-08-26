@@ -14,7 +14,7 @@ class UserStats extends StatsOverviewWidget
     {
         $baseQuery = User::query()
             ->whereDoesntHave('roles', function (Builder $query) {
-                $query->where('name', 'Super Admin');
+                $query->whereIn('name', ['Super Admin', 'Owner']);
             });
 
         return [

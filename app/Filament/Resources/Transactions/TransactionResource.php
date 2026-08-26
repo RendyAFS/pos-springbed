@@ -68,14 +68,17 @@ class TransactionResource extends Resource
                 'verifiedBy'
             ]);
 
-        $user    = Auth::user();
-        $storeId = $user?->store_setting_id;
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
 
-        if (! is_null($storeId)) {
-            $query->where('store_setting_id', $storeId);
+        if ($user && ! $user->hasAnyRole(['Super Admin', 'Owner'])) {
+            $storeId = $user->store_setting_id;
+            if (! is_null($storeId)) {
+                $query->where('store_setting_id', $storeId);
+            }
         }
 
-        if ($user?->roles->contains('id', 4)) {
+        if ($user?->roles->contains('id', 4) || $user?->roles->contains('name', 'Kasir')) {
             $query->where('created_by', $user->id);
         }
 

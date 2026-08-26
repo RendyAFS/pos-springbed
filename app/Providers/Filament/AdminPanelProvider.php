@@ -98,7 +98,7 @@ class AdminPanelProvider extends PanelProvider
                         /** @var User|null $user */
                         $user = Auth::user();
 
-                        if (!$user || $user->hasRole('Super Admin')) {
+                        if (!$user || $user->hasAnyRole(['Super Admin', 'Owner'])) {
                             return false;
                         }
 

@@ -158,7 +158,7 @@ class ListTransactions extends ListRecords
                                 ->multiple()
                                 ->searchable()
                                 ->preload()
-                                ->options(fn() => User::whereDoesntHave('roles', fn($q) => $q->where('name', 'Super Admin'))
+                                ->options(fn() => User::whereDoesntHave('roles', fn($q) => $q->whereIn('name', ['Super Admin', 'Owner']))
                                     ->pluck('name', 'id'))
                         ])
                 ])
