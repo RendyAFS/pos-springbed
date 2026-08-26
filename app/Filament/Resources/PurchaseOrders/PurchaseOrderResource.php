@@ -50,6 +50,7 @@ class PurchaseOrderResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
         if ($user && ! $user->hasAnyRole(['Super Admin', 'Owner'])) {

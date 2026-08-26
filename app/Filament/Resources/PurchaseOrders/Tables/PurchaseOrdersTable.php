@@ -21,18 +21,19 @@ class PurchaseOrdersTable
 {
     public static function configure(Table $table): Table
     {
+        /** @var \App\Models\User|null $user */
+           $user = Auth::user();
         return $table
             ->columns([
                 TextColumn::make('supplier_name')
-                    ->label('Nama Supplier')
-                    ->searchable(),
-                // var
+                ->label('Nama Supplier')
+                ->searchable(),
                 TextColumn::make('storeSetting.store_name')
                     ->label('Toko')
                     ->badge()
                     ->color('gray')
                     ->sortable()
-                    ->visible(fn() => Auth::user()?->hasAnyRole(['Super Admin', 'Owner']) || Auth::user()?->store_setting_id === null)
+                    ->visible(fn() => $user?->hasAnyRole(['Super Admin', 'Owner']) || $user?->store_setting_id === null)
                     ->searchable(),
                 TextColumn::make('invoice_number')
                     ->fontFamily(FontFamily::Mono)

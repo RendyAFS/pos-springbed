@@ -59,6 +59,7 @@ class InventoryStockResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
         $sub = parent::getEloquentQuery()

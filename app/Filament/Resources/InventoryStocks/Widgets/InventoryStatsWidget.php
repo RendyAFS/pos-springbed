@@ -15,6 +15,7 @@ class InventoryStatsWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
         $isOwnerOrAdmin = $user?->hasAnyRole(['Super Admin', 'Owner']);
         $userStoreId = $isOwnerOrAdmin ? null : $user?->store_setting_id;
