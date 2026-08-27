@@ -12,6 +12,7 @@ class PurchaseOrder extends Model
 
     protected $fillable = [
         'store_setting_id',
+        'store_sub_id',
         'supplier_name',
         'invoice_number',
         'purchase_date',
@@ -47,5 +48,10 @@ class PurchaseOrder extends Model
     public function storeSetting()
     {
         return $this->belongsTo(StoreSetting::class, 'store_setting_id');
+    }
+
+    public function storeSub()
+    {
+        return $this->belongsTo(StoreSub::class, 'store_sub_id');
     }
 }

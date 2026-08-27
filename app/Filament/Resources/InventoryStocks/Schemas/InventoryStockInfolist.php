@@ -4,10 +4,13 @@ namespace App\Filament\Resources\InventoryStocks\Schemas;
 
 use App\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Models\InventoryStock;
+use App\Models\StoreSetting;
 use App\Models\StoreSub;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -122,7 +125,6 @@ class InventoryStockInfolist
                                             ->default('Lantai 1')
                                             ->formatStateUsing(function ($state, $record) {
                                                 $name = $record->storeSub?->name ?? 'Lantai 1';
-                                                $type = $record->storeSub?->type?->value ?? ($record->storeSub?->type ?? 'Floor');
                                                 $code = $record->storeSub?->code ? " ({$record->storeSub->code})" : '';
                                                 return "{$name}{$code}";
                                             }),
@@ -144,19 +146,33 @@ class InventoryStockInfolist
                                         Actions::make([
                                             Action::make('editLocation')
                                                 ->label('Edit Lokasi')
-                                                ->icon(Heroicon::PencilSquare)
+                                                ->icon(Heroicon::ArrowsRightLeft)
                                                 ->color('warning')
                                                 ->outlined()
-                                                ->modalHeading(fn($record) => "Edit Lokasi Penyimpanan - {$record->storeSetting?->store_name}")
+                                                ->modalHeading(fn($record) => "Pindah Lokasi / Toko Stock - {$record->product?->name}")
                                                 ->modalWidth(Width::Large)
                                                 ->fillForm(fn($record) => [
-                                                    'store_sub_id' => $record->store_sub_id,
+                                                    'store_setting_id' => $record->store_setting_id,
+                                                    'store_sub_id'     => $record->store_sub_id,
                                                 ])
                                                 ->schema([
+                                                    Select::make('store_setting_id')
+                                                        ->label('Toko')
+                                                        ->options(fn() => StoreSetting::pluck('store_name', 'id'))
+                                                        ->searchable()
+                                                        ->preload()
+                                                        ->required()
+                                                        ->live(onBlur: true)
+                                                        ->afterStateUpdated(fn(Set $set) => $set('store_sub_id', null)),
+
                                                     Select::make('store_sub_id')
-                                                        ->label('Lokasi Penyimpanan (Floor / Rack)')
-                                                        ->options(function ($record) {
-                                                            return StoreSub::where('store_id', $record->store_setting_id)
+                                                        ->label('Sub Lokasi Toko (Floor / Rack)')
+                                                        ->options(function (Get $get, $record) {
+                                                            $storeId = $get('store_setting_id') ?? $record->store_setting_id;
+                                                            if (!$storeId) {
+                                                                return [];
+                                                            }
+                                                            return StoreSub::where('store_id', $storeId)
                                                                 ->get()
                                                                 ->mapWithKeys(function ($sub) {
                                                                     $typeLabel = $sub->type instanceof \BackedEnum ? $sub->type->value : $sub->type;
@@ -168,12 +184,34 @@ class InventoryStockInfolist
                                                         ->required(),
                                                 ])
                                                 ->action(function ($record, array $data) {
-                                                    $record->update([
-                                                        'store_sub_id' => $data['store_sub_id'],
-                                                    ]);
+                                                    $targetStoreId = (int) $data['store_setting_id'];
+                                                    $targetSubId   = (int) $data['store_sub_id'];
+
+                                                    if ($targetStoreId !== (int) $record->store_setting_id) {
+                                                        $existingStock = InventoryStock::where('product_id', $record->product_id)
+                                                            ->where('store_setting_id', $targetStoreId)
+                                                            ->where('id', '!=', $record->id)
+                                                            ->first();
+
+                                                        if ($existingStock) {
+                                                            $existingStock->quantity += $record->quantity;
+                                                            $existingStock->store_sub_id = $targetSubId;
+                                                            $existingStock->save();
+                                                            $record->delete();
+                                                        } else {
+                                                            $record->update([
+                                                                'store_setting_id' => $targetStoreId,
+                                                                'store_sub_id'     => $targetSubId,
+                                                            ]);
+                                                        }
+                                                    } else {
+                                                        $record->update([
+                                                            'store_sub_id' => $targetSubId,
+                                                        ]);
+                                                    }
 
                                                     Notification::make()
-                                                        ->title('Lokasi penyimpanan berhasil diperbarui')
+                                                        ->title('Lokasi & Toko stock berhasil diperbarui')
                                                         ->success()
                                                         ->send();
                                                 }),

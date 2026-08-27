@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PurchaseOrders\Schemas;
 
 use App\Models\InventoryStock;
 use App\Models\Product;
+use App\Models\StoreSub;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
@@ -37,6 +38,7 @@ class PurchaseOrderForm
                             ->dehydrated(fn() => true)
                             ->live(onBlur: true)
                             ->afterStateUpdated(function (Get $get, Set $set) {
+                                $set('store_sub_id', null);
                                 $storeId = $get('store_setting_id');
                                 $items = $get('purchaseOrderItems') ?? [];
                                 foreach ($items as $key => $item) {
@@ -58,19 +60,27 @@ class PurchaseOrderForm
                                 }
                             })
                             ->required(),
+                        Select::make('store_sub_id')
+                            ->label('Sub Lokasi Toko')
+                            ->options(function (Get $get) {
+                                $storeId = $get('store_setting_id');
+                                if (!$storeId) {
+                                    return [];
+                                }
+                                return StoreSub::where('store_id', $storeId)
+                                    ->get()
+                                    ->mapWithKeys(function ($sub) {
+                                        $typeLabel = $sub->type instanceof \BackedEnum ? $sub->type->value : $sub->type;
+                                        return [$sub->id => "{$sub->name} ({$typeLabel}) - Kode: {$sub->code}"];
+                                    });
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->nullable()
+                            ->live(),
                         TextInput::make('supplier_name')
                             ->label('Nama Supplier')
                             ->required(),
-                        TextInput::make('invoice_number')
-                            ->label('Invoice Number')
-                            ->required()
-                            ->default(function () {
-                                $random = strtoupper(Str::random(8));
-                                $timestamp = now()->timestamp;
-                                return "INV{$random}{$timestamp}";
-                            })
-                            ->disabled()
-                            ->dehydrated(true),
                         DatePicker::make('purchase_date')
                             ->label('Tanggal Pemesanan')
                             ->native(false)
@@ -84,6 +94,17 @@ class PurchaseOrderForm
                         TextInput::make('taxpayer_name')
                             ->label('Nama Wajib Pajak')
                             ->required(),
+                        TextInput::make('invoice_number')
+                            ->label('Invoice Number')
+                            ->required()
+                            ->default(function () {
+                                $random = strtoupper(Str::random(8));
+                                $timestamp = now()->timestamp;
+                                return "INV{$random}{$timestamp}";
+                            })
+                            ->disabled()
+                            ->dehydrated(true)
+                            ->columnSpanFull(),
                     ])
                     ->columns(2),
 
