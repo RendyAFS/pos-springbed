@@ -185,28 +185,30 @@ class InventoryStockInfolist
                                                 ])
                                                 ->action(function ($record, array $data) {
                                                     $targetStoreId = (int) $data['store_setting_id'];
-                                                    $targetSubId   = (int) $data['store_sub_id'];
+                                                    $targetSubId   = isset($data['store_sub_id']) && $data['store_sub_id'] !== '' && $data['store_sub_id'] !== null
+                                                        ? (int) $data['store_sub_id']
+                                                        : null;
 
-                                                    if ($targetStoreId !== (int) $record->store_setting_id) {
-                                                        $existingStock = InventoryStock::where('product_id', $record->product_id)
-                                                            ->where('store_setting_id', $targetStoreId)
-                                                            ->where('id', '!=', $record->id)
-                                                            ->first();
+                                                    $query = InventoryStock::where('product_id', $record->product_id)
+                                                        ->where('store_setting_id', $targetStoreId)
+                                                        ->where('id', '!=', $record->id);
 
-                                                        if ($existingStock) {
-                                                            $existingStock->quantity += $record->quantity;
-                                                            $existingStock->store_sub_id = $targetSubId;
-                                                            $existingStock->save();
-                                                            $record->delete();
-                                                        } else {
-                                                            $record->update([
-                                                                'store_setting_id' => $targetStoreId,
-                                                                'store_sub_id'     => $targetSubId,
-                                                            ]);
-                                                        }
+                                                    if ($targetSubId === null) {
+                                                        $query->whereNull('store_sub_id');
+                                                    } else {
+                                                        $query->where('store_sub_id', $targetSubId);
+                                                    }
+
+                                                    $existingStock = $query->first();
+
+                                                    if ($existingStock) {
+                                                        $existingStock->quantity += $record->quantity;
+                                                        $existingStock->save();
+                                                        $record->delete();
                                                     } else {
                                                         $record->update([
-                                                            'store_sub_id' => $targetSubId,
+                                                            'store_setting_id' => $targetStoreId,
+                                                            'store_sub_id'     => $targetSubId,
                                                         ]);
                                                     }
 
