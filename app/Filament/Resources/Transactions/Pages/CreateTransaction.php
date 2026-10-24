@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Transactions\Pages;
 
+use App\Filament\Concerns\HasBackAction;
 use App\Filament\Resources\Transactions\Concerns\HasBarcodeScanner;
 use App\Filament\Resources\Transactions\TransactionResource;
 use App\Models\TransactionPayment;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 
 class CreateTransaction extends CreateRecord
 {
+    use HasBackAction;
     use HasBarcodeScanner;
 
     protected static string $resource = TransactionResource::class;
@@ -93,6 +95,7 @@ class CreateTransaction extends CreateRecord
     protected function getHeaderActions(): array
     {
         return [
+            $this->getBackAction(),
             $this->getScanBarcodeAction(),
         ];
     }

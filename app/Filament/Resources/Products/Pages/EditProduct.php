@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Pages;
 
+use App\Filament\Concerns\HasBackAction;
 use App\Filament\Resources\Products\ProductResource;
 use App\Models\InventoryStock;
 use App\Models\StockAdjustment;
@@ -13,6 +14,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditProduct extends EditRecord
 {
+    use HasBackAction;
+
     protected static string $resource = ProductResource::class;
 
     protected static ?string $title = 'Edit Produk';
@@ -20,6 +23,7 @@ class EditProduct extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            $this->getBackAction(),
             DeleteAction::make(),
             ForceDeleteAction::make(),
             RestoreAction::make(),

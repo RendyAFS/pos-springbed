@@ -2,13 +2,23 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Concerns\HasBackAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\StoreSetting;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateUser extends CreateRecord
 {
+    use HasBackAction;
+
     protected static string $resource = UserResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            $this->getBackAction(),
+        ];
+    }
 
     protected function getRedirectUrl(): string
     {

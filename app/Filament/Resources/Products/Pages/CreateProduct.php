@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Pages;
 
+use App\Filament\Concerns\HasBackAction;
 use App\Filament\Resources\Products\ProductResource;
 use App\Models\InventoryStock;
 use App\Models\StockAdjustment;
@@ -10,9 +11,18 @@ use Filament\Resources\Pages\CreateRecord;
 
 class CreateProduct extends CreateRecord
 {
+    use HasBackAction;
+
     protected static string $resource = ProductResource::class;
 
     protected static ?string $title = 'Buat Produk';
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            $this->getBackAction(),
+        ];
+    }
 
     protected function afterCreate(): void
     {
