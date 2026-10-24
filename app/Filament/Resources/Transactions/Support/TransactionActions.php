@@ -73,7 +73,7 @@ class TransactionActions
 
     public static function kanbanDropdown(): array
     {
-        return [
+        return array_values(array_filter([
             static::verifyTransaction(),
             static::sendWhatsapp(),
             static::updateStatus(),
@@ -81,7 +81,7 @@ class TransactionActions
             static::invoiceA5(),
             static::invoiceA4(),
             static::addDownPayment(),
-        ];
+        ], fn(Action $action) => $action->isVisible()));
     }
 
     public static function updateStatus(): Action
@@ -516,6 +516,7 @@ class TransactionActions
             ->icon(fn(?Transaction $record) => $record?->is_verified ? Heroicon::XMark : Heroicon::CheckBadge)
             ->color(fn(?Transaction $record): string => $record?->is_verified ? 'danger' : 'success')
             ->record(fn(array $arguments) => Transaction::find($arguments['record'] ?? null))
+            ->visible(fn(): bool => Auth::user()?->hasAnyRole(['Owner', 'Super Admin']) ?? false)
             ->requiresConfirmation()
             ->modalHeading(fn(?Transaction $record): string => $record?->is_verified ? 'Batalkan Verifikasi Transaksi' : 'Verifikasi Transaksi (Owner)')
             ->modalDescription(fn(?Transaction $record): string => $record?->is_verified
@@ -524,6 +525,16 @@ class TransactionActions
             ->action(function (Transaction $record) {
                 /** @var \App\Models\User|null $user */
                 $user = Auth::user();
+
+                if (! $user?->hasAnyRole(['Owner', 'Super Admin'])) {
+                    Notification::make()
+                        ->title('Akses Ditolak')
+                        ->body('Hanya Owner yang dapat melakukan verifikasi transaksi.')
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
 
                 if ($record->is_verified) {
                     $record->update([
