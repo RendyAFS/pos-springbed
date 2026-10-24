@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Concerns\HasBackAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\StoreSetting;
 use Filament\Actions\DeleteAction;
@@ -11,11 +12,14 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditUser extends EditRecord
 {
+    use HasBackAction;
+
     protected static string $resource = UserResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
+            $this->getBackAction(),
             DeleteAction::make(),
             ForceDeleteAction::make(),
             RestoreAction::make(),

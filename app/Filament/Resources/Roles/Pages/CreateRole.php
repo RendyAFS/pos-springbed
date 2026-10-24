@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Pages;
 
+use App\Filament\Concerns\HasBackAction;
 use App\Filament\Resources\Roles\RoleResource;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Resources\Pages\CreateRecord;
@@ -12,9 +13,18 @@ use Illuminate\Support\Collection;
 
 class CreateRole extends CreateRecord
 {
+    use HasBackAction;
+
     public Collection $permissions;
 
     protected static string $resource = RoleResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            $this->getBackAction(),
+        ];
+    }
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {

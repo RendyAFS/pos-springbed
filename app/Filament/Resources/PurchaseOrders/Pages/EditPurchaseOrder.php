@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PurchaseOrders\Pages;
 
+use App\Filament\Concerns\HasBackAction;
 use App\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
 use App\Services\PurchaseOrderService;
 use Filament\Actions\DeleteAction;
@@ -11,6 +12,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditPurchaseOrder extends EditRecord
 {
+    use HasBackAction;
+
     protected static string $resource = PurchaseOrderResource::class;
 
     protected static ?string $title = 'Edit Pesanan Pembelian';
@@ -34,6 +37,7 @@ class EditPurchaseOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            $this->getBackAction(),
             DeleteAction::make(),
             ForceDeleteAction::make(),
             RestoreAction::make(),

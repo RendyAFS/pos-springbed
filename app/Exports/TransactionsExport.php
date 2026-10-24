@@ -28,8 +28,9 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
             ->with([
                 'customer',
                 'creator',
-                'transactionItems.product',
-                'transactionItems.bundle.bundleItems.product',
+                'transactionItems.product' => fn($q) => $q->withTrashed(),
+                'transactionItems.bundle' => fn($q) => $q->withTrashed(),
+                'transactionItems.bundle.bundleItems.product' => fn($q) => $q->withTrashed(),
                 'transactionDownPayments',
                 'transactionPayment',
                 'transactionShipment',
@@ -124,46 +125,63 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
             }
 
             foreach ($transaction->transactionItems as $item) {
-                $hargaNetto = $this->canViewHargaNetto
-                    ? (($item->selling_price ?? 0) - ($item->discount ?? 0))
-                    : null;
-
                 if ($item->bundle_id && $item->bundle) {
-
                     $bundleItems = $item->bundle->bundleItems;
 
                     $totalBundlePrice = $bundleItems->sum(function ($bundleItem) {
-                        return ($bundleItem->price ?? 0) * ($bundleItem->qty ?? 1);
+                        $price = (float) ($bundleItem->product?->selling_price ?? $bundleItem->price ?? 0);
+                        return $price * ($bundleItem->qty ?? 1);
                     });
 
+                    $itemSubtotal = $item->subtotal !== null ? (float) $item->subtotal : 0;
+
                     foreach ($bundleItems as $bundleItem) {
+                        $qty = ($bundleItem->qty ?? 1) * ($item->qty ?? 1);
+                        $masterPrice = (float) ($bundleItem->product?->selling_price ?? $bundleItem->price ?? 0);
+                        $harga = $masterPrice * $qty;
 
-                        $componentPrice = ($bundleItem->price ?? 0) * ($bundleItem->qty ?? 1);
-
+                        $componentTotal = $masterPrice * ($bundleItem->qty ?? 1);
                         $ratio = $totalBundlePrice > 0
-                            ? $componentPrice / $totalBundlePrice
+                            ? $componentTotal / $totalBundlePrice
                             : 0;
 
-                        $allocatedHarga = round(($item->subtotal ?? 0) * $ratio);
-
                         $allocatedNetto = $this->canViewHargaNetto
-                            ? round($hargaNetto * $ratio)
+                            ? round($itemSubtotal * $ratio)
                             : null;
 
                         $pushRow(
-                            $bundleItem->qty * $item->qty,
+                            $qty,
                             $bundleItem->product?->name,
-                            $allocatedHarga,
-                            $allocatedNetto
+                            $harga > 0 ? (int) $harga : null,
+                            $allocatedNetto !== null && $allocatedNetto > 0 ? (int) $allocatedNetto : null
                         );
                     }
                 } else {
+                    $qty = (int) ($item->qty ?? 1);
+                    $sellingPrice = (float) ($item->selling_price ?? $item->product?->selling_price ?? 0);
+                    $subtotal = $item->subtotal !== null ? (float) $item->subtotal : null;
+
+                    // Cek jika produk merupakan bonus/cuma-cuma (selling_price & subtotal bernilai null atau 0)
+                    $isBonus = ($item->selling_price === null || (float) $item->selling_price == 0)
+                        && ($item->subtotal === null || (float) $item->subtotal == 0);
+
+                    if ($isBonus) {
+                        $harga = null;
+                        $netto = null;
+                    } else {
+                        // HARGA: Harga master produk / selling price * qty
+                        $harga = $sellingPrice > 0 ? (int) ($sellingPrice * $qty) : ($subtotal !== null ? (int) $subtotal : null);
+                        // HARGA NETTO: Subtotal setelah diskon
+                        $netto = $this->canViewHargaNetto
+                            ? (int) ($subtotal ?? (($sellingPrice * $qty) - (float) ($item->discount ?? 0)))
+                            : null;
+                    }
 
                     $pushRow(
-                        $item->qty,
+                        $qty,
                         $item->product?->name,
-                        (int) $item->subtotal,
-                        $hargaNetto
+                        $harga,
+                        $netto
                     );
                 }
             }

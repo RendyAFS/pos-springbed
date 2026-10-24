@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles\Pages;
 
+use App\Filament\Concerns\HasBackAction;
 use App\Filament\Resources\Roles\RoleResource;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use Filament\Actions\DeleteAction;
@@ -13,13 +14,16 @@ use Illuminate\Support\Collection;
 
 class EditRole extends EditRecord
 {
+    use HasBackAction;
+
     public Collection $permissions;
 
     protected static string $resource = RoleResource::class;
 
-    protected function getActions(): array
+    protected function getHeaderActions(): array
     {
         return [
+            $this->getBackAction(),
             DeleteAction::make(),
         ];
     }
