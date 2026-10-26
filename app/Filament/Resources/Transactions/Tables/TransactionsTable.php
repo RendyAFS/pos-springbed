@@ -132,7 +132,9 @@ class TransactionsTable
                         }
 
                         return new \Illuminate\Support\HtmlString(
-                            $downPaymentBadge . ' ' . $statusBadge
+                            '<div class="flex flex-col items-end gap-1 mt-0.5">' .
+                            $downPaymentBadge . $statusBadge .
+                            '</div>'
                         );
                     }),
                 TextColumn::make('status')
@@ -191,55 +193,18 @@ class TransactionsTable
             ])
             ->defaultSort('transaction_date', 'desc')
             ->filters([
-                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan')
-                    ->columnSpanFull(),
                 TernaryFilter::make('is_down_payment')
                     ->label('Down Payment')
                     ->native(false)
-                    ->placeholder('All')
+                    ->placeholder('Semua')
                     ->trueLabel('Down Payment')
-                    ->falseLabel('Non-Down Payment')
-                    ->columnSpanFull(),
+                    ->falseLabel('Non-Down Payment'),
                 TernaryFilter::make('is_verified')
                     ->label('Verifikasi Owner')
                     ->native(false)
                     ->placeholder('Semua Transaksi')
                     ->trueLabel('Sudah Diverifikasi')
-                    ->falseLabel('Belum Diverifikasi')
-                    ->columnSpanFull(),
-                TernaryFilter::make('all_staff')
-                    ->label('Tampilkan Semua Staff')
-                    ->native(false)
-                    ->placeholder('Ikuti Toggle Header')
-                    ->trueLabel('Semua Staff di Toko')
-                    ->falseLabel('Hanya Transaksi Saya')
-                    ->visible(function () {
-                        /** @var User|null $user */
-                        $user = Auth::user();
-                        return $user?->isStaff() ?? false;
-                    })
-                    ->queries(
-                        true: fn($query) => $query,
-                        false: fn($query) => $query->where('created_by', Auth::id()),
-                        blank: fn($query) => $query,
-                    )
-                    ->columnSpanFull(),
-                SelectFilter::make('created_by')
-                    ->label('Staff Pembuat')
-                    ->searchable()
-                    ->preload()
-                    ->options(function () {
-                        /** @var User|null $user */
-                        $user = Auth::user();
-
-                        return User::query()
-                            ->whereDoesntHave('roles', fn($q) => $q->whereIn('name', ['Super Admin', 'Owner']))
-                            ->when($user && ! $user->hasAnyRole(['Super Admin', 'Owner']), function ($q) use ($user) {
-                                $q->where('store_setting_id', $user->store_setting_id);
-                            })
-                            ->pluck('name', 'id')
-                            ->toArray();
-                    }),
+                    ->falseLabel('Belum Diverifikasi'),
                 SelectFilter::make('status')
                     ->label('Status')
                     ->searchable()
@@ -265,8 +230,42 @@ class TransactionsTable
                             })
                         );
                     }),
+                SelectFilter::make('created_by')
+                    ->label('Staff Pembuat')
+                    ->searchable()
+                    ->preload()
+                    ->options(function () {
+                        /** @var User|null $user */
+                        $user = Auth::user();
+
+                        return User::query()
+                            ->whereDoesntHave('roles', fn($q) => $q->whereIn('name', ['Super Admin', 'Owner']))
+                            ->when($user && ! $user->hasAnyRole(['Super Admin', 'Owner']), function ($q) use ($user) {
+                                $q->where('store_setting_id', $user->store_setting_id);
+                            })
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    }),
+                TernaryFilter::make('all_staff')
+                    ->label('Tampilkan Semua Staff')
+                    ->native(false)
+                    ->placeholder('Ikuti Toggle Header')
+                    ->trueLabel('Semua Staff di Toko')
+                    ->falseLabel('Hanya Transaksi Saya')
+                    ->visible(function () {
+                        /** @var User|null $user */
+                        $user = Auth::user();
+                        return $user?->isStaff() ?? false;
+                    })
+                    ->queries(
+                        true: fn($query) => $query,
+                        false: fn($query) => $query->where('created_by', Auth::id()),
+                        blank: fn($query) => $query,
+                    ),
+                TrashedFilter::make()->native(false)->label('Data Yang di Tampilkan')
+                    ->columnSpanFull(),
             ], layout: FiltersLayout::Modal)
-            ->filtersFormWidth(Width::ExtraLarge)
+            ->filtersFormWidth(Width::Large)
             ->filtersFormColumns(2)
             ->recordActions([
                 TransactionActions::table(),
