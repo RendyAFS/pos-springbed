@@ -16,7 +16,9 @@ trait HasStoreFilter
 
     protected function isStaff(): bool
     {
-        return Auth::user()?->roles->contains('id', 4) ?? false;
+        /** @var User|null $user */
+        $user = Auth::user();
+        return $user?->isStaff() ?? false;
     }
 
     protected function getStoreSettingId(): ?int

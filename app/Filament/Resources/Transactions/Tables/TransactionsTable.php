@@ -21,6 +21,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\TernaryFilter;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class TransactionsTable
 {
@@ -90,7 +92,13 @@ class TransactionsTable
                 TextColumn::make('transaction_date')
                     ->label('Date')
                     ->date('Y-m-d')
+                    ->description(fn($record) => $record->creator?->name ? 'Staff: ' . $record->creator->name : null)
                     ->sortable(),
+                TextColumn::make('creator.name')
+                    ->label('Staff')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('customer.name')
                     ->label('Customer')
                     ->searchable()
@@ -199,7 +207,39 @@ class TransactionsTable
                     ->trueLabel('Sudah Diverifikasi')
                     ->falseLabel('Belum Diverifikasi')
                     ->columnSpanFull(),
-                SelectFilter::make('status'),
+                TernaryFilter::make('all_staff')
+                    ->label('Tampilkan Semua Staff')
+                    ->native(false)
+                    ->placeholder('Ikuti Toggle Header')
+                    ->trueLabel('Semua Staff di Toko')
+                    ->falseLabel('Hanya Transaksi Saya')
+                    ->visible(function () {
+                        /** @var User|null $user */
+                        $user = Auth::user();
+                        return $user?->isStaff() ?? false;
+                    })
+                    ->queries(
+                        true: fn($query) => $query,
+                        false: fn($query) => $query->where('created_by', Auth::id()),
+                        blank: fn($query) => $query,
+                    )
+                    ->columnSpanFull(),
+                SelectFilter::make('created_by')
+                    ->label('Staff Pembuat')
+                    ->searchable()
+                    ->preload()
+                    ->options(function () {
+                        /** @var User|null $user */
+                        $user = Auth::user();
+
+                        return User::query()
+                            ->whereDoesntHave('roles', fn($q) => $q->whereIn('name', ['Super Admin', 'Owner']))
+                            ->when($user && ! $user->hasAnyRole(['Super Admin', 'Owner']), function ($q) use ($user) {
+                                $q->where('store_setting_id', $user->store_setting_id);
+                            })
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    }),
                 SelectFilter::make('status')
                     ->label('Status')
                     ->searchable()

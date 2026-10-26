@@ -65,7 +65,8 @@ class TransactionResource extends Resource
                 'transactionItems',
                 'transactionItems.product',
                 'transactionItems.bundle',
-                'verifiedBy'
+                'verifiedBy',
+                'creator',
             ]);
 
         /** @var \App\Models\User|null $user */
@@ -76,10 +77,6 @@ class TransactionResource extends Resource
             if (! is_null($storeId)) {
                 $query->where('store_setting_id', $storeId);
             }
-        }
-
-        if ($user?->roles->contains('id', 4) || $user?->roles->contains('name', 'Kasir')) {
-            $query->where('created_by', $user->id);
         }
 
         return $query;
