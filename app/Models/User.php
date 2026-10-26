@@ -81,4 +81,12 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->belongsTo(StoreSetting::class, 'store_setting_id');
     }
+
+    public function isStaff(): bool
+    {
+        return $this->hasRole('Staff')
+            || $this->roles->contains('id', 4)
+            || $this->roles->contains('name', 'Kasir')
+            || $this->roles->contains('name', 'Staff');
+    }
 }
