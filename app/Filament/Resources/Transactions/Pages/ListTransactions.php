@@ -443,6 +443,11 @@ class ListTransactions extends ListRecords
             $lines[] = $delivery;
         }
 
+        if ($record->transactionShipment?->shipping_date) {
+            $shippingDateFormatted = Carbon::parse($record->transactionShipment->shipping_date)->translatedFormat('d F Y');
+            $lines[] = "Tanggal Kirim: {$shippingDateFormatted}";
+        }
+
         $hasPreOrder = $record->transactionItems
             ?->where('is_pre_order', true)
             ->isNotEmpty();

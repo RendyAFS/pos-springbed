@@ -71,14 +71,38 @@
     <div data-kanban-column data-column-value="{{ $column->value }}"
         class="fi-kanban-cards space-y-2 p-2 min-h-15 overflow-visible"
         @if ($isCollapsible) x-show="!collapsed" @endif role="list">
-        @forelse($column->records as $record)
-            @include($board->getCardView(), [
-                'record' => $record,
-                'board' => $board,
-                'column' => $column,
-            ])
-        @empty
-            @if ($hasEmptyState)
+        @if ($column->value === 'shipped' || ($column->value instanceof \BackedEnum && $column->value->value === 'shipped'))
+            @php
+                $today = \Carbon\Carbon::today();
+                $yesterdayRecords = collect();
+                $todayRecords = collect();
+                $tomorrowRecords = collect();
+
+                foreach ($column->records as $record) {
+                    $shipDateRaw = $record->transactionShipment?->shipping_date
+                        ?? $record->transactionShipment?->created_at
+                        ?? $record->transaction_date;
+
+                    $shipDate = $shipDateRaw ? \Carbon\Carbon::parse($shipDateRaw)->startOfDay() : null;
+
+                    if ($shipDate) {
+                        if ($shipDate->lt($today)) {
+                            $yesterdayRecords->push($record);
+                        } elseif ($shipDate->eq($today)) {
+                            $todayRecords->push($record);
+                        } else {
+                            $tomorrowRecords->push($record);
+                        }
+                    } else {
+                        $yesterdayRecords->push($record);
+                    }
+                }
+
+                $yesterdayRecords = $yesterdayRecords->sortByDesc(fn($r) => $r->transactionShipment?->shipping_date ?? $r->transactionShipment?->created_at ?? $r->transaction_date);
+                $tomorrowRecords = $tomorrowRecords->sortBy(fn($r) => $r->transactionShipment?->shipping_date ?? $r->transactionShipment?->created_at ?? $r->transaction_date);
+            @endphp
+
+            @if ($column->records->isEmpty() && $hasEmptyState)
                 <div class="flex flex-col items-center justify-center py-6 text-center">
                     @if ($board->getEmptyStateIcon())
                         <x-filament::icon :icon="$board->getEmptyStateIcon()" class="h-8 w-8 text-gray-300 dark:text-gray-600 mb-2" />
@@ -92,7 +116,64 @@
                         </p>
                     @endif
                 </div>
+            @else
+                <div class="py-1 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 select-none">
+                    Yesterday
+                </div>
+                @foreach ($yesterdayRecords as $record)
+                    @include($board->getCardView(), [
+                        'record' => $record,
+                        'board' => $board,
+                        'column' => $column,
+                    ])
+                @endforeach
+
+                <div class="py-1 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 select-none">
+                    Today
+                </div>
+                @foreach ($todayRecords as $record)
+                    @include($board->getCardView(), [
+                        'record' => $record,
+                        'board' => $board,
+                        'column' => $column,
+                    ])
+                @endforeach
+
+                <div class="py-1 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 select-none">
+                    Tomorrow
+                </div>
+                @foreach ($tomorrowRecords as $record)
+                    @include($board->getCardView(), [
+                        'record' => $record,
+                        'board' => $board,
+                        'column' => $column,
+                    ])
+                @endforeach
             @endif
-        @endforelse
+        @else
+            @forelse($column->records as $record)
+                @include($board->getCardView(), [
+                    'record' => $record,
+                    'board' => $board,
+                    'column' => $column,
+                ])
+            @empty
+                @if ($hasEmptyState)
+                    <div class="flex flex-col items-center justify-center py-6 text-center">
+                        @if ($board->getEmptyStateIcon())
+                            <x-filament::icon :icon="$board->getEmptyStateIcon()" class="h-8 w-8 text-gray-300 dark:text-gray-600 mb-2" />
+                        @endif
+                        <p class="text-xs font-medium text-gray-400 dark:text-gray-500">
+                            {{ $board->getEmptyStateHeading() }}
+                        </p>
+                        @if ($board->getEmptyStateDescription())
+                            <p class="text-xs text-gray-400 dark:text-gray-600 mt-0.5">
+                                {{ $board->getEmptyStateDescription() }}
+                            </p>
+                        @endif
+                    </div>
+                @endif
+            @endforelse
+        @endif
     </div>
 </div>

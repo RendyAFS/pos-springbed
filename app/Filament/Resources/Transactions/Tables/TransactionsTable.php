@@ -175,6 +175,11 @@ class TransactionsTable
                     ->label('Kurir')
                     ->default('')
                     ->limit(20),
+                TextColumn::make('transactionShipment.shipping_date')
+                    ->label('Tgl Kirim')
+                    ->date('d/m/Y')
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: false),
                 TextColumn::make('is_verified')
                     ->label('Verifikasi')
                     ->badge()

@@ -36,7 +36,9 @@ class EditTransaction extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['courier_id'] = $this->record->transactionShipment?->courier_id;
+        $data['courier_id']    = $this->record->transactionShipment?->courier_id;
+        $data['shipping_date'] = $this->record->transactionShipment?->shipping_date?->format('Y-m-d')
+            ?? $this->record->transactionShipment?->shipping_date;
 
         if ($payment = $this->record->transactionPayment) {
             $data['payment_method'] = $payment->method instanceof BackedEnum
@@ -67,6 +69,7 @@ class EditTransaction extends EditRecord
 
         $this->extraData = [
             'courier_id'           => $data['courier_id'] ?? null,
+            'shipping_date'        => $data['shipping_date'] ?? null,
             'payment_method'       => $data['payment_method'] ?? null,
             'payment_amount'       => $data['payment_amount'] ?? null,
             'payment_status'       => $data['payment_status'] ?? null,
@@ -78,6 +81,7 @@ class EditTransaction extends EditRecord
 
         unset(
             $data['courier_id'],
+            $data['shipping_date'],
             $data['payment_method'],
             $data['payment_amount'],
             $data['payment_status'],
@@ -115,11 +119,12 @@ class EditTransaction extends EditRecord
             );
         }
 
-        if (filled($extra['courier_id'] ?? null)) {
+        if (filled($extra['courier_id'] ?? null) || filled($extra['shipping_date'] ?? null)) {
             TransactionShipment::updateOrCreate(
                 ['transaction_id' => $this->record->id],
                 [
-                    'courier_id' => $extra['courier_id'],
+                    'courier_id'    => $extra['courier_id'] ?? null,
+                    'shipping_date' => $extra['shipping_date'] ?? null,
                 ]
             );
         } elseif ($this->record->transactionShipment) {

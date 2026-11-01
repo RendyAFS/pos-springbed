@@ -198,6 +198,10 @@ class TransactionInfolist
                                 TextEntry::make('transactionShipment.courier.name')
                                     ->label('Kurir')
                                     ->placeholder('—'),
+                                TextEntry::make('transactionShipment.shipping_date')
+                                    ->label('Tanggal Kirim')
+                                    ->date('d F Y')
+                                    ->placeholder('—'),
                                 TextEntry::make('transactionShipment.tracking_number')
                                     ->label('No. Resi')
                                     ->copyable()

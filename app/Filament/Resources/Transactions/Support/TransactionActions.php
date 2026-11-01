@@ -125,6 +125,19 @@ class TransactionActions
                                 ->label('No. Resi')
                                 ->default(fn(?Transaction $record) => $record?->transactionShipment?->tracking_number)
                                 ->visible(fn(?Transaction $record) => $record?->transactionShipment !== null),
+
+                            DatePicker::make('shipping_date')
+                                ->label('Tanggal Kirim')
+                                ->native(false)
+                                ->suffixIcon(Heroicon::Calendar)
+                                ->closeOnDateSelection()
+                                ->default(fn(?Transaction $record) => $record?->transactionShipment?->shipping_date)
+                                ->visible(
+                                    fn(Get $get) => in_array($get('status'), [
+                                        TransactionStatusEnum::SHIPPED->value,
+                                        TransactionStatusEnum::DELIVERED->value,
+                                    ])
+                                ),
                         ]),
 
                     Step::make('confirm_pickup')
@@ -158,6 +171,18 @@ class TransactionActions
                     $record->transactionShipment->update([
                         'tracking_number' => $data['tracking_number'],
                     ]);
+                }
+
+                if (array_key_exists('shipping_date', $data)) {
+                    if ($record->transactionShipment) {
+                        $record->transactionShipment->update([
+                            'shipping_date' => $data['shipping_date'],
+                        ]);
+                    } elseif (filled($data['shipping_date'])) {
+                        $record->transactionShipment()->create([
+                            'shipping_date' => $data['shipping_date'],
+                        ]);
+                    }
                 }
 
                 Notification::make()
