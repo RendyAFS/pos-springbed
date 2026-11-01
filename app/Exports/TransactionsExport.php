@@ -79,7 +79,9 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, S
                 $statusPembayaran = 'Sisa';
             }
 
-            $tanggalKirim = $transaction->transactionShipment?->created_at ?? null;
+            $tanggalKirim = $transaction->transactionShipment?->shipping_date
+                ?? $transaction->transactionShipment?->created_at
+                ?? null;
 
             $isFirstRow = true;
 

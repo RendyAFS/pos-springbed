@@ -92,6 +92,11 @@ class Transaction extends Model
         return $this->hasOne(TransactionShipment::class, 'transaction_id');
     }
 
+    public function getShippingDateAttribute()
+    {
+        return $this->transactionShipment?->shipping_date;
+    }
+
     public function referalCustomer()
     {
         return $this->belongsTo(Customer::class, 'referal_customer_id');

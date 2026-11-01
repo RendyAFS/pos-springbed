@@ -6,6 +6,7 @@ use App\Enums\PromoDiscountEnum;
 use App\Filament\Resources\Transactions\Schemas\Concerns\HasTotalsCalculation;
 use App\Models\Courier;
 use App\Models\Promo;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
@@ -145,6 +146,19 @@ class PromoShippingStep
                         }
 
                         self::recalculateTotals($get, $set);
+                    }),
+
+                DatePicker::make('shipping_date')
+                    ->label('Tanggal Kirim')
+                    ->placeholder('Pilih tanggal kirim...')
+                    ->native(false)
+                    ->suffixIcon(Heroicon::Calendar)
+                    ->closeOnDateSelection()
+                    ->dehydrated(true)
+                    ->afterStateHydrated(function (DatePicker $component, $record): void {
+                        if ($record && $record->transactionShipment) {
+                            $component->state($record->transactionShipment->shipping_date?->format('Y-m-d') ?? $record->transactionShipment->shipping_date);
+                        }
                     }),
 
                 TextInput::make('shiping_cost')

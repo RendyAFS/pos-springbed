@@ -30,6 +30,7 @@ class CreateTransaction extends CreateRecord
 
         $this->extraData = [
             'courier_id'           => $data['courier_id'] ?? null,
+            'shipping_date'        => $data['shipping_date'] ?? null,
             'payment_method'       => $data['payment_method'] ?? null,
             'payment_amount'       => $data['payment_amount'] ?? null,
             'payment_status'       => $data['payment_status'] ?? null,
@@ -41,6 +42,7 @@ class CreateTransaction extends CreateRecord
 
         unset(
             $data['courier_id'],
+            $data['shipping_date'],
             $data['payment_method'],
             $data['payment_amount'],
             $data['payment_status'],
@@ -76,10 +78,11 @@ class CreateTransaction extends CreateRecord
             ]);
         }
 
-        if (filled($extra['courier_id'] ?? null)) {
+        if (filled($extra['courier_id'] ?? null) || filled($extra['shipping_date'] ?? null)) {
             TransactionShipment::create([
                 'transaction_id' => $this->record->id,
-                'courier_id'     => $extra['courier_id'],
+                'courier_id'     => $extra['courier_id'] ?? null,
+                'shipping_date'  => $extra['shipping_date'] ?? null,
             ]);
         }
 
